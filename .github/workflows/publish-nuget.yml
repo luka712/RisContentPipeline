@@ -1,0 +1,44 @@
+name: Publish NuGet
+
+on:
+  push:
+    branches:
+      - development
+      - master
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Pack preview package (development)
+        if: github.ref_name == 'development'
+        run: dotnet pack -c Release --no-restore -o ./artifacts /p:VersionSuffix=preview.${{ github.run_number }}
+
+      - name: Pack release package (master)
+        if: github.ref_name == 'master'
+        run: dotnet pack -c Release --no-restore -o ./artifacts
+
+      - name: Publish to NuGet
+        run: |
+          dotnet nuget push "./artifacts/*.nupkg" \
+            --api-key "${{ secrets.NUGET_API_KEY }}" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
