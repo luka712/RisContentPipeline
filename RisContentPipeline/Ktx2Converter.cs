@@ -47,7 +47,9 @@ public static class Ktx2Converter
     {
         using var writer = new BinaryWriter(output, System.Text.Encoding.UTF8, leaveOpen: true);
 
+        // KTX2 fixed header size: 12-byte identifier + 68-byte header block.
         const uint headerByteSize = 80;
+        // One Level Index entry is 3 x uint64 (offset, length, uncompressed length).
         const uint levelIndexByteSize = 24;
         var imageByteOffset = headerByteSize + levelIndexByteSize;
         var imageByteLength = (ulong)pixelData.Length;
