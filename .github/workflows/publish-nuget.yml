@@ -37,8 +37,10 @@ jobs:
         run: dotnet pack -c Release --no-restore -o ./artifacts
 
       - name: Publish to NuGet
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.NUGET_API_KEY }}
         run: |
           dotnet nuget push "./artifacts/*.nupkg" \
-            --api-key "${{ secrets.NUGET_API_KEY }}" \
+            --api-key "$NUGET_AUTH_TOKEN" \
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
