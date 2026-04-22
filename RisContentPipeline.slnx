@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+  <Project Path="RisContentPipeline.Tests/RisContentPipeline.Tests.csproj" />
+  <Project Path="RisContentPipeline/RisContentPipeline.csproj" />
+</Solution>
