@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="../Toolkits/Ris.SpriteToolkit/RisTextureToolkit/RisTextureToolkit/RisTextureToolkit.csproj" />
+  <Project Path="RisContentPipeline.GUI.Windows/RisContentPipeline.GUI.Windows.csproj" Id="612f0b54-02db-4f91-91bf-f6fadec80e2b" />
   <Project Path="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
   <Project Path="RisContentPipeline.Tests/RisContentPipeline.Tests.csproj" />
   <Project Path="RisContentPipeline/RisContentPipeline.csproj" />

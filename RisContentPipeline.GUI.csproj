@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <!-- other properties -->
+  </PropertyGroup>
+  <!-- rest of project -->
+</Project>

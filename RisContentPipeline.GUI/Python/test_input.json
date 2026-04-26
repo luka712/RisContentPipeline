@@ -1,0 +1,14 @@
+{
+  "operation": "update_bundle_references",
+  "data": {
+    "textures": ["texture1.png", "sprite.png", "background.png"],
+    "materials": {
+      "main": "main.png",
+      "secondary": "secondary.png"
+    }
+  },
+  "parameters": {
+    "source_extension": ".png",
+    "target_extension": ".ktx"
+  }
+}

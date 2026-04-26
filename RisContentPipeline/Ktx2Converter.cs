@@ -1,80 +1,80 @@
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using RisTextureToolkit.Ktx;
 
 namespace RisContentPipeline;
 
-public static class Ktx2Converter
+/// <summary>
+/// Provides functionality to convert images to KTX2 format with optional Basis Universal compression.
+/// </summary>
+public class Ktx2Converter
 {
-    private static readonly byte[] Ktx2Identifier =
-    [
-        0xAB, 0x4B, 0x54, 0x58, 0x20, 0x32, 0x30, 0xBB,
-        0x0D, 0x0A, 0x1A, 0x0A
-    ];
-
-    private const uint VkFormatR8G8B8A8Unorm = 37;
-
-    public static void ConvertFileToKtx2(string inputFilePath, string outputFilePath)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Ktx2Converter"/> class.
+    /// </summary>
+    public Ktx2Converter()
     {
-        if (string.IsNullOrWhiteSpace(inputFilePath))
-        {
-            throw new ArgumentException("Input file path is required.", nameof(inputFilePath));
-        }
-
-        if (string.IsNullOrWhiteSpace(outputFilePath))
-        {
-            throw new ArgumentException("Output file path is required.", nameof(outputFilePath));
-        }
-
-        using var inputStream = File.OpenRead(inputFilePath);
-        using var outputStream = File.Create(outputFilePath);
-        ConvertToKtx2(inputStream, outputStream);
     }
 
-    public static void ConvertToKtx2(Stream inputStream, Stream outputStream)
+    /// <summary>
+    /// The output folder where the converted KTX2 textures will be saved.
+    /// This is relative to the project root and can be customized as needed.
+    /// </summary>
+    public string BuildFolder { get; set; } = "ContentBuild";
+
+    /// <summary>
+    /// Converts raw RGBA32 pixel data to KTX2 format and writes it to the specified output path.
+    /// </summary>
+    /// <param name="bytes">The raw RGBA32 pixel data (4 bytes per pixel).</param>
+    /// <param name="imageWidth">The width of the image in pixels.</param>
+    /// <param name="imageHeight">The height of the image in pixels.</param>
+    /// <param name="outputPath">The file path where the KTX2 texture will be saved. Must end with .ktx2 extension.</param>
+    /// <param name="ktxBasisParams">Optional Basis Universal compression parameters. If provided, the texture will be compressed to universal basis standard.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="bytes"/> or <paramref name="outputPath"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="outputPath"/> does not end with .ktx2 extension or when byte array size doesn't match image dimensions.</exception>
+    public void Convert
+        (byte[] bytes, 
+        uint imageWidth, uint imageHeight, 
+        string outputPath,
+        KtxBasisParams? ktxBasisParams)
     {
-        ArgumentNullException.ThrowIfNull(inputStream);
-        ArgumentNullException.ThrowIfNull(outputStream);
+        ArgumentNullException.ThrowIfNull(bytes);
+        ArgumentException.ThrowIfNullOrWhiteSpace(outputPath);
 
-        using var image = Image.Load<Rgba32>(inputStream);
+        if (!outputPath.EndsWith(".ktx2", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Output path must have a .ktx2 extension.", nameof(outputPath));
+        }
 
-        var pixelData = new byte[image.Width * image.Height * 4];
-        image.CopyPixelDataTo(pixelData);
+        // By default, use UASTC compression if no parameters are provided
+        ktxBasisParams ??= new KtxBasisParams { UseUastc = true };
 
-        WriteKtx2(outputStream, image.Width, image.Height, pixelData);
-    }
+        // Validate byte array size matches expected dimensions (4 bytes per RGBA32 pixel)
+        uint expectedSize = imageWidth * imageHeight * 4;
+        if (bytes.Length != expectedSize)
+        {
+            throw new ArgumentException(
+                $"Byte array size ({bytes.Length}) doesn't match expected size ({expectedSize}) for {imageWidth}x{imageHeight} RGBA32 image.",
+                nameof(bytes));
+        }
 
-    private static void WriteKtx2(Stream output, int width, int height, byte[] pixelData)
-    {
-        using var writer = new BinaryWriter(output, System.Text.Encoding.UTF8, leaveOpen: true);
+        // Create KTX2 texture with RGBA8 format
+        Ktx2Texture texture = new Ktx2Texture(new KtxTextureCreateInfo
+        {
+            BaseHeight = imageHeight,
+            BaseWidth = imageWidth,
+            VkFormat = VkFormat.R8G8B8A8_UNORM
+        });
 
-        // KTX2 fixed header size: 12-byte identifier + 68-byte header block.
-        const uint headerByteSize = 80;
-        // One Level Index entry is 3 x uint64 (offset, length, uncompressed length).
-        const uint levelIndexByteSize = 24;
-        var imageByteOffset = headerByteSize + levelIndexByteSize;
-        var imageByteLength = (ulong)pixelData.Length;
 
-        writer.Write(Ktx2Identifier);
-        writer.Write(VkFormatR8G8B8A8Unorm);
-        writer.Write(1u);
-        writer.Write((uint)width);
-        writer.Write((uint)height);
-        writer.Write(0u);
-        writer.Write(0u);
-        writer.Write(1u);
-        writer.Write(1u);
-        writer.Write(0u);
-        writer.Write(0u);
-        writer.Write(0u);
-        writer.Write(0u);
-        writer.Write(0u);
-        writer.Write(0ul);
-        writer.Write(0ul);
+        // Set image data directly from the byte array
+        texture.SetImageFromMemory(0, 0, 0, bytes, (ulong)bytes.Length);
 
-        writer.Write((ulong)imageByteOffset);
-        writer.Write(imageByteLength);
-        writer.Write(imageByteLength);
+        // Apply Basis Universal compression if parameters are provided
+        if (ktxBasisParams.HasValue)
+        {
+            texture.CompressBasis(ktxBasisParams.Value);
+        }
 
-        writer.Write(pixelData);
+        // Write the texture to file
+        texture.WriteToNamedFile(outputPath);
     }
 }
