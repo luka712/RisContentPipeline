@@ -1,4 +1,7 @@
-﻿namespace RisContentPipeline.GUI.Services
+﻿
+using Eto.Forms;
+
+namespace RisContentPipeline.GUI.Services
 {
     /// <summary>
     /// The messanger class is responsible for managing messages that are generated during the asset processing workflow. 
@@ -9,6 +12,7 @@
     {
         private readonly List<string> _successLogs = new List<string>();
         private readonly List<string> _errorLogs = new List<string>();
+        private readonly List<string> _infoLogs = new List<string>();
 
         /// <summary>
         /// When a message is pushed, this event is triggered with the message as a parameter.
@@ -19,6 +23,33 @@
         /// When an error message is pushed, this event is triggered with the error message as a parameter.
         /// </summary>
         public event Action<string>? OnErrorLog;
+
+        /// <summary>
+        /// This event is triggered when an informational message is pushed to the logger.
+        /// </summary>
+        public event Action<string>? OnInfoLog;
+
+        /// <summary>
+        /// Pushes an informational message to the logger.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        public void Info(string message)
+        {
+            _infoLogs.Add(message);
+            OnInfoLog?.Invoke(message);
+        }
+
+        /// <summary>
+        /// Pushes an informational message to the logger from an asynchronous context.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        public void InfoAsync(string message)
+        {
+            Application.Instance.AsyncInvoke(() =>
+            {
+                Info(message);
+            });
+        }
 
         /// <summary>
         /// Pushes a success message to the logger. 
@@ -32,6 +63,30 @@
         }
 
         /// <summary>
+        /// Pushes a success message to the logger from an asynchronous context.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        public void SuccessAsync(string message)
+        {
+            Application.Instance.AsyncInvoke(() =>
+            {
+                Success(message);
+            });
+        }
+
+        /// <summary>
+        /// Pushes an error message to the logger from an asynchronous context.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        public void ErrorAsync(string message)
+        {
+            Application.Instance.AsyncInvoke(() =>
+            {
+                Error(message);
+            });
+        }
+
+        /// <summary>
         /// Pushes an error message to the logger.
         /// </summary>
         /// <param name="message">The message.</param>
@@ -39,6 +94,8 @@
         {
             _errorLogs.Add(message);
         }
+
+
 
         /// <summary>
         /// Clears all logs from the logger.

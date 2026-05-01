@@ -22,5 +22,19 @@ namespace RisContentPipeline.GUI.Extensions
                 return bytes;
             }
         }
+
+        /// <summary>
+        /// Executes the specified action with the bitmap data pointer and size.
+        /// </summary>
+        /// <param name="bitmap">The <see cref="Bitmap"/>.</param>
+        /// <param name="action">The action to execute.</param>
+        public static void WithBitmapData(this Bitmap bitmap, Action<IntPtr, uint> action)
+        {
+            using (var bd = bitmap.Lock())
+            {
+                uint size = (uint) (bitmap.Height * bd.ScanWidth);
+                action(bd.Data, size);
+            }
+        }
     }
 }

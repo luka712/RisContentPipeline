@@ -22,7 +22,7 @@ internal class ImageTreeGridItem : TreeGridItem
     /// <summary>
     /// Gets or sets the file path associated with this item.
     /// </summary>
-    public FileOrFolder? FileOrFolder { get; set; }
+    public AssetFileOrFolder? FileOrFolder { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImageTreeGridItem"/> class.
@@ -30,7 +30,7 @@ internal class ImageTreeGridItem : TreeGridItem
     /// <param name="title">The title to display.</param>
     /// <param name="fileOrFolder">The file or folder of this item.</param>
     /// <param name="icon">Icon display as a thumbnail.</param>
-    public ImageTreeGridItem(string title, FileOrFolder? fileOrFolder, Icon icon)
+    public ImageTreeGridItem(string title, AssetFileOrFolder? fileOrFolder, Icon icon)
     {
         Title = title;
         Image = icon;

@@ -47,6 +47,7 @@ namespace RisContentPipeline.GUI.Views
             var buildLogger = context.BuildLogger;
             buildLogger.OnSuccessLog += msg => AddMessage(msg, Icons.CheckIcon);
             buildLogger.OnErrorLog += msg => AddMessage(msg);
+            buildLogger.OnInfoLog += msg => AddMessage(msg, Icons.InfoIcon);
 
             _context.OnBuildStarted += () =>
             {

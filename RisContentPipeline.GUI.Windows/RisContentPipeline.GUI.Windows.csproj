@@ -12,7 +12,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RisContentPipeline.GUI\RisContentPipeline.GUI.csproj" />
+    <None Include="..\Python\win-x64\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
+
+  <ItemGroup>
+    <ProjectReference Include="..\RisContentPipeline.GUI\RisContentPipeline.GUI.csproj" />
+  </ItemGroup>
 </Project>

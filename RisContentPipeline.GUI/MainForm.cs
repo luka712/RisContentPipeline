@@ -2,17 +2,19 @@ using Eto.Forms;
 using Eto.Drawing;
 using RisContentPipeline.GUI.Services;
 using RisContentPipeline.GUI.Views;
+using System.ComponentModel;
 
 
 namespace RisContentPipeline.GUI;
 
 public sealed class MainForm : Form
 {
-    private readonly Context _context = new ();
+    private readonly Context _context = new();
     private readonly BuildLogger _messanger = new BuildLogger();
 
-    private ActionsBar _actionsBar;
+    private ActionsBarView _actionsBar;
     private AssetView _assetView;
+    private ScriptsView _scriptsView;
     private BuildView _buildView;
     private Label _statusLabel;
     private TextBox _inputBox;
@@ -25,16 +27,18 @@ public sealed class MainForm : Form
         Title = "RisContentPipeline";
         ClientSize = new Eto.Drawing.Size(1000, 600);
         Resizable = true;
+        _context.LoadSession();
 
         // Create menu
         Menu = CreateMenu();
 
         // Create actions bar
-        _actionsBar = new ActionsBar(this, _context);
+        _actionsBar = new ActionsBarView(this, _context);
         _actionsBar.FileAdded += OnFileAdded;
         _actionsBar.FolderAdded += OnFolderAdded;
 
         _assetView = new AssetView(_context);
+        _scriptsView = new ScriptsView(_context);
         _buildView = new BuildView(_context);
 
         // Create the right panel
@@ -48,7 +52,18 @@ public sealed class MainForm : Form
             Rows =
             {
                 new TableRow(
-                    new TableCell(_assetView.AssetTreeView, false),
+
+                    new TableCell(new StackLayout
+                    {
+                        Spacing = 8,
+                        Padding = new Padding(0),
+                        Items =
+                        {
+                            new StackLayoutItem(_assetView.AssetTreeView, true),
+                            new StackLayoutItem(_scriptsView.ScriptsTreeView, true)
+                        },
+                    }, false),
+                    // new TableCell(_assetView.AssetTreeView, false),
                     new TableCell(_buildView.BuildOutputTreeView, false)
                 )
             }
@@ -67,35 +82,67 @@ public sealed class MainForm : Form
         var fileMenu = new ButtonMenuItem { Text = "&File" };
         fileMenu.Items.Add(new Command { MenuText = "E&xit", Shortcut = Application.Instance.CommonModifier | Keys.Q });
 
+        // EDIT
         var editMenu = new ButtonMenuItem { Text = "&Edit" };
-        
+
+        // - Preferences
+        var preferencesCommand = new Command
+        {
+            MenuText = "&Preferences...",
+            Shortcut = Application.Instance.CommonModifier | Keys.Comma,
+        };
+        preferencesCommand.Executed += (sender, e) =>
+        {
+            var preferencesWindow = new Windows.PreferencesWindow(_context);
+            preferencesWindow.ShowModal(this);
+        };
+        editMenu.Items.Add(preferencesCommand);
+
+        // WINDOWS
+        var windowsMenu = new ButtonMenuItem { Text = "&Windows" };
+
+        // - Image Viewer
+        var imageViewerCommand = new Command
+        {
+            MenuText = "&Image Viewer",
+            Shortcut = Application.Instance.CommonModifier | Keys.I,
+        };
+        imageViewerCommand.Executed += (sender, e) =>
+        {
+            var imageViewerWindow = new Windows.ImageViewerWindow(_context);
+            imageViewerWindow.Show();
+        };
+        windowsMenu.Items.Add(imageViewerCommand);
+
         var helpMenu = new ButtonMenuItem { Text = "&Help" };
         helpMenu.Items.Add(new Command { MenuText = "&About..." });
 
         return new MenuBar
         {
-            Items = { fileMenu, editMenu },
+            Items = { fileMenu, editMenu , windowsMenu },
             HelpItems = { helpMenu }
         };
     }
 
     private void OnFileAdded(object? sender, string filePath)
     {
-        UpdateStatus($"Added file: {Path.GetFileName(filePath)}");
-        // TODO: Add file to asset view
-        _assetView.Refresh();
+        _context.AsyncInvoke(() =>
+        {
+            UpdateStatus($"Added file: {Path.GetFileName(filePath)}");
+            _assetView.Refresh();
+        });
     }
 
     private void OnFolderAdded(object? sender, string folderPath)
     {
         UpdateStatus($"Added folder: {Path.GetFileName(folderPath)}");
-       // _assetView.LoadAssetsFromDirectory(folderPath);
+        // _assetView.LoadAssetsFromDirectory(folderPath);
     }
 
     private Panel CreateRightPanel()
     {
         var rightPanel = new Panel();
-        
+
         _inputBox = new TextBox { PlaceholderText = "Input image file (.png/.jpg/.bmp/.gif/.tga...)" };
         _outputBox = new TextBox { PlaceholderText = "Output .ktx2 file" };
         _statusLabel = new Label();
@@ -139,7 +186,7 @@ public sealed class MainForm : Form
                 //using var image = SixLabors.ImageSharp.Image.Load<Rgba32>(_inputBox.Text);
                 //var pipeline = new Ktx2Converter();
                 //pipeline.Convert(image, _outputBox.Text, null);
-                
+
                 UpdateStatus("Conversion complete.");
             }
             catch (Exception ex)
@@ -175,5 +222,11 @@ public sealed class MainForm : Form
     private void UpdateStatus(string message)
     {
         _statusLabel.Text = message;
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        base.OnClosing(e);
+        _context.SaveSession();
     }
 }

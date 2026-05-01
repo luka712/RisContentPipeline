@@ -28,6 +28,16 @@ namespace RisContentPipeline.GUI
         /// </summary>
         public static Icon CheckIcon { get; private set; } = null!;
 
+        /// <summary>
+        /// The Python script icon.
+        /// </summary>
+        public static Icon PythonIcon { get; private set; } = null!;
+
+        /// <summary>
+        /// The info icon used in the asset view to indicate informational messages or warnings related to assets.
+        /// </summary>
+        public static Icon InfoIcon { get; private set; } = null!;
+
         private static Icon LoadIcon(string path)
         {
             var directory = AppDomain.CurrentDomain.BaseDirectory;
@@ -45,6 +55,8 @@ namespace RisContentPipeline.GUI
             ImageIcon = LoadIcon("Icons/image-solid.png");
             FileIcon = LoadIcon("Icons/file-solid.png");
             CheckIcon = LoadIcon("Icons/check-solid.png");
+            PythonIcon = LoadIcon("Icons/python-brands-solid.png");
+            InfoIcon = LoadIcon("Icons/circle-info-solid.png");
         }
     }
 }
