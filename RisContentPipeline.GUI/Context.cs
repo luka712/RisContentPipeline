@@ -224,7 +224,7 @@ namespace RisContentPipeline.GUI
                     {
                         param = new KtxBasisParams
                         {
-                            UseUastc = Ktx2Settings.UseUastc,
+                            Uastc = Ktx2Settings.UseUastc,
                             // CompressionLevel = Ktx2Settings.CompressionLevel,
                             // QualityLevel = Ktx2Settings.QualityLevel
                         };

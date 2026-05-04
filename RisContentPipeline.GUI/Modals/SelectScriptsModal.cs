@@ -13,6 +13,20 @@ namespace RisContentPipeline.GUI.Modals
         private readonly Context _context;
         private readonly ListBox _listBox = new();
 
+        private void SelectAndClose()
+        {
+            if (_listBox.SelectedValue != null)
+            {
+                if(_listBox.SelectedValue is Script selectedScript)
+                {
+                    Close([ selectedScript ]);
+                    return;
+                };
+
+                Close(_listBox.SelectedValue as Script[]);
+            }
+        }
+        
         /// <summary>
         /// The constructor.
         /// </summary>
@@ -24,21 +38,10 @@ namespace RisContentPipeline.GUI.Modals
         
             _listBox.Size = new Size(400, 300);
             _listBox.DataStore = _context.InternalScripts;
+            _listBox.MouseDoubleClick += (sender, e) => SelectAndClose();
 
             var okButton = new Button { Text = "OK" };
-            okButton.Click += (sender, e) =>
-            {
-                if (_listBox.SelectedValue != null)
-                {
-                    if(_listBox.SelectedValue is Script selectedScript)
-                    {
-                        Close([ selectedScript ]);
-                        return;
-                    };
-
-                    Close(_listBox.SelectedValue as Script[]);
-                }
-            };
+            okButton.Click += (sender, e) => SelectAndClose();
 
             var cancelButton = new Button { Text = "Cancel" };
             cancelButton.Click += (sender, e) => Close(null);

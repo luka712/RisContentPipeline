@@ -8,12 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RisKtx2" Version="0.1.2" />
-    <PackageReference Include="RisTextureToolkit" Version="0.1.0-preview.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\Toolkits\Ris.SpriteToolkit\RisTextureToolkit\RisTextureToolkit\RisTextureToolkit.csproj" />
+    <PackageReference Include="RisKtx2" Version="0.1.4" />
   </ItemGroup>
 
 </Project>

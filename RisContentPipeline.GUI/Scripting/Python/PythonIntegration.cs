@@ -1,3 +1,4 @@
+using System.Reflection;
 using Python.Runtime;
 using RisContentPipeline.GUI.Data;
 
@@ -11,6 +12,7 @@ internal sealed class PythonIntegration : IDisposable
     private const string INTERNAL_SCRIPTS_DIRECTORY = "InternalScripts";
     private const string USER_SCRIPTS_DIRECTORY = "UserScripts";
 
+    private readonly string _currentDirectory;
     private readonly Context _context;
     private bool _initialized;
     private bool _disposed;
@@ -23,6 +25,9 @@ internal sealed class PythonIntegration : IDisposable
     internal PythonIntegration(Context context)
     {
         _context = context;
+        _currentDirectory = Path.GetDirectoryName(
+            Assembly.GetExecutingAssembly().Location
+        )!;
     }
 
     /// <summary>
@@ -71,8 +76,13 @@ internal sealed class PythonIntegration : IDisposable
         string scriptsDir = Path.GetFullPath(INTERNAL_SCRIPTS_DIRECTORY);
         if (!Directory.Exists(scriptsDir))
         {
-            throw new InvalidOperationException($"Could not find '{INTERNAL_SCRIPTS_DIRECTORY}'.");
+            scriptsDir = Path.Combine(_currentDirectory, INTERNAL_SCRIPTS_DIRECTORY);
+            if (!Directory.Exists(scriptsDir))
+            {
+                throw new InvalidOperationException($"Could not find '{INTERNAL_SCRIPTS_DIRECTORY}'.");
+            }
         }
+
         sys.path.append(scriptsDir);
 
         string userScriptsDir = Path.GetFullPath(USER_SCRIPTS_DIRECTORY);
@@ -96,14 +106,15 @@ internal sealed class PythonIntegration : IDisposable
         _api.current_asset = new Data.PythonAssetFile(fileOrFolder);
 
         Directory.CreateDirectory(_context.BuildDirectory);
-        var scriptName = pythonScript.FilePath;   
+        var scriptName = pythonScript.FilePath;
 
         try
         {
             using (Py.GIL())
             {
                 ImportModules();
-                scriptName = scriptName.Split('/').Last().Split('\\').Last().Replace(".py", "");;
+                scriptName = scriptName.Split('/').Last().Split('\\').Last().Replace(".py", "");
+                ;
                 dynamic script = Py.Import(scriptName);
                 script.api = _api;
                 dynamic builtins = Py.Import("builtins");
@@ -123,7 +134,8 @@ internal sealed class PythonIntegration : IDisposable
                     if (modifiedContent != null)
                     {
                         File.WriteAllText(fileOrFolder.AbsolutePathOrFileName, modifiedContent);
-                        _context.BuildLogger.Success($"Modified content saved back to '{fileOrFolder.AbsolutePathOrFileName}'.");
+                        _context.BuildLogger.Success(
+                            $"Modified content saved back to '{fileOrFolder.AbsolutePathOrFileName}'.");
                     }
                 }
             }
@@ -152,6 +164,7 @@ internal sealed class PythonIntegration : IDisposable
             {
                 // Ignore errors during shutdown
             }
+
             _initialized = false;
         }
 
@@ -164,13 +177,13 @@ internal sealed class PythonIntegration : IDisposable
     private string FindPython()
     {
         var path = "";
-        if (OperatingSystem.IsWindows())
+        if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
         {
             path += "python-3.11.8";
         }
         else
         {
-            throw new PlatformNotSupportedException("Only Windows is supported for Python integration in this implementation.");
+            throw new PlatformNotSupportedException("Unsupported operating system for Python integration.");
         }
 
         return path;
@@ -178,12 +191,17 @@ internal sealed class PythonIntegration : IDisposable
 
     /// <summary>
     /// Gets the Python DLL path from the Python executable path.
-    /// </summary>
+    /// </summary>c
     private string GetPythonDllPath(string pythonExePath)
     {
         if (!Directory.Exists(pythonExePath))
         {
-            throw new DirectoryNotFoundException($"Python directory not found: {pythonExePath}");
+            // Try a relative path
+            pythonExePath = Path.Combine(_currentDirectory, pythonExePath);
+            if (!Directory.Exists(pythonExePath))
+            {
+                throw new DirectoryNotFoundException($"Python directory not found: {pythonExePath}");
+            }
         }
 
         if (OperatingSystem.IsWindows())
@@ -199,12 +217,13 @@ internal sealed class PythonIntegration : IDisposable
                 return dllFiles[0];
             }
 
-            throw new FileNotFoundException($"Could not locate Python versioned DLL (pythonXXX.dll) in: {pythonExePath}");
+            throw new FileNotFoundException(
+                $"Could not locate Python versioned DLL (pythonXXX.dll) in: {pythonExePath}");
         }
         else if (OperatingSystem.IsLinux())
         {
             // Linux uses libpython3.XX.so with version number
-            var soFiles = Directory.GetFiles(Path.Combine(pythonExePath, "..", "lib"), "libpython3.*.so")
+            var soFiles = Directory.GetFiles(Path.Combine(pythonExePath, "lib"), "libpython3.*.so")
                 .OrderByDescending(f => f)
                 .ToArray();
 

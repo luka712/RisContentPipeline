@@ -10,6 +10,21 @@ namespace RisContentPipeline
     {
         private readonly ImageToKtx2Pipeline _ktx2Pipeline = new();
 
+        private void EnsureDirectoryExists(string? filePath)
+        {
+            if (String.IsNullOrEmpty(filePath))
+            {
+                return;
+            }
+            
+            var directory = Path.GetDirectoryName(filePath);
+
+            if (!String.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);   
+            }
+        }
+
         /// <summary>
         /// Converts an ImageContainer to a Ktx2Texture using the provided KtxBasisParams.
         /// </summary>
@@ -21,6 +36,7 @@ namespace RisContentPipeline
             var ktxTexture = _ktx2Pipeline.Convert(imageContainer, basisParams);
             if (!string.IsNullOrEmpty(outputFilePath))
             {
+                EnsureDirectoryExists(outputFilePath);  
                 ktxTexture.WriteToNamedFile(outputFilePath);
             }
             return ktxTexture;
@@ -38,6 +54,7 @@ namespace RisContentPipeline
             var ktxTexture = _ktx2Pipeline.Convert(imageContainer, quality);
             if (!string.IsNullOrEmpty(outputFilePath))
             {
+                EnsureDirectoryExists(outputFilePath);
                 ktxTexture.WriteToNamedFile(outputFilePath);
             }
             return ktxTexture;
