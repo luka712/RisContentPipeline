@@ -1,11 +1,9 @@
-﻿using Eto.Drawing;
-using RisContentPipeline.Container;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace RisContentPipeline.GUI.Data
 {
     /// <summary>
-    /// File or folder of other folders or files, which contains underlying data file,
+    /// File or folder of other folders or files, which contains an underlying data file,
     /// typically an image, audio, or other asset that can be processed by the content pipeline.
     /// </summary>
     public class AssetFileOrFolder
@@ -28,14 +26,14 @@ namespace RisContentPipeline.GUI.Data
         }
 
         /// <summary>
-        /// The file path of the the file or folder.
+        /// The file path of the file or folder.
         /// </summary>
-        public string PathOrFileName { get; private set; }
+        public string? PathOrFileName { get; private set; }
 
         /// <summary>
         /// The image file.
         /// </summary>
-        public ImageContainer? Image { get; set; }
+        internal ImageContainerExtended? Image { get; set; }
 
         /// <summary>
         /// Gets the content of the file if it is a JSON file.

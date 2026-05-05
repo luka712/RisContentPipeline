@@ -22,10 +22,10 @@ namespace RisContentPipeline.GUI.Views
             _context = context;
             BuildOutputTreeView = new TreeGridView
             {
-                Size = new Size(250, -1)
+                Size = new Size(-1, 250)
             };
 
-            // Add column to tree view
+            // Add a column to the tree view
             BuildOutputTreeView.Columns.Add(new GridColumn
             {
                 HeaderText = "Build Output",

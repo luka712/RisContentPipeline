@@ -10,11 +10,12 @@ namespace RisContentPipeline.GUI.Views;
 internal class ScriptsView
 {
     private readonly Context _context;
+    private readonly TreeGridView _treeView;
 
     /// <summary>
     /// The tree view that displays the list of scripts. 
     /// </summary>
-    internal TreeGridView ScriptsTreeView { get; }
+    internal DynamicLayout Content { get; }
 
     /// <summary>
     /// The constructor.
@@ -22,21 +23,27 @@ internal class ScriptsView
     /// </summary>
     public ScriptsView(Context context)
     {
-        // Create tree view for assets
-        ScriptsTreeView = new TreeGridView
+        // Create a tree view for assets
+        Content = new DynamicLayout()
         {
-            Size = new Size(250, -1)
+            Width = Theme.SIDE_PANELS_WIDTH - Theme.PADDING * 2,
+            Height = -1, 
         };
-
-        // Add column to tree view
-        ScriptsTreeView.Columns.Add(new GridColumn
+        Content.BeginVertical();
+        _treeView = new TreeGridView();
+        Content.AddRow(_treeView);
+        Content.AddAutoSized(null);
+        Content.EndVertical();
+        
+        // Add a column to the tree view
+        _treeView.Columns.Add(new GridColumn
         {
             HeaderText = "Scripts",
             DataCell = new ImageTextCell(0, 1)
         });
 
         // Set up tree view event handlers
-        ScriptsTreeView.SelectionChanged += OnAssetSelectionChanged;
+        _treeView.SelectionChanged += OnAssetSelectionChanged;
         _context = context;
 
         _context.OnBuildScriptAdded += (_, script) =>
@@ -63,7 +70,7 @@ internal class ScriptsView
         }
 
         // Set the data store
-        ScriptsTreeView.DataStore = rootItem;
+        _treeView.DataStore = rootItem;
 
         // Expand the root
         rootItem.Expanded = true;
@@ -108,7 +115,7 @@ internal class ScriptsView
 
     private void OnAssetSelectionChanged(object? sender, EventArgs e)
     {
-        if (ScriptsTreeView.SelectedItem is ImageTreeGridItem selectedItem && selectedItem.FileOrFolder != null)
+        if (_treeView.SelectedItem is ImageTreeGridItem selectedItem && selectedItem.FileOrFolder != null)
         {
             // For now, just handle the selection
             // In a real implementation, you would notify the main form or trigger an event

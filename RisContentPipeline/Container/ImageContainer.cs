@@ -31,7 +31,12 @@ namespace RisContentPipeline.Container
         /// The number of channels in the image (e.g., 4 for RGBA).
         /// </summary>
         public uint Channels { get; set; }
-
+        
+        /// <summary>
+        /// If true, the image will be generated with mipmaps.
+        /// </summary>
+        public bool GenerateMipmaps { get; set; }
+        
         /// <summary>
         /// The format of the image data.
         /// </summary>

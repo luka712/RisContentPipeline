@@ -8,6 +8,8 @@ namespace RisContentPipeline;
 /// </summary>
 public class ImageToKtx2Pipeline : IContentPipeline<ImageContainer, Ktx2Texture>
 {
+    private readonly StbImageLoader _stbImageLoader = new();
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ImageToKtx2Pipeline"/> class.
     /// </summary>
@@ -47,7 +49,34 @@ public class ImageToKtx2Pipeline : IContentPipeline<ImageContainer, Ktx2Texture>
         }
         else
         {
-            texture.SetImageFromMemory(0, 0, 0, pointer, width * height * channels); // Assuming 4 bytes per pixel for RGBA8
+            texture.SetImageFromMemory(0, 0, 0, pointer,
+                width * height * channels); // Assuming 4 bytes per pixel for RGBA8
+        }
+
+        // If we have mip levels.
+        if (source.GenerateMipmaps)
+        {
+            var sourceWidth = (int)width;
+            var sourceHeight = (int)height;
+            var targetWidth = sourceWidth / 2;
+            var targetHeight = sourceHeight / 2;
+            var mipData = source.Data;
+            uint i = 1;
+            do
+            {
+                mipData = _stbImageLoader.Resize(
+                    mipData, sourceWidth, sourceHeight,
+                    (int)source.Channels,
+                    targetWidth, targetHeight);
+
+                texture.SetImageFromMemory(i, 0, 0, mipData, (uint)mipData.Length);
+
+                sourceWidth = targetWidth;
+                sourceHeight = targetHeight;
+                targetWidth = sourceWidth / 2;
+                targetHeight = sourceHeight / 2;
+                i++;
+            } while (targetWidth > 1 && targetHeight > 1);
         }
 
         // Apply Basis Universal compression if parameters are provided

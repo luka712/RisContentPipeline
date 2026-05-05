@@ -10,33 +10,39 @@ namespace RisContentPipeline.GUI.Views;
 internal class AssetView
 {
     private readonly Context _context;
+    private readonly TreeGridView _treeView;
 
     /// <summary>
     /// The tree view that displays the list of assets. 
     /// This will be populated with the contents of the "Assets" folder and allow users to select assets for processing.
     /// </summary>
-    internal TreeGridView AssetTreeView { get; }
+    internal DynamicLayout Content { get; }
 
     /// <summary>
     /// The constructor initializes the asset view, setting up the tree view and loading sample assets for demonstration purposes.
     /// </summary>
     public AssetView(Context context)
     {
-        // Create tree view for assets
-        AssetTreeView = new TreeGridView
+        // Create a tree view for assets
+        Content = new DynamicLayout()
         {
-            Size = new Size(250, -1)
+            Width = Theme.SIDE_PANELS_WIDTH - Theme.PADDING * 2,
+            Height = -1, 
         };
+        Content.BeginVertical();
+        _treeView = new TreeGridView();
+        Content.AddRow(_treeView);
+        Content.EndVertical();
 
-        // Add column to tree view
-        AssetTreeView.Columns.Add(new GridColumn
+        // Add a column to the tree view
+        _treeView.Columns.Add(new GridColumn
         {
             HeaderText = "Assets",
             DataCell = new ImageTextCell(0, 1)
         });
 
         // Set up tree view event handlers
-        AssetTreeView.SelectionChanged += OnAssetSelectionChanged;
+        _treeView.SelectionChanged += OnAssetSelectionChanged;
         _context = context;
 
         //// Initialize with sample data
@@ -48,7 +54,7 @@ internal class AssetView
         // Create a placeholder icon for the root folder
         var rootItem = new ImageTreeGridItem("Assets", null, Icons.FolderIcon);
 
-        var filesOrFolders = _context.FilesOrFolders.OrderBy(f => f.PathOrFileName).ToList();   
+        var filesOrFolders = _context.FilesOrFolders.OrderBy(f => f.PathOrFileName).ToList();
         foreach (var fileOrFolder in filesOrFolders)
         {
             // Create a placeholder thumbnail
@@ -61,9 +67,8 @@ internal class AssetView
                     thumbnail
                 );
                 rootItem.Children.Add(item);
-                
             }
-            else if(fileOrFolder.IsJson || fileOrFolder.IsXml)
+            else if (fileOrFolder.IsJson || fileOrFolder.IsXml)
             {
                 var item = new ImageTreeGridItem(
                     fileOrFolder.PathOrFileName,
@@ -72,11 +77,10 @@ internal class AssetView
                 );
                 rootItem.Children.Add(item);
             }
-
         }
 
         // Set the data store
-        AssetTreeView.DataStore = rootItem;
+        _treeView.DataStore = rootItem;
 
         // Expand the root
         rootItem.Expanded = true;
@@ -84,9 +88,9 @@ internal class AssetView
 
     private void OnAssetSelectionChanged(object? sender, EventArgs e)
     {
-        if (AssetTreeView.SelectedItem is ImageTreeGridItem selectedItem && selectedItem.FileOrFolder != null)
+        if (_treeView.SelectedItem is ImageTreeGridItem selectedItem && selectedItem.FileOrFolder != null)
         {
-           _context.OnItemSelected?.Invoke(selectedItem.FileOrFolder);
+            _context.OnItemSelected?.Invoke(selectedItem.FileOrFolder);
         }
     }
 }

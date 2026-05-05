@@ -21,6 +21,11 @@
         /// If false, the textures will be compressed using the ETC1S format, which is more efficient but may result in lower quality. The default value is false (ETC1S).
         /// </summary>
         public bool UseUastc { get; set; }
+        
+        /// <summary>
+        /// If <c>true</c>, the KTX2 textures will be generated with mipmaps.
+        /// </summary>
+        public bool GenerateMipmaps { get; set; }
 
         /// <summary>
         /// The target encoding format for KTX2 textures. 
@@ -29,5 +34,19 @@
         /// The default value is Basis.
         /// </summary>
         public Ktx2EncodingTarget EncodeTarget { get; set; }
+
+        /// <summary>
+        /// Copies the current settings.
+        /// </summary>
+        /// <returns>The copy of settings.</returns>
+        public Ktx2Settings Copy()
+        {
+            return new Ktx2Settings()
+            {
+                UseUastc = UseUastc,
+                EncodeTarget = EncodeTarget,
+                GenerateMipmaps = GenerateMipmaps
+            };
+        }
     }
 }

@@ -56,9 +56,9 @@ namespace RisContentPipeline.GUI
         public BuildLogger BuildLogger { get; } = new BuildLogger();
 
         /// <summary>
-        /// The settings related to KTX2 texture conversion.
+        /// The global settings related to KTX2 texture conversion.
         /// </summary>
-        public Ktx2Settings Ktx2Settings { get; } = new Ktx2Settings();
+        public Ktx2Settings Ktx2GlobalSettings { get; set; } = new();
 
         /// <summary>
         /// The list of scripts to be executed during the build process.
@@ -138,12 +138,14 @@ namespace RisContentPipeline.GUI
                 AssetFileOrFolder fileOrFolder = new AssetFileOrFolder
                 {
                     AbsolutePathOrFileName = filePath,
-                    Image = new ImageContainer
+                    Image = new ImageContainerExtended()
                     {
+                        FilePath = filePath,
                         Data = data,
                         Width = (uint)width,
                         Height = (uint)height,
                         Channels = (uint)channels,
+                        Ktx2ExportSettings = Ktx2GlobalSettings.Copy()
                     }
                 };
                 _filesOrFolders.Add(fileOrFolder);
@@ -220,11 +222,11 @@ namespace RisContentPipeline.GUI
                 try
                 {
                     KtxBasisParams? param = null;
-                    if (Ktx2Settings.EncodeTarget != Ktx2EncodingTarget.NoEncoding)
+                    if (Ktx2GlobalSettings.EncodeTarget != Ktx2EncodingTarget.NoEncoding)
                     {
                         param = new KtxBasisParams
                         {
-                            Uastc = Ktx2Settings.UseUastc,
+                            Uastc = Ktx2GlobalSettings.UseUastc,
                             // CompressionLevel = Ktx2Settings.CompressionLevel,
                             // QualityLevel = Ktx2Settings.QualityLevel
                         };

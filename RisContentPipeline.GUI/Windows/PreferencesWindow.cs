@@ -108,8 +108,12 @@ namespace RisContentPipeline.GUI.Windows
         {
             // Here you would apply the settings from the UI to the context or configuration
             _context.BuildDirectory = _buildDirectoryTextBox.Text;
-            _context.Ktx2Settings.UseUastc = _useUastcCheckBox.Checked == true;
-            _context.Ktx2Settings.EncodeTarget = (Ktx2EncodingTarget)_encodeTargetDropDown.SelectedIndex;
+            _context.Ktx2GlobalSettings = new()
+            {
+                UseUastc = _useUastcCheckBox.Checked == true,
+                EncodeTarget = (Ktx2EncodingTarget)_encodeTargetDropDown.SelectedIndex
+            };
+            
             Close();
         }   
 
@@ -126,7 +130,7 @@ namespace RisContentPipeline.GUI.Windows
             { 
                 AllowDrop= true,
                 DataStore = Enum.GetNames(typeof(Ktx2EncodingTarget)),
-                SelectedIndex = (int)_context.Ktx2Settings.EncodeTarget,
+                SelectedIndex = (int)_context.Ktx2GlobalSettings.EncodeTarget,
                 ToolTip = "Select the target encoding format for KTX2 textures. Basis will encode textures to Basis format during the build process, while NoEncoding will process textures as-is.",
             };
             generalLayout.AddRow(new Label { Text = "KTX2 Encoding Target" }, _encodeTargetDropDown);
@@ -138,7 +142,7 @@ namespace RisContentPipeline.GUI.Windows
 
             _useUastcCheckBox = new CheckBox 
             { 
-                Checked = _context.Ktx2Settings.UseUastc,
+                Checked = _context.Ktx2GlobalSettings.UseUastc,
                 ToolTip = "Check to use UASTC base, uncheck to use ETC1S base."
             };
             generalLayout.AddRow([new Label { Text = "Use UASTC Base" }, _useUastcCheckBox]);

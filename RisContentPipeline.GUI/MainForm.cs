@@ -14,8 +14,10 @@ public sealed class MainForm : Form
 
     private ActionsBarView _actionsBar;
     private AssetView _assetView;
-    private ScriptsView _scriptsView;
-    private BuildView _buildView;
+    private readonly ScriptsView _scriptsView;
+    private readonly BuildView _buildView;
+    private readonly SettingsView _settingsView;
+    private readonly InspectorView _inspectorView;
     private Label _statusLabel;
     private TextBox _inputBox;
     private TextBox _outputBox;
@@ -25,14 +27,14 @@ public sealed class MainForm : Form
         Icons.Load();
 
         Title = "RisContentPipeline";
-        ClientSize = new Eto.Drawing.Size(1000, 600);
+        ClientSize = new Eto.Drawing.Size(Theme.CLIENT_WIDTH, Theme.CLIENT_HEIGHT);
         Resizable = true;
         _context.LoadSession();
 
-        // Create menu
+        // Create a menu
         Menu = CreateMenu();
 
-        // Create actions bar
+        // Create an actions bar
         _actionsBar = new ActionsBarView(this, _context);
         _actionsBar.FileAdded += OnFileAdded;
         _actionsBar.FolderAdded += OnFolderAdded;
@@ -40,34 +42,50 @@ public sealed class MainForm : Form
         _assetView = new AssetView(_context);
         _scriptsView = new ScriptsView(_context);
         _buildView = new BuildView(_context);
+        _settingsView = new SettingsView(_context);
+        _inspectorView = new InspectorView(this, _context);
+        
 
-        // Create the right panel
-        var rightPanel = CreateRightPanel();
-
-        // Create main content layout
-        var contentLayout = new TableLayout
-        {
-            Spacing = new Eto.Drawing.Size(8, 8),
-            Padding = new Padding(8),
-            Rows =
+        // Create the main content layout
+        var contentLayout = new StackLayout(
+        [
+            new StackLayoutItem(new StackLayout
             {
-                new TableRow(
-
-                    new TableCell(new StackLayout
+                Spacing = 8,
+                Width = Theme.SIDE_PANELS_WIDTH,
+                Padding = new Padding(Theme.PADDING),
+                Items =
+                {
+                    new StackLayoutItem(_assetView.Content, true),
+                    new StackLayoutItem(_scriptsView.Content, true)
+                },
+            }, false),
+            new StackLayoutItem(
+                new DynamicLayout(
+                    new StackLayout
                     {
                         Spacing = 8,
-                        Padding = new Padding(0),
+                        Width = -1,
                         Items =
                         {
-                            new StackLayoutItem(_assetView.AssetTreeView, true),
-                            new StackLayoutItem(_scriptsView.ScriptsTreeView, true)
+                            new StackLayoutItem(_inspectorView.Content, true),
+                            new StackLayoutItem(_buildView.BuildOutputTreeView, true),
                         },
-                    }, false),
-                    // new TableCell(_assetView.AssetTreeView, false),
-                    new TableCell(_buildView.BuildOutputTreeView, false)
-                )
-            }
+                    })),
+            new StackLayoutItem(new StackLayout
+            {
+                Spacing = 8,
+                Width = Theme.SIDE_PANELS_WIDTH,
+                Items =
+                {
+                    new StackLayoutItem(_settingsView.Content, true)
+                },
+            })
+        ])
+        {
+            Orientation = Orientation.Horizontal,
         };
+
 
         // Create root layout with toolbar and content
         var rootLayout = new DynamicLayout();
@@ -119,7 +137,7 @@ public sealed class MainForm : Form
 
         return new MenuBar
         {
-            Items = { fileMenu, editMenu , windowsMenu },
+            Items = { fileMenu, editMenu, windowsMenu },
             HelpItems = { helpMenu }
         };
     }
@@ -221,7 +239,7 @@ public sealed class MainForm : Form
 
     private void UpdateStatus(string message)
     {
-        _statusLabel.Text = message;
+        _statusLabel?.Text = message;
     }
 
     protected override void OnClosing(CancelEventArgs e)
