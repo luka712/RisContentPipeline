@@ -23,15 +23,15 @@ namespace RisContentPipeline.GUI.Windows
 
             context.OnItemSelected += item =>
             {
-                if (item.Image != null)
-                {
-                    _currentImage = new Bitmap(item.Image.Data);
-
-                    if (_imageView != null)
-                    {
-                        _imageView.Image = _currentImage;
-                    }
-                }
+                // if (item.Image != null)
+                // {
+                //     _currentImage = new Bitmap(item.Image.Data);
+                //
+                //     if (_imageView != null)
+                //     {
+                //         _imageView.Image = _currentImage;
+                //     }
+                // }
             };
 
             _imageView = new ImageView

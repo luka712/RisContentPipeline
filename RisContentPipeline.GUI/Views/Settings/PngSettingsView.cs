@@ -9,9 +9,9 @@ public class PngSettingsView
     /// <summary>
     /// Parent is a table to which we assign various settings.
     /// </summary>
-    /// <param name="imageContainer">The <see cref="ImageContainerExtended"/>.</param>
+    /// <param name="imageContainer">The <see cref="ImageContainer"/>.</param>
     /// <param name="tableLayout">The table to attach rows to.</param>
-    static internal void Create(ImageContainerExtended imageContainer, TableLayout tableLayout)
+    static internal void Create(ImageContainer imageContainer, TableLayout tableLayout)
     {
         // TEXTURE MODE DROPDOWN
         string[] textureModes = ["Basis UASTC", "Basis ETC1S"];
@@ -48,10 +48,10 @@ public class PngSettingsView
             new Label() { Text = "Meta", Font = SystemFonts.Bold() }
         ));
 
-        tableLayout.Rows.Add(new TableRow(
-            new Label { Text = "Dimensions" },
-            new Label { Text = $"{imageContainer.Width} x {imageContainer.Height}" }
-        ));
+        // tableLayout.Rows.Add(new TableRow(
+        //     new Label { Text = "Dimensions" },
+        //     new Label { Text = $"{imageContainer.Width} x {imageContainer.Height}" }
+        // ));
 
         tableLayout.Rows.Add(new TableRow(
             new Label { Text = "File Path" },

@@ -1,11 +1,11 @@
 ﻿using Eto.Forms;
-using RisContentPipeline.Container;
 using RisContentPipeline.GUI.Data;
 using RisContentPipeline.GUI.Scripting.Python;
 using RisContentPipeline.GUI.Services;
 using RisContentPipeline.GUI.Settings;
 using RisKtx2;
 using System.Text.Json;
+using RisContentPipeline.Ktx2;
 
 
 namespace RisContentPipeline.GUI
@@ -16,7 +16,7 @@ namespace RisContentPipeline.GUI
         /// The collection of pipelines available in the content pipeline. 
         /// This includes various processing pipelines for handling different types of assets (e.g., images, audio, etc.).
         /// </summary>
-        private readonly ContentPipelines _pipelines = new ();
+        private readonly IPipelineSystem _pipelineSystem = new PipelineSystem();
 
 
         private readonly StbImageLoader _stbImageLoader = new StbImageLoader();
@@ -28,7 +28,8 @@ namespace RisContentPipeline.GUI
         /// The list of internal Python scripts that are included with the content pipeline.
         /// These scripts can be used for various processing tasks, such as converting PNG files to KTX2 format.
         /// </summary>
-        internal IReadOnlyList<Script> InternalScripts = [
+        internal IReadOnlyList<Script> InternalScripts =
+        [
             new Script("InternalScripts/texture_packer_json_png_to_ktx2.py")
         ];
 
@@ -103,7 +104,7 @@ namespace RisContentPipeline.GUI
         {
             if (filePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
             {
-                return AddPngFileAsync(filePath);
+                AddPngFile(filePath);
             }
             else if (
                 filePath.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
@@ -121,39 +122,20 @@ namespace RisContentPipeline.GUI
         /// </summary>
         /// <param name="filePath">The file path.</param>
         /// <param name="parent">The parent, if any.</param>
-        internal Task AddPngFileAsync(string filePath, AssetFileOrFolder? parent = null)
+        internal void AddPngFile(string filePath, AssetFileOrFolder? parent = null)
         {
             TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
-
-            Task.Run(() =>
+            AssetFileOrFolder fileOrFolder = new AssetFileOrFolder
             {
-                var data = _stbImageLoader.Load(filePath, out int width, out int height, out int channels);
-                if (data == null)
+                AbsolutePathOrFileName = filePath,
+                Image = new ImageContainer()
                 {
-                    BuildLogger.ErrorAsync($"Failed to load image: '{filePath}'");
-                    tcs.SetResult(false);
-                    return;
+                    FilePath = filePath,
+                    Ktx2ExportSettings = Ktx2GlobalSettings.Copy()
                 }
-
-                AssetFileOrFolder fileOrFolder = new AssetFileOrFolder
-                {
-                    AbsolutePathOrFileName = filePath,
-                    Image = new ImageContainerExtended()
-                    {
-                        FilePath = filePath,
-                        Data = data,
-                        Width = (uint)width,
-                        Height = (uint)height,
-                        Channels = (uint)channels,
-                        Ktx2ExportSettings = Ktx2GlobalSettings.Copy()
-                    }
-                };
-                _filesOrFolders.Add(fileOrFolder);
-                tcs.SetResult(true);
-            });
-
-            return tcs.Task;
-
+            };
+            _filesOrFolders.Add(fileOrFolder);
+            tcs.SetResult(true);
         }
 
         internal void AddGenericFile(string filePath, AssetFileOrFolder? parent = null)
@@ -196,7 +178,6 @@ namespace RisContentPipeline.GUI
                     tasks.Add(HandleImageAsync(fileOrFolder));
                 }
             }
-
         }
 
         internal void AsyncInvoke(Action action)
@@ -218,30 +199,38 @@ namespace RisContentPipeline.GUI
                 }
 
                 var filePath = Path.Combine(BuildDirectory, Path.GetFileNameWithoutExtension(file.PathOrFileName));
-                Ktx2Texture texture = null!;
                 try
                 {
-                    KtxBasisParams? param = null;
-                    if (Ktx2GlobalSettings.EncodeTarget != Ktx2EncodingTarget.NoEncoding)
-                    {
-                        param = new KtxBasisParams
-                        {
-                            Uastc = Ktx2GlobalSettings.UseUastc,
-                            // CompressionLevel = Ktx2Settings.CompressionLevel,
-                            // QualityLevel = Ktx2Settings.QualityLevel
-                        };
-                    }
-
                     // Convert the image to KTX2 format using the content pipeline's texture processing pipeline
                     // and save the output to the specified build directory with a .ktx2 extension.
-                    texture = _pipelines.CovertToKtx2(source, param, $"{filePath}.ktx2");
+                    var ktxPipelineSource = new Ktx2PipelineSource()
+                    {
+                        FilePath = source.FilePath,
+                    };
+
+                    var ktxPipelineOptions = new Ktx2PipelineOptions()
+                    {
+                        GenerateMipmaps = source.Ktx2ExportSettings.GenerateMipmaps,
+                        UniversalBasisCompression = Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.Basis,
+                        OutputPath = $"{filePath}.ktx2",
+                    };
+                    
+                    var result = _pipelineSystem.Convert("png", "ktx2", ktxPipelineSource, ktxPipelineOptions);
+
+                    if (!result.Success)
+                    {
+                        BuildLogger.ErrorAsync($"Failed to convert image '{file.PathOrFileName}' to KTX2 format.");
+                        return;
+                    }
                 }
                 catch (Exception ex)
                 {
                     BuildLogger.ErrorAsync($"Error processing image '{file.PathOrFileName}': {ex.Message}");
                     return;
                 }
-                BuildLogger.SuccessAsync($"'{file.PathOrFileName}' has been converted to KTX2 format. Output file: '{filePath}.ktx2'");
+
+                BuildLogger.SuccessAsync(
+                    $"'{file.PathOrFileName}' has been converted to KTX2 format. Output file: '{filePath}.ktx2'");
             });
         }
 
@@ -259,7 +248,7 @@ namespace RisContentPipeline.GUI
                     AddBuildScript(new Script(scriptPath));
                 }
             }
-        }   
+        }
 
         public void SaveSession()
         {

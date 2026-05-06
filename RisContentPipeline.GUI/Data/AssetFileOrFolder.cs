@@ -33,7 +33,7 @@ namespace RisContentPipeline.GUI.Data
         /// <summary>
         /// The image file.
         /// </summary>
-        internal ImageContainerExtended? Image { get; set; }
+        internal ImageContainer? Image { get; set; }
 
         /// <summary>
         /// Gets the content of the file if it is a JSON file.

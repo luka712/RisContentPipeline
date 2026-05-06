@@ -68,7 +68,7 @@ internal class SettingsView
         }
     }
 
-    private void ImageAssetProperties(ImageContainerExtended imageContainer)
+    private void ImageAssetProperties(ImageContainer imageContainer)
     {
         _tableLayout = CreateTableLayout();
 

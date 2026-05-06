@@ -1,4 +1,3 @@
-using RisContentPipeline.Container;
 using RisContentPipeline.GUI.Settings;
 
 namespace RisContentPipeline.GUI.Data;
@@ -6,7 +5,7 @@ namespace RisContentPipeline.GUI.Data;
 /// <summary>
 /// The extended image container that includes additional settings for KTX2 export.
 /// </summary>
-internal class ImageContainerExtended : ImageContainer
+internal class ImageContainer
 {
     /// <summary>
     /// The settings for exporting the image to KTX2.
