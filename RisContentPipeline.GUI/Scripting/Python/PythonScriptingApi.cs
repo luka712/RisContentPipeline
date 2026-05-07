@@ -12,7 +12,12 @@ namespace RisContentPipeline.GUI.Scripting.Python
     {
         private readonly IPipelineSystem _pipelineSystem;
 
-        // TODO: create a doc comment for this constructor
+        /// <summary>
+        /// Creates a new <see cref="PythonScriptingApi"/> bound to the supplied pipeline system.
+        /// Every method exposed on this class becomes available to Python scripts as the
+        /// <c>api</c> module-level attribute that the host injects into each script.
+        /// </summary>
+        /// <param name="pipelineSystem">The pipeline system that newly-registered pipelines will be added to.</param>
         public PythonScriptingApi(IPipelineSystem pipelineSystem)
         {
             _pipelineSystem = pipelineSystem;
@@ -24,7 +29,12 @@ namespace RisContentPipeline.GUI.Scripting.Python
         /// </summary>
         public PythonAssetFile? current_asset { get; internal set; }
 
-        // TODO: create a doc comment for this method
+        /// <summary>
+        /// Validates that <paramref name="json"/> is a JSON object and writes it to <paramref name="path"/>.
+        /// </summary>
+        /// <param name="path">The destination file path.</param>
+        /// <param name="json">The JSON string to write. Must represent a JSON object.</param>
+        /// <returns><c>true</c> if the file was written successfully, otherwise <c>false</c>.</returns>
         public bool save_json(string path, string json)
         {
             try
@@ -45,7 +55,11 @@ namespace RisContentPipeline.GUI.Scripting.Python
             }
         }
 
-        // TODO: create a doc comment for this method
+        /// <summary>
+        /// Reads the file at <paramref name="path"/> and returns its raw text content.
+        /// </summary>
+        /// <param name="path">The path of the file to read.</param>
+        /// <returns>The file content as a string, or an empty string if the file cannot be read.</returns>
         public string read_json_as_str(string path)
         {
             try
@@ -59,14 +73,27 @@ namespace RisContentPipeline.GUI.Scripting.Python
             }
         }
 
-        // TODO: create a doc comment for this method
+        /// <summary>
+        /// Reads the file at <paramref name="path"/> and deserializes it into a dictionary.
+        /// </summary>
+        /// <param name="path">The path of the JSON file to read.</param>
+        /// <returns>A dictionary representing the parsed JSON object, or an empty dictionary if the file cannot be parsed.</returns>
         public Dictionary<string, object> read_json(string path)
         {
             var json = File.ReadAllText(path);
             return JsonSerializer.Deserialize<Dictionary<string, object>>(json) ?? new Dictionary<string, object>();
         }
 
-        // TODO: create a doc comment for this method
+        /// <summary>
+        /// Internal helper that creates a <see cref="GenericPipeline"/> wrapping the given
+        /// managed callback and registers it with the pipeline system.
+        /// </summary>
+        /// <param name="name">The unique pipeline name.</param>
+        /// <param name="source">The list of supported source types.</param>
+        /// <param name="target">The list of supported target types. Use <c>"*"</c> to accept any.</param>
+        /// <param name="convertAction">The conversion callback returning a result dictionary
+        /// with <c>success</c>, <c>message</c>, and <c>result</c> keys.</param>
+        /// <returns>The newly-registered <see cref="IPipeline"/>.</returns>
         private IPipeline AddPipeline(
             string name,
             string[] source,
@@ -103,7 +130,17 @@ namespace RisContentPipeline.GUI.Scripting.Python
             return pipeline;
         }
 
-        // TODO: create a doc comment for this method
+        /// <summary>
+        /// Registers a Python-defined pipeline with the underlying <see cref="IPipelineSystem"/>.
+        /// The Python function is expected to take a source object and an options object and to
+        /// return a dictionary with the keys <c>success</c> (bool), <c>message</c> (str, optional),
+        /// and <c>result</c> (any, optional).
+        /// </summary>
+        /// <param name="name">The unique pipeline name.</param>
+        /// <param name="source">The list of supported source types.</param>
+        /// <param name="target">The list of supported target types. Use <c>"*"</c> to accept any.</param>
+        /// <param name="pyFunction">The Python callable that performs the conversion.</param>
+        /// <returns>The newly-registered <see cref="IPipeline"/>.</returns>
         public IPipeline add_pipeline(string name, string[] source, string[] target, dynamic pyFunction)
         {
             // Wrapper that converts PyObject function calls to the expected delegate signature

@@ -1,5 +1,8 @@
 namespace RisContentPipeline;
 
+/// <summary>
+/// Event arguments fired when the conversion of all stored sources begins.
+/// </summary>
 public class ConvertStartEventArgs
 {
     /// <summary>
@@ -9,14 +12,20 @@ public class ConvertStartEventArgs
     public int TotalItems { get; internal set; }
 }
 
+/// <summary>
+/// Event arguments fired after a single item finished its conversion.
+/// </summary>
 public class OnItemConversionFinishEventArgs
 {
     /// <summary>
     /// The result of the conversion of the item.
     /// </summary>
-    public PipelineResult Result { get; internal set; }
+    public PipelineResult Result { get; internal set; } = new();
 }
 
+/// <summary>
+/// Event arguments fired after every stored source has been processed.
+/// </summary>
 public class ConvertEndedEventArgs
 {
     /// <summary>
@@ -42,7 +51,8 @@ public interface IPipelineSystem
     event EventHandler<ConvertEndedEventArgs>? OnConvertAllFinished;
 
     /// <summary>
-    /// Called when a pipeline item is run. The event handler receives the <see cref="PipelineResult"/> of the item that was run.
+    /// Called after each individual stored source has been processed during a <see cref="ConvertAll"/> run.
+    /// The event handler receives the <see cref="PipelineResult"/> of the item that was just converted.
     /// </summary>
     event EventHandler<OnItemConversionFinishEventArgs>? OnItemConversionFinish;
 
@@ -75,4 +85,10 @@ public interface IPipelineSystem
     /// <param name="source">The source.</param>
     /// <param name="options">The compilation options.</param>
     PipelineResult Convert(string sourceType, string targetType, object source, object? options);
+
+    /// <summary>
+    /// Removes all stored source assets without affecting registered pipelines.
+    /// Useful when re-building from scratch.
+    /// </summary>
+    void ClearStoredAssets();
 }

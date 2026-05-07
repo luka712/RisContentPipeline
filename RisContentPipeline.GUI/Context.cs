@@ -11,10 +11,34 @@ using RisContentPipeline.Generic;
 
 namespace RisContentPipeline.GUI
 {
-    // TODO: add doc comment
+    /// <summary>
+    /// The application-wide context shared by views, modals, and the build pipeline.
+    /// It owns the active <see cref="IPipelineSystem"/>, the list of imported assets, the
+    /// list of build scripts and the global KTX2 settings, and is also responsible for
+    /// loading/saving the user session and orchestrating the build process.
+    /// </summary>
     internal class Context
     {
-        // TODO: reorganize and cleanup.
+        // ----- Static configuration -----------------------------------------------------
+
+        /// <summary>
+        /// The directory (relative to the executable) that contains the built-in Python
+        /// scripts shipped with the application.
+        /// </summary>
+        private const string INTERNAL_SCRIPTS_DIRECTORY = "InternalScripts";
+
+        /// <summary>
+        /// The directory (relative to the executable) that contains user-provided Python
+        /// scripts. The folder is optional and is only loaded when it exists.
+        /// </summary>
+        private const string USER_SCRIPTS_DIRECTORY = "UserScripts";
+
+        /// <summary>
+        /// The path of the JSON file used to persist the session between application runs.
+        /// </summary>
+        private const string SESSION_FILE = "session.json";
+
+        // ----- Fields -------------------------------------------------------------------
 
         /// <summary>
         /// The collection of pipelines available in the content pipeline. 
@@ -22,19 +46,20 @@ namespace RisContentPipeline.GUI
         /// </summary>
         public IPipelineSystem PipelineSystem = new PipelineSystem();
 
-
         private readonly StbImageLoader _stbImageLoader = new StbImageLoader();
         private readonly List<Script> _buildScripts = [];
+        private readonly List<Script> _internalScripts = [];
 
         private List<AssetFileOrFolder> _filesOrFolders = new List<AssetFileOrFolder>();
 
-        // TODO: create method to load scripts from directories
-
         /// <summary>
-        /// The constructor.
+        /// Initializes a new <see cref="Context"/> and wires up build logging for the
+        /// underlying <see cref="IPipelineSystem"/>.
         /// </summary>
         public Context()
         {
+            LoadInternalScripts();
+
             PipelineSystem.OnConvertAllFinished += (sender, args) =>
             {
                 BuildLogger.InfoAsync($"Conversion of all items finished. Total items: {args.TotalItems}");
@@ -48,12 +73,11 @@ namespace RisContentPipeline.GUI
 
         /// <summary>
         /// The list of internal Python scripts that are included with the content pipeline.
+        /// The list is populated at construction time by <see cref="LoadInternalScripts"/>
+        /// from the <see cref="INTERNAL_SCRIPTS_DIRECTORY"/> directory.
         /// These scripts can be used for various processing tasks, such as converting PNG files to KTX2 format.
         /// </summary>
-        internal IReadOnlyList<Script> InternalScripts =
-        [
-            new Script("InternalScripts/texture_packer_json_png_to_ktx2_pipeline.py")
-        ];
+        internal IReadOnlyList<Script> InternalScripts => _internalScripts;
 
         /// <summary>
         /// This event is triggered when the build process starts.
@@ -169,10 +193,12 @@ namespace RisContentPipeline.GUI
         }
 
         /// <summary>
-        /// Builds the content by processing each file or folder in the list. 
-        /// It checks if the file has an associated image and calls the appropriate method to handle the image (e.g., converting it to KTX2 format).
-        /// After processing all files, it checks if there are any Python scripts to execute and runs them using the PythonIntegration class, 
-        /// passing the list of files to be processed by the scripts.
+        /// Builds the content by queuing every imported file or folder into the
+        /// <see cref="PipelineSystem"/> and invoking <see cref="IPipelineSystem.ConvertAll"/>.
+        /// Before queuing, all registered build scripts get their <c>before_build</c>
+        /// callback invoked, and any previously stored assets are cleared from the
+        /// pipeline system to avoid duplicate processing on successive builds.
+        /// After conversion, each script's <c>after_build</c> callback is invoked.
         /// </summary>
         internal void Build()
         {
@@ -191,59 +217,60 @@ namespace RisContentPipeline.GUI
             OnBuildStarted?.Invoke();
             BuildLogger.Clear();
 
-            // List<Task> tasks = new();
+            // Make sure we don't accumulate stored assets from previous builds.
+            PipelineSystem.ClearStoredAssets();
 
-            // Add all files to pipeline.
+            // Queue all files into the pipeline system.
             foreach (var fileOrFolder in _filesOrFolders)
             {
-                if (fileOrFolder.Image != null)
-                {
-                    var image = fileOrFolder.Image;
-                    var ktx2Settings = image.Ktx2ExportSettings;
-                    var filePath = Path.Combine(BuildDirectory, Path.GetFileNameWithoutExtension(fileOrFolder.PathOrFileName!));
-                    PipelineSystem.StoreSourceAsset("png", "ktx", new Ktx2PipelineSource()
-                    {
-                        FilePath = fileOrFolder.AbsolutePathOrFileName,
-                    }, new Ktx2PipelineOptions()
-                    {
-                        GenerateMipmaps = ktx2Settings.GenerateMipmaps,
-                        OutputPath = $"{filePath}.ktx2",
-                        UniversalBasisCompression = Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.Basis,
-                        UseUastc = Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.Basis && ktx2Settings.UseUastc,
-                    });
-                }
-                else if (fileOrFolder.IsJson)
-                {
-                    var fileType = fileOrFolder.PathOrFileName?.Split('.')?.LastOrDefault();
-                    if (fileType != null)
-                    {
-                        PipelineSystem.StoreSourceAsset(fileType, IPipeline.ANY_TYPE, new GenericPipelineSource()
-                        {
-                            FilePath = fileOrFolder.AbsolutePathOrFileName,
-                        }, new GenericPipelineOptions()
-                        {
-                            OutputPath = Path.Combine(BuildDirectory, Path.GetFileName(fileOrFolder.AbsolutePathOrFileName)),
-                        });
-                    }
-                }
+                QueueFileForBuild(fileOrFolder);
             }
 
             PipelineSystem.ConvertAll();
 
+            // Run after build scripts.
+            foreach (var script in BuildScripts)
+            {
+                pythonIntegration.AfterBuild(script);
+            }
+        }
 
-            //foreach (var fileOrFolder in _filesOrFolders)
-            //{
-            //    foreach (var script in BuildScripts)
-            //    {
-            //        pythonIntegration.ProcessAsset(script, fileOrFolder);
-            //    }
-
-
-            //    if (fileOrFolder.Image != null)
-            //    {
-            //        tasks.Add(HandleImageAsync(fileOrFolder));
-            //    }
-            //}
+        /// <summary>
+        /// Stores a single asset in the pipeline system based on its detected type.
+        /// </summary>
+        /// <param name="fileOrFolder">The asset to be queued for processing.</param>
+        private void QueueFileForBuild(AssetFileOrFolder fileOrFolder)
+        {
+            if (fileOrFolder.Image != null)
+            {
+                var image = fileOrFolder.Image;
+                var ktx2Settings = image.Ktx2ExportSettings;
+                var filePath = Path.Combine(BuildDirectory, Path.GetFileNameWithoutExtension(fileOrFolder.PathOrFileName!));
+                PipelineSystem.StoreSourceAsset("png", "ktx", new Ktx2PipelineSource()
+                {
+                    FilePath = fileOrFolder.AbsolutePathOrFileName,
+                }, new Ktx2PipelineOptions()
+                {
+                    GenerateMipmaps = ktx2Settings.GenerateMipmaps,
+                    OutputPath = $"{filePath}.ktx2",
+                    UniversalBasisCompression = Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.Basis,
+                    UseUastc = Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.Basis && ktx2Settings.UseUastc,
+                });
+            }
+            else if (fileOrFolder.IsJson)
+            {
+                var fileType = fileOrFolder.PathOrFileName?.Split('.')?.LastOrDefault();
+                if (fileType != null)
+                {
+                    PipelineSystem.StoreSourceAsset(fileType, IPipeline.ANY_TYPE, new GenericPipelineSource()
+                    {
+                        FilePath = fileOrFolder.AbsolutePathOrFileName,
+                    }, new GenericPipelineOptions()
+                    {
+                        OutputPath = Path.Combine(BuildDirectory, Path.GetFileName(fileOrFolder.AbsolutePathOrFileName)),
+                    });
+                }
+            }
         }
 
         internal void AsyncInvoke(Action action)
@@ -300,19 +327,31 @@ namespace RisContentPipeline.GUI
             });
         }
 
+        /// <summary>
+        /// Loads the user session from <see cref="SESSION_FILE"/>, restoring the list of
+        /// previously configured build scripts. Silently does nothing if no session file
+        /// exists.
+        /// </summary>
         public void LoadSession()
         {
-            if (!File.Exists("session.json"))
+            if (!File.Exists(SESSION_FILE))
                 return;
 
-            string jsonContent = File.ReadAllText("session.json");
-            var session = JsonSerializer.Deserialize<Session>(jsonContent);
-            if (session != null)
+            try
             {
-                foreach (var scriptPath in session.BuildScripts.Distinct())
+                string jsonContent = File.ReadAllText(SESSION_FILE);
+                var session = JsonSerializer.Deserialize<Session>(jsonContent);
+                if (session != null)
                 {
-                    AddBuildScript(new Script(scriptPath));
+                    foreach (var scriptPath in session.BuildScripts.Distinct())
+                    {
+                        AddBuildScript(new Script(scriptPath));
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                BuildLogger.Error($"Failed to load session from '{SESSION_FILE}': {ex.Message}");
             }
         }
 
@@ -324,7 +363,96 @@ namespace RisContentPipeline.GUI
             };
 
             string jsonContent = JsonSerializer.Serialize(session);
-            File.WriteAllText("session.json", jsonContent);
+            File.WriteAllText(SESSION_FILE, jsonContent);
+        }
+
+        /// <summary>
+        /// Cleans the build directory by recursively deleting all generated artifacts.
+        /// Pipeline state and imported assets are preserved so a subsequent
+        /// <see cref="Build"/> can recreate the output from scratch.
+        /// </summary>
+        internal void Clean()
+        {
+            try
+            {
+                if (Directory.Exists(BuildDirectory))
+                {
+                    Directory.Delete(BuildDirectory, recursive: true);
+                    BuildLogger.Info($"Cleaned build directory: '{BuildDirectory}'");
+                }
+                else
+                {
+                    BuildLogger.Info($"Nothing to clean. Build directory does not exist: '{BuildDirectory}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                BuildLogger.Error($"Failed to clean build directory '{BuildDirectory}': {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Performs a clean and full re-build of all imported assets.
+        /// </summary>
+        internal void Rebuild()
+        {
+            Clean();
+            Build();
+        }
+
+        /// <summary>
+        /// Discovers all <c>.py</c> scripts inside the <see cref="INTERNAL_SCRIPTS_DIRECTORY"/>
+        /// folder (relative to the working directory and to the executable directory) and
+        /// caches them in <see cref="_internalScripts"/>.
+        /// Pure helper module files prefixed with <c>base_</c> or <c>__</c> (such as
+        /// <c>base_processor.py</c> and <c>__template__.py</c>) are skipped because they
+        /// are intended to be imported by other scripts rather than executed directly.
+        /// </summary>
+        private void LoadInternalScripts()
+        {
+            _internalScripts.Clear();
+            var directory = ResolveScriptDirectory(INTERNAL_SCRIPTS_DIRECTORY);
+            if (directory == null)
+            {
+                return;
+            }
+
+            foreach (var file in Directory.EnumerateFiles(directory, "*.py", SearchOption.TopDirectoryOnly))
+            {
+                var name = Path.GetFileName(file);
+                if (name.StartsWith("base_", StringComparison.OrdinalIgnoreCase) ||
+                    name.StartsWith("__", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                _internalScripts.Add(new Script(file));
+            }
+        }
+
+        /// <summary>
+        /// Resolves a script directory relative to either the current working directory
+        /// or the executable directory. Returns <c>null</c> if neither location exists.
+        /// </summary>
+        private static string? ResolveScriptDirectory(string relativeDirectory)
+        {
+            var fromCwd = Path.GetFullPath(relativeDirectory);
+            if (Directory.Exists(fromCwd))
+            {
+                return fromCwd;
+            }
+
+            var assemblyDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            if (assemblyDir != null)
+            {
+                var fromAssembly = Path.Combine(assemblyDir, relativeDirectory);
+                if (Directory.Exists(fromAssembly))
+                {
+                    return fromAssembly;
+                }
+            }
+
+            return null;
         }
     }
 }

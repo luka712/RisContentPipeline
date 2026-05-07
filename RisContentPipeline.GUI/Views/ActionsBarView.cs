@@ -73,8 +73,7 @@ internal class ActionsBarView
         };
         rebuildButton.Click += (sender, e) =>
         {
-            // TODO: Implement rebuild functionality
-            MessageBox.Show(parentWindow, "Rebuild functionality coming soon!", MessageBoxType.Information);
+            _context.Rebuild();
         };
 
         var cleanButton = new Button
@@ -85,8 +84,7 @@ internal class ActionsBarView
         };
         cleanButton.Click += (sender, e) =>
         {
-            // TODO: Implement clean functionality
-            MessageBox.Show(parentWindow, "Clean functionality coming soon!", MessageBoxType.Information);
+            _context.Clean();
         };
 
         var addBuildScript = new Button

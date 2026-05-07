@@ -2,11 +2,16 @@ using RisContentPipeline.Ktx2;
 
 namespace RisContentPipeline;
 
-// TODO: Add doc comments.
+/// <summary>
+/// The default <see cref="IPipelineSystem"/> implementation.
+/// Maintains a registry of <see cref="IPipeline"/> instances and a queue of source assets
+/// that should be processed when <see cref="ConvertAll"/> is invoked.
+/// </summary>
 public class PipelineSystem : IPipelineSystem
 {
     /// <summary>
     /// The store for the source and target types and the source and options.
+    /// Each tuple consists of (sourceType, targetType, source, options).
     /// </summary>
     private readonly List<Tuple<string, string, object, object?>> _store = new();
 
@@ -59,9 +64,7 @@ public class PipelineSystem : IPipelineSystem
         return results;
     }
 
-    /// <summary>
-    /// Convert the source to the target.
-    /// </summary>
+    /// <inheritdoc/>
     public PipelineResult Convert(string sourceType, string targetType, object source, object? options)
     {
         foreach (var pipeline in _pipelines)
@@ -72,6 +75,16 @@ public class PipelineSystem : IPipelineSystem
             }
         }
 
-        return new PipelineResult();
+        return new PipelineResult
+        {
+            Success = false,
+            ErrorMessage = $"No pipeline registered that can convert '{sourceType}' to '{targetType}'."
+        };
+    }
+
+    /// <inheritdoc/>
+    public void ClearStoredAssets()
+    {
+        _store.Clear();
     }
 }
