@@ -46,6 +46,20 @@ namespace RisContentPipeline.GUI.Scripting.Python
         }
 
         // TODO: create a doc comment for this method
+        public string read_json_as_str(string path)
+        {
+            try
+            {
+                return File.ReadAllText(path);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to read JSON file: {ex.Message}");
+                return string.Empty;
+            }
+        }
+
+        // TODO: create a doc comment for this method
         public Dictionary<string, object> read_json(string path)
         {
             var json = File.ReadAllText(path);
@@ -53,7 +67,7 @@ namespace RisContentPipeline.GUI.Scripting.Python
         }
 
         // TODO: create a doc comment for this method
-        private void AddPipeline(
+        private IPipeline AddPipeline(
             string name,
             string[] source,
             string[] target,
@@ -61,6 +75,20 @@ namespace RisContentPipeline.GUI.Scripting.Python
         {
             PipelineResult Callback(object obj, object? opt)
             {
+                if (obj is GenericPipelineSource genericObj)
+                {
+                    var pyObj = PyObject.FromManagedObject(genericObj);
+                    pyObj.SetAttr("file_path", PyObject.FromManagedObject(genericObj.FilePath));
+                    obj = pyObj;
+
+                }
+                if (opt is GenericPipelineOptions genericOpt)
+                {
+                    var pyOpt = PyObject.FromManagedObject(genericOpt);
+                    pyOpt.SetAttr("output_path", PyObject.FromManagedObject(genericOpt.OutputPath));
+                    opt = pyOpt;
+                }
+
                 var dict = convertAction(obj, opt);
 
                 dict.TryGetValue("success", out object? success);
@@ -70,7 +98,9 @@ namespace RisContentPipeline.GUI.Scripting.Python
                 return new PipelineResult() { Success = success is bool and true, ErrorMessage = message is string and { Length: > 0 } ? message.ToString() : null, Result = result };
             }
 
-            _pipelineSystem.AddPipeline(new GenericPipeline(name, source, target, Callback));
+            var pipeline = new GenericPipeline(name, source, target, Callback);
+            _pipelineSystem.AddPipeline(pipeline);
+            return pipeline;
         }
 
         // TODO: create a doc comment for this method
@@ -135,7 +165,7 @@ namespace RisContentPipeline.GUI.Scripting.Python
             }
 
             // Use the existing add_pipeline method with the wrapper
-            return add_pipeline(name, source, target, ConvertActionWrapper);
+            return AddPipeline(name, source, target, ConvertActionWrapper);
         }
     }
 }

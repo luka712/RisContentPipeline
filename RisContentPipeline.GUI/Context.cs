@@ -6,6 +6,7 @@ using RisContentPipeline.GUI.Settings;
 using RisKtx2;
 using System.Text.Json;
 using RisContentPipeline.Ktx2;
+using RisContentPipeline.Generic;
 
 
 namespace RisContentPipeline.GUI
@@ -14,7 +15,7 @@ namespace RisContentPipeline.GUI
     internal class Context
     {
         // TODO: reorganize and cleanup.
-        
+
         /// <summary>
         /// The collection of pipelines available in the content pipeline. 
         /// This includes various processing pipelines for handling different types of assets (e.g., images, audio, etc.).
@@ -28,7 +29,23 @@ namespace RisContentPipeline.GUI
         private List<AssetFileOrFolder> _filesOrFolders = new List<AssetFileOrFolder>();
 
         // TODO: create method to load scripts from directories
-        
+
+        /// <summary>
+        /// The constructor.
+        /// </summary>
+        public Context()
+        {
+            PipelineSystem.OnConvertAllFinished += (sender, args) =>
+            {
+                BuildLogger.InfoAsync($"Conversion of all items finished. Total items: {args.TotalItems}");
+            };
+
+            PipelineSystem.OnConvertAllStarted += (sender, args) =>
+              {
+                  BuildLogger.InfoAsync($"Conversion of all items started. Total items: {args.TotalItems}");
+              };
+        }
+
         /// <summary>
         /// The list of internal Python scripts that are included with the content pipeline.
         /// These scripts can be used for various processing tasks, such as converting PNG files to KTX2 format.
@@ -174,21 +191,59 @@ namespace RisContentPipeline.GUI
             OnBuildStarted?.Invoke();
             BuildLogger.Clear();
 
-            List<Task> tasks = new();
+            // List<Task> tasks = new();
 
+            // Add all files to pipeline.
             foreach (var fileOrFolder in _filesOrFolders)
             {
-                foreach (var script in BuildScripts)
-                {
-                    pythonIntegration.ProcessAsset(script, fileOrFolder);
-                }
-
-
                 if (fileOrFolder.Image != null)
                 {
-                    tasks.Add(HandleImageAsync(fileOrFolder));
+                    var image = fileOrFolder.Image;
+                    var ktx2Settings = image.Ktx2ExportSettings;
+                    var filePath = Path.Combine(BuildDirectory, Path.GetFileNameWithoutExtension(fileOrFolder.PathOrFileName!));
+                    PipelineSystem.StoreSourceAsset("png", "ktx", new Ktx2PipelineSource()
+                    {
+                        FilePath = fileOrFolder.AbsolutePathOrFileName,
+                    }, new Ktx2PipelineOptions()
+                    {
+                        GenerateMipmaps = ktx2Settings.GenerateMipmaps,
+                        OutputPath = $"{filePath}.ktx2",
+                        UniversalBasisCompression = Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.Basis,
+                        UseUastc = Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.Basis && ktx2Settings.UseUastc,
+                    });
+                }
+                else if (fileOrFolder.IsJson)
+                {
+                    var fileType = fileOrFolder.PathOrFileName?.Split('.')?.LastOrDefault();
+                    if (fileType != null)
+                    {
+                        PipelineSystem.StoreSourceAsset(fileType, IPipeline.ANY_TYPE, new GenericPipelineSource()
+                        {
+                            FilePath = fileOrFolder.AbsolutePathOrFileName,
+                        }, new GenericPipelineOptions()
+                        {
+                            OutputPath = Path.Combine(BuildDirectory, Path.GetFileName(fileOrFolder.AbsolutePathOrFileName)),
+                        });
+                    }
                 }
             }
+
+            PipelineSystem.ConvertAll();
+
+
+            //foreach (var fileOrFolder in _filesOrFolders)
+            //{
+            //    foreach (var script in BuildScripts)
+            //    {
+            //        pythonIntegration.ProcessAsset(script, fileOrFolder);
+            //    }
+
+
+            //    if (fileOrFolder.Image != null)
+            //    {
+            //        tasks.Add(HandleImageAsync(fileOrFolder));
+            //    }
+            //}
         }
 
         internal void AsyncInvoke(Action action)
@@ -225,7 +280,7 @@ namespace RisContentPipeline.GUI
                         UniversalBasisCompression = Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.Basis,
                         OutputPath = $"{filePath}.ktx2",
                     };
-                    
+
                     var result = PipelineSystem.Convert("png", "ktx2", ktxPipelineSource, ktxPipelineOptions);
 
                     if (!result.Success)
