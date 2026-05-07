@@ -16,7 +16,7 @@ internal sealed class PythonIntegration : IDisposable
     private readonly Context _context;
     private bool _initialized;
     private bool _disposed;
-    private readonly PythonScriptingApi _api = new();
+    private readonly PythonScriptingApi _api;
 
     /// <summary>
     /// The constructor takes a Context object which provides access to the content pipeline's build directory and other relevant information.
@@ -25,6 +25,7 @@ internal sealed class PythonIntegration : IDisposable
     internal PythonIntegration(Context context)
     {
         _context = context;
+        _api = new(_context.PipelineSystem);
         _currentDirectory = Path.GetDirectoryName(
             Assembly.GetExecutingAssembly().Location
         )!;
@@ -92,6 +93,49 @@ internal sealed class PythonIntegration : IDisposable
         }
     }
 
+    private void AssertInitialized()
+    {
+        if (!_initialized)
+        {
+            throw new InvalidOperationException("Python runtime not initialized. Call Initialize() first.");
+        }
+
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(nameof(PythonIntegration));
+        }
+    }
+
+    // TODO: add doc comment
+    public void BeforeBuild(Script pythonScript)
+    {
+        AssertInitialized();
+
+        var scriptName = pythonScript.FilePath;
+
+        try
+        {
+            using (Py.GIL())
+            {
+                ImportModules();
+                scriptName = scriptName.Split('/').Last().Split('\\').Last().Replace(".py", "");
+                dynamic script = Py.Import(scriptName);
+                script.api = _api;
+                dynamic builtins = Py.Import("builtins");
+                
+                if (script.HasAttr("before_build"))
+                {
+                    script.before_build();
+                }
+            }
+        }
+        catch (PythonException ex)
+        {
+            throw new Exception($"Python module '{scriptName}' error: {ex.Message}", ex);
+        }
+    }
+    
+    // TODO: create AfterBuild method
 
     public void ProcessAsset(Script pythonScript, AssetFileOrFolder fileOrFolder)
     {

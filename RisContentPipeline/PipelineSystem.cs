@@ -2,29 +2,32 @@ using RisContentPipeline.Ktx2;
 
 namespace RisContentPipeline;
 
+// TODO: Add doc comments.
 public class PipelineSystem : IPipelineSystem
 {
     /// <summary>
     /// The store for the source and target types and the source and options.
     /// </summary>
-    private List<Tuple<string, string, object, object?>> _store = new();
+    private readonly List<Tuple<string, string, object, object?>> _store = new();
     
     private readonly List<IPipeline> _pipelines =
     [
         new Ktx2Pipeline()
     ];
 
-    /// <summary>
-    /// Add a pipeline to the content pipelines.
-    /// </summary>
-    /// <param name="pipeline">The pipeline to add.</param>
-    public void RegisterPipeline(IPipeline pipeline)
+    /// <inheritdoc/>
+    public void AddPipeline(IPipeline pipeline)
     {
-        _pipelines.Add(pipeline);
+        // If the pipeline is already added, do nothing.
+        if (_pipelines.Any(x => x.Name == pipeline.Name))
+        {
+            return;
+        }
+        _pipelines.Add(pipeline);   
     }
 
     /// <inheritdoc/>
-    public void Store(string sourceType, string targetType, object source, object? options)
+    public void StoreSourceAsset(string sourceType, string targetType, object source, object? options)
     {
         _store.Add(Tuple.Create(sourceType, targetType, source, options));
     }

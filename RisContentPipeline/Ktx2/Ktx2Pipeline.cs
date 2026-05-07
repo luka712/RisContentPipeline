@@ -7,13 +7,14 @@ namespace RisContentPipeline.Ktx2;
 /// </summary>
 public class Ktx2Pipeline : APipeline
 {
+    private const string NAME = "KTX2";
     private readonly StbImageLoader _stbImageLoader = new();
     
     /// <summary>
     /// Initializes a new instance of the <see cref="Ktx2Pipeline"/> class.
     /// </summary>
     public Ktx2Pipeline()
-        : base(["png"], ["ktx2"])
+        : base(NAME, ["png"], ["ktx2"])
     {
     }
 

@@ -6,6 +6,11 @@ namespace RisContentPipeline;
 public interface IPipeline
 {
     /// <summary>
+    /// The name of the pipeline.
+    /// </summary>
+    string Name { get; }
+    
+    /// <summary>
     /// The source types that this pipeline can process.
     /// </summary>
     IReadOnlyList<string> SourceTypes { get; }

@@ -11,13 +11,18 @@ public abstract class APipeline : IPipeline
     /// <summary>
     /// The constructor takes the source and target types that this pipeline can process.
     /// </summary>
+    /// <param name="name">The name of the pipeline. Used as unique identifier of pipeline.</param>
     /// <param name="sourceTypes">The source types.</param>
     /// <param name="targetTypes">The target types.</param>
-    protected APipeline(string[] sourceTypes, string[] targetTypes)
+    protected APipeline(string name, string[] sourceTypes, string[] targetTypes)
     {
+        Name = name;
         _sourceTypes = sourceTypes;
         _targetTypes = targetTypes;
     }
+    
+    /// <inheritdoc/>
+    public string Name { get; } 
     
     /// <inheritdoc/>
     public IReadOnlyList<string> SourceTypes => _sourceTypes;

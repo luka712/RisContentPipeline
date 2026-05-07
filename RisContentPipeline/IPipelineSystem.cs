@@ -6,13 +6,19 @@ namespace RisContentPipeline;
 public interface IPipelineSystem
 {
     /// <summary>
+    /// Add a pipeline to the pipeline system.
+    /// </summary>
+    /// <param name="pipeline">The <see cref="IPipeline"/>.</param>
+    void AddPipeline(IPipeline pipeline);
+    
+    /// <summary>
     /// Store a source for later processing.
     /// </summary>
     /// <param name="sourceType">The source type.</param>
     /// <param name="targetType">The target type.</param>
     /// <param name="source">The source object.</param>
     /// <param name="options">The options.</param>
-    void Store(string sourceType, string targetType, object source, object? options);
+    void StoreSourceAsset(string sourceType, string targetType, object source, object? options);
     
     /// <summary>
     /// Convert all stored sources to targets.
