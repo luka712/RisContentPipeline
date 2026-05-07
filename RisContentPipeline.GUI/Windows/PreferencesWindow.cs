@@ -1,21 +1,24 @@
 ﻿using Eto.Drawing;
 using Eto.Forms;
 using RisContentPipeline.GUI.Settings;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace RisContentPipeline.GUI.Windows
 {
+    /// <summary>
+    /// The preferences dialog. Lets the user edit build settings, general settings,
+    /// and appearance settings. Settings are committed to the <see cref="Context"/>
+    /// when the user clicks <c>OK</c>; <c>Cancel</c> closes without saving.
+    /// </summary>
     internal class PreferencesWindow : Dialog
     {
         private readonly Context _context;
 
-        private TextBox _buildDirectoryTextBox;
+        // Build settings
+        private TextBox _buildDirectoryTextBox = null!;
 
-        // Ktx2 settings
-        private DropDown _encodeTargetDropDown;
-        private CheckBox _useUastcCheckBox;
+        // KTX2 settings
+        private DropDown _encodeTargetDropDown = null!;
+        private CheckBox _useUastcCheckBox = null!;
 
         /// <summary>
         /// The constructor.
@@ -24,133 +27,205 @@ namespace RisContentPipeline.GUI.Windows
         internal PreferencesWindow(Context context)
         {
             _context = context;
+
             Title = "Preferences";
-
             Resizable = true;
-            ClientSize = new Size(800, 600);
+            ClientSize = new Size(640, 420);
+            MinimumSize = new Size(480, 320);
+            Padding = new Padding(Theme.PADDING * 2);
 
-            var buildSettingsTab = AddBuildSettings();  
+            // ---- Tabs ---------------------------------------------------------
+            var buildSettingsTab = AddBuildSettings();
+            var generalTab = CreateGeneralTab();
+            var appearanceTab = CreateAppearanceTab();
 
-            // --- General Tab ---
-            var autoSaveCheckBox = new CheckBox { Text = "Enable Auto Save" };
-            var usernameTextBox = new TextBox { PlaceholderText = "Enter username" };
-
-            var generalLayout = new DynamicLayout { Padding = 10, Spacing = new Size(5, 5) };
-            generalLayout.AddRow(autoSaveCheckBox);
-            generalLayout.AddRow(new Label { Text = "Username:" }, usernameTextBox);
-
-            var generalTab = new TabPage
-            {
-                Text = "General",
-                Content = generalLayout
-            };
-
-            // --- Appearance Tab ---
-            var themeDropDown = new DropDown
-            {
-                DataStore = new string[] { "Light", "Dark", "System" },
-                SelectedIndex = 2
-            };
-
-            var fontSizeStepper = new NumericStepper
-            {
-                MinValue = 8,
-                MaxValue = 24,
-                Value = 12
-            };
-
-            var appearanceLayout = new DynamicLayout { Padding = 10, Spacing = new Size(5, 5) };
-            appearanceLayout.AddRow(new Label { Text = "Theme:" }, themeDropDown);
-            appearanceLayout.AddRow(new Label { Text = "Font Size:" }, fontSizeStepper);
-
-            var appearanceTab = new TabPage
-            {
-                Text = "Appearance",
-                Content = appearanceLayout
-            };
-
-            // --- Tab Control ---
             var tabs = new TabControl
             {
                 Pages = { buildSettingsTab, generalTab, appearanceTab }
             };
 
-            // --- Buttons ---
-            var okButton = new Button { Text = "OK" };
+            // ---- Buttons ------------------------------------------------------
+            var okButton = new Button { Text = "OK", Width = 90 };
             okButton.Click += (sender, e) => ApplySettingsAndClose();
 
-            var cancelButton = new Button { Text = "Cancel" };
+            var cancelButton = new Button { Text = "Cancel", Width = 90 };
             cancelButton.Click += (sender, e) => Close();
 
             DefaultButton = okButton;
             AbortButton = cancelButton;
 
-            // --- Main Layout ---
-            Content = new DynamicLayout
+            var buttonRow = new StackLayout
             {
-                Padding = 10,
-                Spacing = new Size(5, 5),
-                Rows =
-            {
-                tabs,
-                new StackLayout
+                Orientation = Orientation.Horizontal,
+                Spacing = Theme.CONTROL_SPACING,
+                HorizontalContentAlignment = HorizontalAlignment.Right,
+                Items =
                 {
-                    Orientation = Orientation.Horizontal,
-                    VerticalContentAlignment = VerticalAlignment.Bottom,
-                    HorizontalContentAlignment = HorizontalAlignment.Right,
-                    Items = { okButton, cancelButton }
+                    new StackLayoutItem(null, expand: true),
+                    okButton,
+                    cancelButton,
                 }
-            }
             };
+
+            // ---- Root layout: tabs fill, button row pinned to bottom ----------
+            var root = new TableLayout
+            {
+                Spacing = new Size(0, Theme.CONTROL_SPACING),
+                Rows =
+                {
+                    new TableRow(tabs) { ScaleHeight = true },
+                    new TableRow(buttonRow),
+                }
+            };
+
+            Content = root;
         }
 
         private void ApplySettingsAndClose()
         {
-            // Here you would apply the settings from the UI to the context or configuration
-            _context.BuildDirectory = _buildDirectoryTextBox.Text;
+            _context.BuildDirectory = _buildDirectoryTextBox.Text ?? _context.BuildDirectory;
             _context.Ktx2GlobalSettings = new()
             {
                 UseUastc = _useUastcCheckBox.Checked == true,
-                EncodeTarget = (Ktx2EncodingTarget)_encodeTargetDropDown.SelectedIndex
+                EncodeTarget = (Ktx2EncodingTarget)_encodeTargetDropDown.SelectedIndex,
             };
-            
+
             Close();
-        }   
+        }
 
         private TabPage AddBuildSettings()
         {
-            var generalLayout = new DynamicLayout { Spacing = new Size(5, 5) };
-
             // Build Directory
-            _buildDirectoryTextBox = new TextBox { Text = _context.BuildDirectory, PlaceholderText = "Build directory ..." };
-            generalLayout.AddRow([new Label { Text = "Build Directory" }, _buildDirectoryTextBox]);
+            _buildDirectoryTextBox = new TextBox
+            {
+                Text = _context.BuildDirectory,
+                PlaceholderText = "Build directory ...",
+            };
+            var browseBuildDirButton = new Button { Text = "Browse..." };
+            browseBuildDirButton.Click += (_, _) =>
+            {
+                using var dialog = new SelectFolderDialog { Title = "Select Build Directory" };
+                if (dialog.ShowDialog(this) == DialogResult.Ok)
+                {
+                    _buildDirectoryTextBox.Text = dialog.Directory;
+                }
+            };
 
             // KTX Settings
-            _encodeTargetDropDown = new DropDown 
-            { 
-                AllowDrop= true,
+            _encodeTargetDropDown = new DropDown
+            {
                 DataStore = Enum.GetNames(typeof(Ktx2EncodingTarget)),
                 SelectedIndex = (int)_context.Ktx2GlobalSettings.EncodeTarget,
-                ToolTip = "Select the target encoding format for KTX2 textures. Basis will encode textures to Basis format during the build process, while NoEncoding will process textures as-is.",
+                ToolTip = "Select the target encoding format for KTX2 textures. " +
+                          "Basis will encode textures to Basis format during the build process, " +
+                          "while NoEncoding will process textures as-is.",
             };
-            generalLayout.AddRow(new Label { Text = "KTX2 Encoding Target" }, _encodeTargetDropDown);
             _encodeTargetDropDown.SelectedIndexChanged += (sender, e) =>
             {
                 var selectedTarget = (Ktx2EncodingTarget)_encodeTargetDropDown.SelectedIndex;
                 _useUastcCheckBox.Enabled = selectedTarget == Ktx2EncodingTarget.Basis;
             };
 
-            _useUastcCheckBox = new CheckBox 
-            { 
+            _useUastcCheckBox = new CheckBox
+            {
                 Checked = _context.Ktx2GlobalSettings.UseUastc,
-                ToolTip = "Check to use UASTC base, uncheck to use ETC1S base."
+                ToolTip = "Check to use UASTC base, uncheck to use ETC1S base.",
+                Enabled = _context.Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.Basis,
             };
-            generalLayout.AddRow([new Label { Text = "Use UASTC Base" }, _useUastcCheckBox]);
+
+            var layout = new TableLayout
+            {
+                Padding = new Padding(Theme.PADDING * 2),
+                Spacing = Theme.FormSpacing,
+                Rows =
+                {
+                    new TableRow(
+                        new Label { Text = "Build Directory" },
+                        new TableCell(_buildDirectoryTextBox, scaleWidth: true),
+                        browseBuildDirButton),
+                    new TableRow(
+                        new Label { Text = "KTX2 Encoding Target" },
+                        new TableCell(_encodeTargetDropDown, scaleWidth: true),
+                        null),
+                    new TableRow(
+                        new Label { Text = "Use UASTC Base" },
+                        new TableCell(_useUastcCheckBox, scaleWidth: true),
+                        null),
+                    new TableRow { ScaleHeight = true },
+                }
+            };
 
             return new TabPage
             {
                 Text = "Build Settings",
-                Content = generalLayout,
+                Padding = new Padding(Theme.PADDING),
+                Content = layout,
+            };
+        }
+
+        private static TabPage CreateGeneralTab()
+        {
+            var autoSaveCheckBox = new CheckBox { Text = "Enable Auto Save" };
+            var usernameTextBox = new TextBox { PlaceholderText = "Enter username" };
+
+            var layout = new TableLayout
+            {
+                Padding = new Padding(Theme.PADDING * 2),
+                Spacing = Theme.FormSpacing,
+                Rows =
+                {
+                    new TableRow(autoSaveCheckBox, null),
+                    new TableRow(
+                        new Label { Text = "Username:" },
+                        new TableCell(usernameTextBox, scaleWidth: true)),
+                    new TableRow { ScaleHeight = true },
+                }
+            };
+
+            return new TabPage
+            {
+                Text = "General",
+                Padding = new Padding(Theme.PADDING),
+                Content = layout,
+            };
+        }
+
+        private static TabPage CreateAppearanceTab()
+        {
+            var themeDropDown = new DropDown
+            {
+                DataStore = new[] { "Light", "Dark", "System" },
+                SelectedIndex = 2,
+            };
+
+            var fontSizeStepper = new NumericStepper
+            {
+                MinValue = 8,
+                MaxValue = 24,
+                Value = 12,
+            };
+
+            var layout = new TableLayout
+            {
+                Padding = new Padding(Theme.PADDING * 2),
+                Spacing = Theme.FormSpacing,
+                Rows =
+                {
+                    new TableRow(
+                        new Label { Text = "Theme:" },
+                        new TableCell(themeDropDown, scaleWidth: true)),
+                    new TableRow(
+                        new Label { Text = "Font Size:" },
+                        new TableCell(fontSizeStepper, scaleWidth: true)),
+                    new TableRow { ScaleHeight = true },
+                }
+            };
+
+            return new TabPage
+            {
+                Text = "Appearance",
+                Padding = new Padding(Theme.PADDING),
+                Content = layout,
             };
         }
     }

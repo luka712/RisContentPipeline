@@ -33,106 +33,84 @@ internal class ActionsBarView
     /// Initializes a new instance of the <see cref="ActionsBarView"/> class.
     /// </summary>
     /// <param name="parentWindow">The parent window for dialogs.</param>
+    /// <param name="context">The application <see cref="Context"/>.</param>
     public ActionsBarView(Window parentWindow, Context context)
     {
         _context = context;
 
         // Create buttons
-        var addFileButton = new Button
-        {
-            Text = "Add File",
-            ToolTip = "Add an existing asset file to the project",
-            Width = 100
-        };
+        var addFileButton = CreateButton("Add File", "Add an existing asset file to the project", 100);
         addFileButton.Click += (sender, e) => ShowAddFileDialog(parentWindow);
 
-        var addFolderButton = new Button
-        {
-            Text = "Add Folder",
-            ToolTip = "Add an existing folder and its contents to the project",
-            Width = 100
-        };
+        var addFolderButton = CreateButton("Add Folder", "Add an existing folder and its contents to the project", 110);
         addFolderButton.Click += (sender, e) => ShowAddFolderDialog(parentWindow);
 
-        var buildButton = new Button
-        {
-            Text = "Build",
-            ToolTip = "Build all assets in the project",
-            Width = 80
-        };
-        buildButton.Click += (sender, e) =>
-        {
-            _context.Build();
-        };
+        var buildButton = CreateButton("Build", "Build all assets in the project", 80);
+        buildButton.Click += (sender, e) => _context.Build();
 
-        var rebuildButton = new Button
-        {
-            Text = "Rebuild",
-            ToolTip = "Rebuild all assets in the project",
-            Width = 80
-        };
-        rebuildButton.Click += (sender, e) =>
-        {
-            _context.Rebuild();
-        };
+        var rebuildButton = CreateButton("Rebuild", "Rebuild all assets in the project", 90);
+        rebuildButton.Click += (sender, e) => _context.Rebuild();
 
-        var cleanButton = new Button
-        {
-            Text = "Clean",
-            ToolTip = "Clean all built assets",
-            Width = 80
-        };
-        cleanButton.Click += (sender, e) =>
-        {
-            _context.Clean();
-        };
+        var cleanButton = CreateButton("Clean", "Clean all built assets", 80);
+        cleanButton.Click += (sender, e) => _context.Clean();
 
-        var addBuildScript = new Button
-        {
-            Text = "Add Build Script",
-            ToolTip = "Add a custom Python script to the build process",
-            Width = 120
-        };
+        var addBuildScript = CreateButton("Add Build Script", "Add a custom Python script to the build process", 140);
         addBuildScript.Click += (sender, e) =>
         {
             using var dialog = new SelectScriptsModal(_context);
             var selectedScripts = dialog.ShowModal(parentWindow);
             if (selectedScripts != null && selectedScripts.Any())
             {
-                foreach(var script in selectedScripts)
+                foreach (var script in selectedScripts)
                 {
                     _context.AddBuildScript(script);
                 }
             }
         };
 
-        // Create horizontal layout for buttons
+        // Create horizontal layout for buttons.
+        // The empty StackLayoutItem with Expand=true acts as a flexible spacer
+        // that pushes the build/script buttons to the right side of the bar.
         var layout = new StackLayout
         {
             Orientation = Orientation.Horizontal,
-            Spacing = 5,
-            Padding = new Padding(5),
+            Spacing = Theme.CONTROL_SPACING,
+            Padding = new Padding(Theme.PADDING),
+            VerticalContentAlignment = VerticalAlignment.Center,
             Items =
             {
                 addFileButton,
                 addFolderButton,
-                new StackLayoutItem {  }, // Spacer
+                CreateSeparator(),
+                addBuildScript,
+                new StackLayoutItem(null, expand: true), // flexible spacer
                 buildButton,
                 rebuildButton,
                 cleanButton,
-                addBuildScript
             }
         };
 
-
-        // Wrap in panel with background
         Panel = new Panel
         {
             Content = layout,
             BackgroundColor = SystemColors.ControlBackground,
-            Padding = new Padding(2)
         };
     }
+
+    private static Button CreateButton(string text, string tooltip, int width) => new()
+    {
+        Text = text,
+        ToolTip = tooltip,
+        Width = width,
+        Height = Theme.BUTTON_HEIGHT,
+    };
+
+    private static Control CreateSeparator() => new Panel
+    {
+        Width = 1,
+        Height = Theme.BUTTON_HEIGHT - 4,
+        BackgroundColor = SystemColors.ControlBackground.ToArgb() == 0 ? Colors.Gray : Colors.DarkGray,
+    };
 
     /// <summary>
     /// Shows the add file dialog and raises the FileAdded event if a file is selected.
