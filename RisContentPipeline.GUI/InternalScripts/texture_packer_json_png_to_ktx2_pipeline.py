@@ -17,4 +17,4 @@ def convert(json, options) -> dict:
     
 
 def before_build():
-   api.create_pipeline("texture_packer_json", ["json"], ["json"], convert )
+   api.add_pipeline("texture_packer_json", ["json"], ["json"], convert )
