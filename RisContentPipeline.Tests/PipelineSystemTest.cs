@@ -34,7 +34,7 @@ public class PipelineSystemTest
     public void Test_StoreAndExecute()
     {
         var pipelineSystem = new PipelineSystem();
-        pipelineSystem.Store("png", "ktx2",  new Ktx2PipelineSource()
+        pipelineSystem.StoreSourceAsset("png", "ktx2",  new Ktx2PipelineSource()
         {
             FilePath = "Data/test.png"
         }, new Ktx2PipelineOptions()
@@ -43,7 +43,7 @@ public class PipelineSystemTest
             OutputPath = "Data/output_system_test_a.ktx2"
         });
         
-        pipelineSystem.Store("png", "ktx2",  new Ktx2PipelineSource()
+        pipelineSystem.StoreSourceAsset("png", "ktx2",  new Ktx2PipelineSource()
         {
             FilePath = "Data/test.png"
         }, new Ktx2PipelineOptions()

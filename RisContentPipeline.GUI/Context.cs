@@ -10,13 +10,16 @@ using RisContentPipeline.Ktx2;
 
 namespace RisContentPipeline.GUI
 {
+    // TODO: add doc comment
     internal class Context
     {
+        // TODO: reorganize and cleanup.
+        
         /// <summary>
         /// The collection of pipelines available in the content pipeline. 
         /// This includes various processing pipelines for handling different types of assets (e.g., images, audio, etc.).
         /// </summary>
-        private readonly IPipelineSystem _pipelineSystem = new PipelineSystem();
+        public IPipelineSystem PipelineSystem = new PipelineSystem();
 
 
         private readonly StbImageLoader _stbImageLoader = new StbImageLoader();
@@ -24,13 +27,15 @@ namespace RisContentPipeline.GUI
 
         private List<AssetFileOrFolder> _filesOrFolders = new List<AssetFileOrFolder>();
 
+        // TODO: create method to load scripts from directories
+        
         /// <summary>
         /// The list of internal Python scripts that are included with the content pipeline.
         /// These scripts can be used for various processing tasks, such as converting PNG files to KTX2 format.
         /// </summary>
         internal IReadOnlyList<Script> InternalScripts =
         [
-            new Script("InternalScripts/texture_packer_json_png_to_ktx2.py")
+            new Script("InternalScripts/texture_packer_json_png_to_ktx2_pipeline.py")
         ];
 
         /// <summary>
@@ -160,6 +165,12 @@ namespace RisContentPipeline.GUI
                 pythonIntegration.Initialize();
             }
 
+            // Run before build scripts.
+            foreach (var script in BuildScripts)
+            {
+                pythonIntegration.BeforeBuild(script);
+            }
+
             OnBuildStarted?.Invoke();
             BuildLogger.Clear();
 
@@ -215,7 +226,7 @@ namespace RisContentPipeline.GUI
                         OutputPath = $"{filePath}.ktx2",
                     };
                     
-                    var result = _pipelineSystem.Convert("png", "ktx2", ktxPipelineSource, ktxPipelineOptions);
+                    var result = PipelineSystem.Convert("png", "ktx2", ktxPipelineSource, ktxPipelineOptions);
 
                     if (!result.Success)
                     {

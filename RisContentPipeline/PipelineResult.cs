@@ -14,4 +14,9 @@ public class PipelineResult
     /// The resulting object of the pipeline execution.
     /// </summary>
     public object? Result { get; set; }
+    
+    /// <summary>
+    /// The error message if the pipeline execution failed.
+    /// </summary>
+    public string? ErrorMessage { get; set; }
 }

@@ -6,7 +6,6 @@ extended to handle various content pipeline operations.
 """
 from typing import Any, Dict
 
-
 def create_success_result() -> dict:
     """
         Create a successful result.
@@ -29,6 +28,17 @@ def create_error_result(message: str) -> dict:
         "success": False,
         "error": message
     }
+    
+def before_build():
+    """
+    TODO: add doc comment. 
+    """
+    return None 
+    
+def after_build():
+    """
+    TODO: add doc comment. 
+    """
 
 def process_asset() -> dict:
     """

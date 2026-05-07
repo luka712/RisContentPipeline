@@ -8,6 +8,9 @@
 
   <ItemGroup>
     <None Include="Data\AssetFileOrFolder.cs" />
+    <None Update="InternalScripts\texture_packer_json_png_to_ktx2_pipeline.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 
