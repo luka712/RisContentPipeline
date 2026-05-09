@@ -57,7 +57,7 @@ public class PngSettingsView
         AddSectionHeader(tableLayout, "Meta");
 
         tableLayout.Rows.Add(new TableRow(
-            new Label { Text = "File Path", VerticalAlignment = VerticalAlignment.Top },
+            new Label { Text = "File Path", VerticalAlignment = VerticalAlignment.Top  },
             new Label
             {
                 Text = imageContainer.FilePath,
@@ -67,7 +67,7 @@ public class PngSettingsView
         ));
 
         tableLayout.Rows.Add(new TableRow(
-            new Label { Text = "Type" },
+            new Label { Text = "Type"},
             new Label
             {
                 Text = imageContainer.FileType,
@@ -85,6 +85,7 @@ public class PngSettingsView
         {
             Text = title,
             Font = SystemFonts.Bold(),
-        }, scaleWidth: true)));
+            Width = Theme.SETTINGS_LABEL_COLUMN_WIDTH,
+        }, scaleWidth: false)));
     }
 }

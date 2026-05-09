@@ -26,17 +26,20 @@ internal static class Theme
     /// <summary>Initial height of the main window.</summary>
     internal const int CLIENT_HEIGHT = 720;
 
-    /// <summary>Initial width of the left and right side panels (also their preferred minimum width).</summary>
-    internal const int SIDE_PANELS_WIDTH = 320;
+    /// <summary>Minimum width of the left side panels when the user resizes splitters.</summary>
+    internal const int LEFT_SIDE_PANELS_MIN_WIDTH = 250;
 
-    /// <summary>Minimum width of the left and right side panels when the user resizes splitters.</summary>
-    internal const int SIDE_PANELS_MIN_WIDTH = 220;
+    /// <summary>Minimum width of the right side panels when the user resizes splitters.</summary>
+    internal const int RIGHT_SIDE_PANELS_MIN_WIDTH = 350;
 
     /// <summary>Initial height for the build output panel.</summary>
     internal const int BUILD_OUTPUT_HEIGHT = 220;
 
     /// <summary>Default height for action bar buttons.</summary>
     internal const int BUTTON_HEIGHT = 28;
+
+    /// <summary>Default width for labels in settings views.</summary>
+    internal const int SETTINGS_LABEL_COLUMN_WIDTH = 120;
 
     // ----- Layout helpers ---------------------------------------------------
 

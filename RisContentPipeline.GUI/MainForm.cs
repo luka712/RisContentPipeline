@@ -79,9 +79,9 @@ public sealed class MainForm : Form
             Orientation = Orientation.Horizontal,
             Panel1 = centerSplitter,
             Panel2 = rightPanel,
-            Position = Theme.CLIENT_WIDTH - Theme.SIDE_PANELS_WIDTH * 2,
+            Position = Theme.CLIENT_WIDTH - Theme.RIGHT_SIDE_PANELS_MIN_WIDTH,
             FixedPanel = SplitterFixedPanel.Panel2,
-            Panel2MinimumSize = Theme.SIDE_PANELS_MIN_WIDTH,
+            Panel2MinimumSize = Theme.RIGHT_SIDE_PANELS_MIN_WIDTH,
         };
 
         // ---- Top-level horizontal splitter (left | (center | right)) ----
@@ -90,9 +90,9 @@ public sealed class MainForm : Form
             Orientation = Orientation.Horizontal,
             Panel1 = leftSplitter,
             Panel2 = centerRightSplitter,
-            Position = Theme.SIDE_PANELS_WIDTH,
+            Position = Theme.LEFT_SIDE_PANELS_MIN_WIDTH,
             FixedPanel = SplitterFixedPanel.Panel1,
-            Panel1MinimumSize = Theme.SIDE_PANELS_MIN_WIDTH,
+            Panel1MinimumSize = Theme.LEFT_SIDE_PANELS_MIN_WIDTH,
         };
 
         // ---- Status bar ----

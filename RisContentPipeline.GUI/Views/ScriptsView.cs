@@ -17,6 +17,28 @@ internal class ScriptsView
     /// </summary>
     internal Control Content { get; }
 
+    // Store the last clicked cell for context menu actions
+    private int? _lastClickedRow = null;
+
+    private void HandleRemoveScriptItem()
+    {
+        if (_lastClickedRow.HasValue)
+        {
+            var item = _treeView.DataStore[_lastClickedRow.Value];
+            if (item is TreeGridItem treeGridItem)
+            {
+                var scriptName = treeGridItem.Values[1].ToString();
+                var scriptToRemove = _context.BuildScripts.FirstOrDefault(s => s.Name == scriptName);
+                if (scriptToRemove != null)
+                {
+                    _context.RemoveBuildScript(scriptToRemove);
+                    Refresh();
+                }
+            }
+
+        }
+    }
+
     /// <summary>
     /// The constructor.
     /// </summary>
@@ -30,6 +52,15 @@ internal class ScriptsView
             ShowHeader = false,
             AllowMultipleSelection = false,
             Border = BorderType.None,
+        };
+        _treeView.CellClick += (sender, args) => _lastClickedRow = args.Row;
+
+        _treeView.ContextMenu = new ContextMenu
+        {
+            Items =
+            {
+                new ButtonMenuItem { Text = "Remove Script", Command = new Command((_, __) => HandleRemoveScriptItem()) },
+            }
         };
 
         // Add a column to the tree view
@@ -64,7 +95,7 @@ internal class ScriptsView
         {
             var item = new TreeGridItem
             {
-                Values = [Icons.PythonIcon, script.Name]
+                Values = [Icons.PythonIcon, script.Name],
             };
             rootItem.Children.Add(item);
         }

@@ -57,6 +57,7 @@ internal class SettingsView
         {
             Padding = new Padding(Theme.PADDING),
             Spacing = Theme.FormSpacing,
+            Width = Theme.RIGHT_SIDE_PANELS_MIN_WIDTH - Theme.PADDING * 2 - Theme.FormSpacing.Width * 2,
         };
 
     /// <summary>
@@ -109,7 +110,7 @@ internal class SettingsView
     private void ImageAssetProperties(ImageContainer imageContainer)
     {
         _tableLayout.Rows.Add(new TableRow(
-            new Label { Text = "Name", TextColor = SystemColors.ControlText },
+            new Label { Text = "Name", TextColor = SystemColors.ControlText},
             new Label { Text = imageContainer.FileName }
         ));
 

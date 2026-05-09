@@ -60,15 +60,15 @@ namespace RisContentPipeline.GUI
         {
             LoadInternalScripts();
 
-            PipelineSystem.OnConvertAllFinished += (sender, args) =>
+            PipelineSystem.OnConvertAllStarted += (sender, args) =>
             {
-                BuildLogger.InfoAsync($"Conversion of all items finished. Total items: {args.TotalItems}");
+                BuildLogger.InfoAsync($"Build started. Total items: {args.TotalItems}");
             };
 
-            PipelineSystem.OnConvertAllStarted += (sender, args) =>
-              {
-                  BuildLogger.InfoAsync($"Conversion of all items started. Total items: {args.TotalItems}");
-              };
+            PipelineSystem.OnConvertAllFinished += (sender, args) =>
+            {
+                BuildLogger.InfoAsync($"Build finished. Total items: {args.TotalItems}");
+            };
         }
 
         /// <summary>
@@ -86,9 +86,13 @@ namespace RisContentPipeline.GUI
 
         /// <summary>
         /// Fires when a new build script is added to the context.
-        /// The event handler receives the path of the added script as a parameter.
         /// </summary>
         public EventHandler<Script>? OnBuildScriptAdded;
+
+        /// <summary>
+        /// Fires when a build script is removed from the context.
+        /// </summary>
+        public EventHandler<Script>? OnBuildScriptRemoved;
 
         public IReadOnlyList<AssetFileOrFolder> FilesOrFolders => _filesOrFolders;
 
@@ -127,6 +131,33 @@ namespace RisContentPipeline.GUI
         {
             _buildScripts.Add(script);
             OnBuildScriptAdded?.Invoke(this, script);
+        }
+
+        /// <summary>
+        /// Removes a build script from the list of scripts to be executed during the build process.
+        /// </summary>
+        /// <param name="scriptToRemove">The script name.</param>
+        /// <exception cref="NotImplementedException"></exception>
+        internal void RemoveBuildScript(string name)
+        {
+            var script = _buildScripts.FirstOrDefault(s => s.Name == name);
+            if (script != null)
+            {
+                RemoveBuildScript(script);
+            }
+        }
+
+        /// <summary>
+        /// Removes a build script from the list of scripts to be executed during the build process.
+        /// </summary>
+        /// <param name="script">The <see cref="Script"/>.</param>
+        /// <exception cref="NotImplementedException"></exception>
+        internal void RemoveBuildScript(Script script)
+        {
+            if (_buildScripts.Remove(script))
+            {
+                OnBuildScriptRemoved?.Invoke(this, script);
+            }
         }
 
         /// <summary>
@@ -454,5 +485,7 @@ namespace RisContentPipeline.GUI
 
             return null;
         }
+
+
     }
 }

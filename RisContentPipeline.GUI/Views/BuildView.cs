@@ -60,7 +60,6 @@ namespace RisContentPipeline.GUI.Views
             _context.OnBuildStarted += () =>
             {
                 _rootItem.Children.Clear();
-                AddMessage("Build started...", Icons.InfoIcon);
             };
 
             // Wrap the tree view in a titled GroupBox for clearer visual separation
