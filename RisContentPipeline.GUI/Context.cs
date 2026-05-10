@@ -10,13 +10,6 @@ using RisContentPipeline.Generic;
 
 namespace RisContentPipeline.GUI
 {
-<<<<<<< HEAD
-    // TODO: add doc comment
-    internal class Context
-    {
-        // TODO: reorganize and cleanup.
-        
-=======
     /// <summary>
     /// The application-wide context shared by views, modals, and the build pipeline.
     /// It owns the active <see cref="IPipelineSystem"/>, the list of imported assets, the
@@ -46,16 +39,11 @@ namespace RisContentPipeline.GUI
 
         // ----- Fields -------------------------------------------------------------------
 
->>>>>>> origin/main
         /// <summary>
         /// The collection of pipelines available in the content pipeline. 
         /// This includes various processing pipelines for handling different types of assets (e.g., images, audio, etc.).
         /// </summary>
         public IPipelineSystem PipelineSystem = new PipelineSystem();
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/main
 
         private readonly StbImageLoader _stbImageLoader = new StbImageLoader();
         private readonly List<Script> _buildScripts = [];
@@ -63,8 +51,6 @@ namespace RisContentPipeline.GUI
 
         private List<AssetFileOrFolder> _filesOrFolders = new List<AssetFileOrFolder>();
 
-        // TODO: create method to load scripts from directories
-        
         /// <summary>
         /// Initializes a new <see cref="Context"/> and wires up build logging for the
         /// underlying <see cref="IPipelineSystem"/>.
@@ -90,14 +76,7 @@ namespace RisContentPipeline.GUI
         /// from the <see cref="INTERNAL_SCRIPTS_DIRECTORY"/> directory.
         /// These scripts can be used for various processing tasks, such as converting PNG files to KTX2 format.
         /// </summary>
-<<<<<<< HEAD
-        internal IReadOnlyList<Script> InternalScripts =
-        [
-            new Script("InternalScripts/texture_packer_json_png_to_ktx2_pipeline.py")
-        ];
-=======
         internal IReadOnlyList<Script> InternalScripts => _internalScripts;
->>>>>>> origin/main
 
         /// <summary>
         /// This event is triggered when the build process starts.
@@ -358,11 +337,7 @@ namespace RisContentPipeline.GUI
                         UniversalBasisCompression = Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.Basis,
                         OutputPath = $"{filePath}.ktx2",
                     };
-<<<<<<< HEAD
-                    
-=======
 
->>>>>>> origin/main
                     var result = PipelineSystem.Convert("png", "ktx2", ktxPipelineSource, ktxPipelineOptions);
 
                     if (!result.Success)

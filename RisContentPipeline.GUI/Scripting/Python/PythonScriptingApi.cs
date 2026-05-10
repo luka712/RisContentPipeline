@@ -1,8 +1,5 @@
 ﻿using System.Text.Json;
-<<<<<<< HEAD
-=======
 using Python.Runtime;
->>>>>>> origin/main
 using RisContentPipeline.Generic;
 using RisContentPipeline.GUI.Scripting.Python.Data;
 
@@ -15,41 +12,29 @@ namespace RisContentPipeline.GUI.Scripting.Python
     {
         private readonly IPipelineSystem _pipelineSystem;
 
-<<<<<<< HEAD
-        // TODO: create a doc comment for this constructor
-=======
         /// <summary>
         /// Creates a new <see cref="PythonScriptingApi"/> bound to the supplied pipeline system.
         /// Every method exposed on this class becomes available to Python scripts as the
         /// <c>api</c> module-level attribute that the host injects into each script.
         /// </summary>
         /// <param name="pipelineSystem">The pipeline system that newly-registered pipelines will be added to.</param>
->>>>>>> origin/main
         public PythonScriptingApi(IPipelineSystem pipelineSystem)
         {
             _pipelineSystem = pipelineSystem;
         }
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> origin/main
         /// <summary>
         /// The current file or folder being processed in the content pipeline.
         /// This is set by the content pipeline before executing the Python script, allowing the script to access information about the file or folder being processed.
         /// </summary>
         public PythonAssetFile? current_asset { get; internal set; }
 
-<<<<<<< HEAD
-        // TODO: create a doc comment for this method
-=======
         /// <summary>
         /// Validates that <paramref name="json"/> is a JSON object and writes it to <paramref name="path"/>.
         /// </summary>
         /// <param name="path">The destination file path.</param>
         /// <param name="json">The JSON string to write. Must represent a JSON object.</param>
         /// <returns><c>true</c> if the file was written successfully, otherwise <c>false</c>.</returns>
->>>>>>> origin/main
         public bool save_json(string path, string json)
         {
             try
@@ -70,9 +55,6 @@ namespace RisContentPipeline.GUI.Scripting.Python
             }
         }
 
-<<<<<<< HEAD
-        // TODO: create a doc comment for this method
-=======
         /// <summary>
         /// Reads the file at <paramref name="path"/> and returns its raw text content.
         /// </summary>
@@ -96,17 +78,12 @@ namespace RisContentPipeline.GUI.Scripting.Python
         /// </summary>
         /// <param name="path">The path of the JSON file to read.</param>
         /// <returns>A dictionary representing the parsed JSON object, or an empty dictionary if the file cannot be parsed.</returns>
->>>>>>> origin/main
         public Dictionary<string, object> read_json(string path)
         {
             var json = File.ReadAllText(path);
             return JsonSerializer.Deserialize<Dictionary<string, object>>(json) ?? new Dictionary<string, object>();
         }
 
-<<<<<<< HEAD
-        // TODO: create a doc comment for this method
-        public IPipeline add_pipeline(string name, string[] source, string[] target,
-=======
         /// <summary>
         /// Internal helper that creates a <see cref="GenericPipeline"/> wrapping the given
         /// managed callback and registers it with the pipeline system.
@@ -121,13 +98,10 @@ namespace RisContentPipeline.GUI.Scripting.Python
             string name,
             string[] source,
             string[] target,
->>>>>>> origin/main
             Func<object, object?, Dictionary<string, object>> convertAction)
         {
             PipelineResult Callback(object obj, object? opt)
             {
-<<<<<<< HEAD
-=======
                 if (obj is GenericPipelineSource genericObj)
                 {
                     var pyObj = PyObject.FromManagedObject(genericObj);
@@ -142,7 +116,6 @@ namespace RisContentPipeline.GUI.Scripting.Python
                     opt = pyOpt;
                 }
 
->>>>>>> origin/main
                 var dict = convertAction(obj, opt);
 
                 dict.TryGetValue("success", out object? success);
@@ -156,8 +129,6 @@ namespace RisContentPipeline.GUI.Scripting.Python
             _pipelineSystem.AddPipeline(pipeline);
             return pipeline;
         }
-<<<<<<< HEAD
-=======
 
         /// <summary>
         /// Registers a Python-defined pipeline with the underlying <see cref="IPipelineSystem"/>.
@@ -233,6 +204,5 @@ namespace RisContentPipeline.GUI.Scripting.Python
             // Use the existing add_pipeline method with the wrapper
             return AddPipeline(name, source, target, ConvertActionWrapper);
         }
->>>>>>> origin/main
     }
 }

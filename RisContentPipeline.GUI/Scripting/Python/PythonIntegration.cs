@@ -106,11 +106,6 @@ internal sealed class PythonIntegration : IDisposable
         }
     }
 
-<<<<<<< HEAD
-    // TODO: add doc comment
-    public void BeforeBuild(Script pythonScript)
-    {
-=======
     /// <summary>
     /// Invokes the optional <c>before_build</c> function of the supplied Python script.
     /// Used to perform set-up work or to register additional pipelines on the
@@ -145,7 +140,6 @@ internal sealed class PythonIntegration : IDisposable
     /// </summary>
     private void InvokeOptionalScriptHook(Script pythonScript, string hookName)
     {
->>>>>>> origin/main
         AssertInitialized();
 
         var scriptName = pythonScript.FilePath;
@@ -155,16 +149,6 @@ internal sealed class PythonIntegration : IDisposable
             using (Py.GIL())
             {
                 ImportModules();
-<<<<<<< HEAD
-                scriptName = scriptName.Split('/').Last().Split('\\').Last().Replace(".py", "");
-                dynamic script = Py.Import(scriptName);
-                script.api = _api;
-                dynamic builtins = Py.Import("builtins");
-                
-                if (script.HasAttr("before_build"))
-                {
-                    script.before_build();
-=======
                 scriptName = Path.GetFileNameWithoutExtension(scriptName);
                 dynamic script = Py.Import(scriptName);
                 script.api = _api;
@@ -172,23 +156,14 @@ internal sealed class PythonIntegration : IDisposable
                 if (script.HasAttr(hookName))
                 {
                     script.GetAttr(hookName).Invoke();
->>>>>>> origin/main
                 }
             }
         }
         catch (PythonException ex)
         {
-<<<<<<< HEAD
-            throw new Exception($"Python module '{scriptName}' error: {ex.Message}", ex);
-        }
-    }
-    
-    // TODO: create AfterBuild method
-=======
             throw new Exception($"Python module '{scriptName}' error in '{hookName}': {ex.Message}", ex);
         }
     }
->>>>>>> origin/main
 
     public void ProcessAsset(Script pythonScript, AssetFileOrFolder fileOrFolder)
     {
