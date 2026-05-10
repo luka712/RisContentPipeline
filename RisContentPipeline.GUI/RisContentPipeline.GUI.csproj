@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <None Include="Data\AssetFileOrFolder.cs" />
-    <None Update="InternalScripts\texture_packer_json_png_to_ktx2_pipeline.py">
+    <None Update="InternalScripts\texture_packer_json_png_to_ktx2.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -40,9 +40,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Icons\python-brands-solid.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="InternalScripts\texture_packer_json_png_to_ktx2.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

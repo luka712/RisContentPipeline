@@ -8,7 +8,6 @@ using System.Text.Json;
 using RisContentPipeline.Ktx2;
 using RisContentPipeline.Generic;
 
-
 namespace RisContentPipeline.GUI
 {
     /// <summary>
