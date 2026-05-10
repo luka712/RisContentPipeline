@@ -106,9 +106,46 @@ internal sealed class PythonIntegration : IDisposable
         }
     }
 
+<<<<<<< HEAD
     // TODO: add doc comment
     public void BeforeBuild(Script pythonScript)
     {
+=======
+    /// <summary>
+    /// Invokes the optional <c>before_build</c> function of the supplied Python script.
+    /// Used to perform set-up work or to register additional pipelines on the
+    /// <see cref="IPipelineSystem"/> before the build runs.
+    /// If the script does not define a <c>before_build</c> function this method is a no-op.
+    /// </summary>
+    /// <param name="pythonScript">The user-supplied <see cref="Script"/>.</param>
+    /// <exception cref="InvalidOperationException">Thrown when the Python runtime has not been initialized.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown when this instance has already been disposed.</exception>
+    /// <exception cref="Exception">Thrown wrapping any <see cref="PythonException"/> raised by the script.</exception>
+    public void BeforeBuild(Script pythonScript)
+    {
+        InvokeOptionalScriptHook(pythonScript, "before_build");
+    }
+
+    /// <summary>
+    /// Invokes the optional <c>after_build</c> function of the supplied Python script.
+    /// Used to perform clean-up or post-processing tasks after the build has completed.
+    /// If the script does not define an <c>after_build</c> function this method is a no-op.
+    /// </summary>
+    /// <param name="pythonScript">The user-supplied <see cref="Script"/>.</param>
+    /// <exception cref="InvalidOperationException">Thrown when the Python runtime has not been initialized.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown when this instance has already been disposed.</exception>
+    /// <exception cref="Exception">Thrown wrapping any <see cref="PythonException"/> raised by the script.</exception>
+    public void AfterBuild(Script pythonScript)
+    {
+        InvokeOptionalScriptHook(pythonScript, "after_build");
+    }
+
+    /// <summary>
+    /// Imports the script module and invokes the named hook function if it exists.
+    /// </summary>
+    private void InvokeOptionalScriptHook(Script pythonScript, string hookName)
+    {
+>>>>>>> origin/main
         AssertInitialized();
 
         var scriptName = pythonScript.FilePath;
@@ -118,6 +155,7 @@ internal sealed class PythonIntegration : IDisposable
             using (Py.GIL())
             {
                 ImportModules();
+<<<<<<< HEAD
                 scriptName = scriptName.Split('/').Last().Split('\\').Last().Replace(".py", "");
                 dynamic script = Py.Import(scriptName);
                 script.api = _api;
@@ -126,16 +164,31 @@ internal sealed class PythonIntegration : IDisposable
                 if (script.HasAttr("before_build"))
                 {
                     script.before_build();
+=======
+                scriptName = Path.GetFileNameWithoutExtension(scriptName);
+                dynamic script = Py.Import(scriptName);
+                script.api = _api;
+
+                if (script.HasAttr(hookName))
+                {
+                    script.GetAttr(hookName).Invoke();
+>>>>>>> origin/main
                 }
             }
         }
         catch (PythonException ex)
         {
+<<<<<<< HEAD
             throw new Exception($"Python module '{scriptName}' error: {ex.Message}", ex);
         }
     }
     
     // TODO: create AfterBuild method
+=======
+            throw new Exception($"Python module '{scriptName}' error in '{hookName}': {ex.Message}", ex);
+        }
+    }
+>>>>>>> origin/main
 
     public void ProcessAsset(Script pythonScript, AssetFileOrFolder fileOrFolder)
     {
@@ -235,7 +288,7 @@ internal sealed class PythonIntegration : IDisposable
 
     /// <summary>
     /// Gets the Python DLL path from the Python executable path.
-    /// </summary>c
+    /// </summary>
     private string GetPythonDllPath(string pythonExePath)
     {
         if (!Directory.Exists(pythonExePath))

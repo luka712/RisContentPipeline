@@ -2,18 +2,32 @@ using RisContentPipeline.Ktx2;
 
 namespace RisContentPipeline;
 
-// TODO: Add doc comments.
+/// <summary>
+/// The default <see cref="IPipelineSystem"/> implementation.
+/// Maintains a registry of <see cref="IPipeline"/> instances and a queue of source assets
+/// that should be processed when <see cref="ConvertAll"/> is invoked.
+/// </summary>
 public class PipelineSystem : IPipelineSystem
 {
     /// <summary>
     /// The store for the source and target types and the source and options.
+    /// Each tuple consists of (sourceType, targetType, source, options).
     /// </summary>
     private readonly List<Tuple<string, string, object, object?>> _store = new();
-    
+
     private readonly List<IPipeline> _pipelines =
     [
         new Ktx2Pipeline()
     ];
+
+    /// <inheritdoc/>
+    public event EventHandler<ConvertStartEventArgs>? OnConvertAllStarted;
+
+    /// <inheritdoc/>
+    public event EventHandler<ConvertEndedEventArgs>? OnConvertAllFinished;
+
+    /// <inheritdoc/>
+    public event EventHandler<OnItemConversionFinishEventArgs>? OnItemConversionFinish;
 
     /// <inheritdoc/>
     public void AddPipeline(IPipeline pipeline)
@@ -23,7 +37,7 @@ public class PipelineSystem : IPipelineSystem
         {
             return;
         }
-        _pipelines.Add(pipeline);   
+        _pipelines.Add(pipeline);
     }
 
     /// <inheritdoc/>
@@ -35,17 +49,22 @@ public class PipelineSystem : IPipelineSystem
     /// <inheritdoc/>
     public IReadOnlyList<PipelineResult> ConvertAll()
     {
+        OnConvertAllStarted?.Invoke(this, new ConvertStartEventArgs() { TotalItems = _store.Count });
+
         var results = new List<PipelineResult>();
-        foreach(var (sourceType, targetType, source, options) in _store)
+        foreach (var (sourceType, targetType, source, options) in _store)
         {
-            results.Add(Convert(sourceType, targetType, source, options));
+            var result = Convert(sourceType, targetType, source, options);
+            OnItemConversionFinish?.Invoke(this, new OnItemConversionFinishEventArgs() { Result = result! });
+            results.Add(result);
         }
+
+        OnConvertAllFinished?.Invoke(this, new ConvertEndedEventArgs() { TotalItems = _store.Count });
+
         return results;
     }
 
-    /// <summary>
-    /// Convert the source to the target.
-    /// </summary>
+    /// <inheritdoc/>
     public PipelineResult Convert(string sourceType, string targetType, object source, object? options)
     {
         foreach (var pipeline in _pipelines)
@@ -56,6 +75,16 @@ public class PipelineSystem : IPipelineSystem
             }
         }
 
-        return new PipelineResult();
+        return new PipelineResult
+        {
+            Success = false,
+            ErrorMessage = $"No pipeline registered that can convert '{sourceType}' to '{targetType}'."
+        };
+    }
+
+    /// <inheritdoc/>
+    public void ClearStoredAssets()
+    {
+        _store.Clear();
     }
 }

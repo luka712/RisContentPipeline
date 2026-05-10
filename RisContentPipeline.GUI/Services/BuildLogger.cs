@@ -93,9 +93,8 @@ namespace RisContentPipeline.GUI.Services
         public void Error(string message)
         {
             _errorLogs.Add(message);
+            OnErrorLog?.Invoke(message);
         }
-
-
 
         /// <summary>
         /// Clears all logs from the logger.
@@ -105,6 +104,7 @@ namespace RisContentPipeline.GUI.Services
         {
             _successLogs.Clear();
             _errorLogs.Clear();
+            _infoLogs.Clear();
         }
     }
 }

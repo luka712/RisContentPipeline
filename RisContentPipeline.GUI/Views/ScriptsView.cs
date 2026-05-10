@@ -13,44 +13,76 @@ internal class ScriptsView
     private readonly TreeGridView _treeView;
 
     /// <summary>
-    /// The tree view that displays the list of scripts. 
+    /// The titled panel that hosts the scripts tree view.
     /// </summary>
-    internal DynamicLayout Content { get; }
+    internal Control Content { get; }
+
+    // Store the last clicked cell for context menu actions
+    private int? _lastClickedRow = null;
+
+    private void HandleRemoveScriptItem()
+    {
+        if (_lastClickedRow.HasValue)
+        {
+            var item = _treeView.DataStore[_lastClickedRow.Value];
+            if (item is TreeGridItem treeGridItem)
+            {
+                var scriptName = treeGridItem.Values[1].ToString();
+                var scriptToRemove = _context.BuildScripts.FirstOrDefault(s => s.Name == scriptName);
+                if (scriptToRemove != null)
+                {
+                    _context.RemoveBuildScript(scriptToRemove);
+                    Refresh();
+                }
+            }
+
+        }
+    }
 
     /// <summary>
     /// The constructor.
-    /// <param name="context">The <see cref="Context"/>.</param>"
     /// </summary>
+    /// <param name="context">The <see cref="Context"/>.</param>
     public ScriptsView(Context context)
     {
-        // Create a tree view for assets
-        Content = new DynamicLayout()
+        _context = context;
+
+        _treeView = new TreeGridView
         {
-            Width = Theme.SIDE_PANELS_WIDTH - Theme.PADDING * 2,
-            Height = -1, 
+            ShowHeader = false,
+            AllowMultipleSelection = false,
+            Border = BorderType.None,
         };
-        Content.BeginVertical();
-        _treeView = new TreeGridView();
-        Content.AddRow(_treeView);
-        Content.AddAutoSized(null);
-        Content.EndVertical();
-        
+        _treeView.CellClick += (sender, args) => _lastClickedRow = args.Row;
+
+        _treeView.ContextMenu = new ContextMenu
+        {
+            Items =
+            {
+                new ButtonMenuItem { Text = "Remove Script", Command = new Command((_, __) => HandleRemoveScriptItem()) },
+            }
+        };
+
         // Add a column to the tree view
         _treeView.Columns.Add(new GridColumn
         {
             HeaderText = "Scripts",
+            AutoSize = true,
             DataCell = new ImageTextCell(0, 1)
         });
 
         // Set up tree view event handlers
         _treeView.SelectionChanged += OnAssetSelectionChanged;
-        _context = context;
 
-        _context.OnBuildScriptAdded += (_, script) =>
+        Content = new GroupBox
         {
-            Refresh();
+            Text = "Build Scripts",
+            Font = SystemFonts.Bold(),
+            Padding = new Padding(Theme.PADDING),
+            Content = _treeView,
         };
 
+        _context.OnBuildScriptAdded += (_, _) => Refresh();
         Refresh();
     }
 
@@ -61,10 +93,9 @@ internal class ScriptsView
 
         foreach (var script in _context.BuildScripts)
         {
-            //var thumbnail = Icons.ImageIcon;
-            var item = new TreeGridItem()
+            var item = new TreeGridItem
             {
-                Values = [Icons.PythonIcon, script.Name]
+                Values = [Icons.PythonIcon, script.Name],
             };
             rootItem.Children.Add(item);
         }
@@ -76,83 +107,11 @@ internal class ScriptsView
         rootItem.Expanded = true;
     }
 
-    //private void LoadSampleAssets()
-    //{
-    //    // Create a placeholder icon for the root folder
-    //    var rootItem = new ImageTreeGridItem("Assets", Icons.FolderIcon, null);
-
-    //    // Add some sample image files (you can replace this with actual file scanning)
-    //    var sampleImages = new[]
-    //    {
-    //        "sample1.png",
-    //        "sample2.jpg",
-    //        "sample3.bmp",
-    //        "textures/wood.png",
-    //        "textures/metal.jpg",
-    //        "ui/icons/button.png"
-    //    };
-
-    //    foreach (var imagePath in sampleImages)
-    //    {
-    //        // Create a placeholder thumbnail
-    //        var thumbnail = Icons.ImageIcon;
-    //        var item = new ImageTreeGridItem(
-    //            Path.GetFileName(imagePath),
-    //            thumbnail,
-    //            imagePath
-    //        );
-    //        rootItem.Children.Add(item);
-    //    }
-
-    //    // Set the data store
-    //    AssetTreeView.DataStore = rootItem;
-
-    //    // Expand the root
-    //    rootItem.Expanded = true;
-    //}
-
-
-
     private void OnAssetSelectionChanged(object? sender, EventArgs e)
     {
         if (_treeView.SelectedItem is ImageTreeGridItem selectedItem && selectedItem.FileOrFolder != null)
         {
-            // For now, just handle the selection
-            // In a real implementation, you would notify the main form or trigger an event
-            // For example: AssetSelected?.Invoke(this, new AssetSelectedEventArgs(selectedItem.FilePath));
+            // Selection currently has no further side effects.
         }
     }
-
-    ///// <summary>
-    ///// Loads assets from a specified directory path.
-    ///// </summary>
-    ///// <param name="directoryPath">The directory path to scan for assets.</param>
-    //public void LoadAssetsFromDirectory(string directoryPath)
-    //{
-    //    if (!Directory.Exists(directoryPath))
-    //    {
-    //        return;
-    //    }
-
-    //    var rootItem = new ImageTreeGridItem(Path.GetFileName(directoryPath), Icons.FolderIcon, directoryPath);
-
-    //    // Get all image files from the directory
-    //    var imageExtensions = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tga", ".webp" };
-    //    var imageFiles = Directory.GetFiles(directoryPath, "*.*", SearchOption.AllDirectories)
-    //        .Where(f => imageExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()));
-
-    //    foreach (var imagePath in imageFiles)
-    //    {
-    //        var thumbnail = Icons.ImageIcon;
-    //        var item = new ImageTreeGridItem(
-    //            Path.GetFileName(imagePath),
-    //            thumbnail,
-    //            imagePath
-    //        );
-    //        rootItem.Children.Add(item);
-    //    }
-
-    //    AssetTreeView.DataStore = rootItem;
-    //    rootItem.Expanded = true;
-    //}
 }

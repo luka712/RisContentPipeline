@@ -7,27 +7,30 @@ using System.ComponentModel;
 
 namespace RisContentPipeline.GUI;
 
+/// <summary>
+/// The main application window.
+/// Hosts the actions bar at the top, three resizable columns of views in the middle
+/// (assets/scripts | inspector + build output | settings), and a status bar at the bottom.
+/// </summary>
 public sealed class MainForm : Form
 {
     private readonly Context _context = new();
-    private readonly BuildLogger _messanger = new BuildLogger();
 
-    private ActionsBarView _actionsBar;
-    private AssetView _assetView;
+    private readonly ActionsBarView _actionsBar;
+    private readonly AssetView _assetView;
     private readonly ScriptsView _scriptsView;
     private readonly BuildView _buildView;
     private readonly SettingsView _settingsView;
     private readonly InspectorView _inspectorView;
-    private Label _statusLabel;
-    private TextBox _inputBox;
-    private TextBox _outputBox;
+    private readonly Label _statusLabel = new() { Text = "Ready" };
 
     public MainForm()
     {
         Icons.Load();
 
         Title = "RisContentPipeline";
-        ClientSize = new Eto.Drawing.Size(Theme.CLIENT_WIDTH, Theme.CLIENT_HEIGHT);
+        ClientSize = new Size(Theme.CLIENT_WIDTH, Theme.CLIENT_HEIGHT);
+        MinimumSize = new Size(900, 540);
         Resizable = true;
         _context.LoadSession();
 
@@ -44,55 +47,81 @@ public sealed class MainForm : Form
         _buildView = new BuildView(_context);
         _settingsView = new SettingsView(_context);
         _inspectorView = new InspectorView(this, _context);
-        
 
-        // Create the main content layout
-        var contentLayout = new StackLayout(
-        [
-            new StackLayoutItem(new StackLayout
-            {
-                Spacing = 8,
-                Width = Theme.SIDE_PANELS_WIDTH,
-                Padding = new Padding(Theme.PADDING),
-                Items =
-                {
-                    new StackLayoutItem(_assetView.Content, true),
-                    new StackLayoutItem(_scriptsView.Content, true)
-                },
-            }, false),
-            new StackLayoutItem(
-                new DynamicLayout(
-                    new StackLayout
-                    {
-                        Spacing = 8,
-                        Width = -1,
-                        Items =
-                        {
-                            new StackLayoutItem(_inspectorView.Content, true),
-                            new StackLayoutItem(_buildView.BuildOutputTreeView, true),
-                        },
-                    })),
-            new StackLayoutItem(new StackLayout
-            {
-                Spacing = 8,
-                Width = Theme.SIDE_PANELS_WIDTH,
-                Items =
-                {
-                    new StackLayoutItem(_settingsView.Content, true)
-                },
-            })
-        ])
+        WireBuildLoggerToStatus();
+
+        // ---- Left column: assets stacked above scripts (resizable vertically) ----
+        var leftSplitter = new Splitter
         {
-            Orientation = Orientation.Horizontal,
+            Orientation = Orientation.Vertical,
+            Panel1 = _assetView.Content,
+            Panel2 = _scriptsView.Content,
+            Position = (Theme.CLIENT_HEIGHT - Theme.BUILD_OUTPUT_HEIGHT) / 2,
+            FixedPanel = SplitterFixedPanel.None,
         };
 
+        // ---- Center column: inspector stacked above build output (resizable vertically) ----
+        var centerSplitter = new Splitter
+        {
+            Orientation = Orientation.Vertical,
+            Panel1 = _inspectorView.Content,
+            Panel2 = _buildView.Content,
+            Position = Theme.CLIENT_HEIGHT - Theme.BUILD_OUTPUT_HEIGHT - 80,
+            FixedPanel = SplitterFixedPanel.Panel2,
+        };
 
-        // Create root layout with toolbar and content
+        // ---- Right column: settings panel ----
+        var rightPanel = _settingsView.Content;
+
+        // ---- Center+right horizontal splitter ----
+        var centerRightSplitter = new Splitter
+        {
+            Orientation = Orientation.Horizontal,
+            Panel1 = centerSplitter,
+            Panel2 = rightPanel,
+            Position = Theme.CLIENT_WIDTH - Theme.RIGHT_SIDE_PANELS_MIN_WIDTH,
+            FixedPanel = SplitterFixedPanel.Panel2,
+            Panel2MinimumSize = Theme.RIGHT_SIDE_PANELS_MIN_WIDTH,
+        };
+
+        // ---- Top-level horizontal splitter (left | (center | right)) ----
+        var mainSplitter = new Splitter
+        {
+            Orientation = Orientation.Horizontal,
+            Panel1 = leftSplitter,
+            Panel2 = centerRightSplitter,
+            Position = Theme.LEFT_SIDE_PANELS_MIN_WIDTH,
+            FixedPanel = SplitterFixedPanel.Panel1,
+            Panel1MinimumSize = Theme.LEFT_SIDE_PANELS_MIN_WIDTH,
+        };
+
+        // ---- Status bar ----
+        var statusBar = new Panel
+        {
+            BackgroundColor = SystemColors.ControlBackground,
+            Padding = new Padding(8, 4),
+            Content = _statusLabel,
+        };
+
+        // ---- Root layout: actions bar / main / status bar ----
         var rootLayout = new DynamicLayout();
         rootLayout.Add(_actionsBar.Panel);
-        rootLayout.Add(contentLayout, yscale: true);
+        rootLayout.Add(mainSplitter, yscale: true);
+        rootLayout.Add(statusBar);
 
         Content = rootLayout;
+    }
+
+    /// <summary>
+    /// Mirrors interesting <see cref="BuildLogger"/> events into the status bar so the
+    /// user always has a quick read-out of the last action.
+    /// </summary>
+    private void WireBuildLoggerToStatus()
+    {
+        var logger = _context.BuildLogger;
+        logger.OnInfoLog += msg => UpdateStatus(msg);
+        logger.OnSuccessLog += msg => UpdateStatus(msg);
+        logger.OnErrorLog += msg => UpdateStatus($"Error: {msg}");
     }
 
     private MenuBar CreateMenu()
@@ -157,89 +186,12 @@ public sealed class MainForm : Form
         // _assetView.LoadAssetsFromDirectory(folderPath);
     }
 
-    private Panel CreateRightPanel()
-    {
-        var rightPanel = new Panel();
-
-        _inputBox = new TextBox { PlaceholderText = "Input image file (.png/.jpg/.bmp/.gif/.tga...)" };
-        _outputBox = new TextBox { PlaceholderText = "Output .ktx2 file" };
-        _statusLabel = new Label();
-
-        var browseInputButton = new Button { Text = "Browse input" };
-        browseInputButton.Click += (_, _) =>
-        {
-            using var dialog = new OpenFileDialog();
-            dialog.Filters.Add(new FileFilter("Images", ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tga", ".webp"));
-            if (dialog.ShowDialog(this) == DialogResult.Ok)
-            {
-                _inputBox.Text = dialog.FileName;
-                UpdateStatus($"Selected input: {Path.GetFileName(dialog.FileName)}");
-            }
-        };
-
-        var browseOutputButton = new Button { Text = "Browse output" };
-        browseOutputButton.Click += (_, _) =>
-        {
-            using var dialog = new SaveFileDialog();
-            dialog.Filters.Add(new FileFilter("KTX2", ".ktx2"));
-            dialog.FileName = "output.ktx2";
-            if (dialog.ShowDialog(this) == DialogResult.Ok)
-            {
-                _outputBox.Text = dialog.FileName;
-                UpdateStatus($"Selected output: {Path.GetFileName(dialog.FileName)}");
-            }
-        };
-
-        var convertButton = new Button { Text = "Convert to KTX2" };
-        convertButton.Click += (_, _) =>
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(_inputBox.Text) || string.IsNullOrWhiteSpace(_outputBox.Text))
-                {
-                    UpdateStatus("Please specify both input and output files.");
-                    return;
-                }
-
-                //using var image = SixLabors.ImageSharp.Image.Load<Rgba32>(_inputBox.Text);
-                //var pipeline = new Ktx2Converter();
-                //pipeline.Convert(image, _outputBox.Text, null);
-
-                UpdateStatus("Conversion complete.");
-            }
-            catch (Exception ex)
-            {
-                UpdateStatus($"Conversion failed: {ex.Message}");
-            }
-        };
-
-        var clearButton = new Button { Text = "Clear" };
-        clearButton.Click += (_, _) =>
-        {
-            _inputBox.Text = string.Empty;
-            _outputBox.Text = string.Empty;
-            UpdateStatus("Cleared input and output fields.");
-        };
-
-        rightPanel.Content = new TableLayout
-        {
-            Padding = 12,
-            Spacing = new Eto.Drawing.Size(8, 8),
-            Rows =
-            {
-                new TableRow(_inputBox, browseInputButton),
-                new TableRow(_outputBox, browseOutputButton),
-                new TableRow(convertButton, clearButton),
-                new TableRow(_statusLabel)
-            }
-        };
-
-        return rightPanel;
-    }
-
     private void UpdateStatus(string message)
     {
-        _statusLabel?.Text = message;
+        if (_statusLabel != null)
+        {
+            _statusLabel.Text = message;
+        }
     }
 
     protected override void OnClosing(CancelEventArgs e)

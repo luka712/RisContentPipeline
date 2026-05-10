@@ -5,6 +5,13 @@ namespace RisContentPipeline;
 /// </summary>
 public interface IPipeline
 {
+    public const string ANY_TYPE = "*";
+
+    /// <summary>
+    /// The name of the pipeline.
+    /// </summary>
+    string Name { get; }
+    
     /// <summary>
     /// The name of the pipeline.
     /// </summary>

@@ -13,40 +13,42 @@ internal class AssetView
     private readonly TreeGridView _treeView;
 
     /// <summary>
-    /// The tree view that displays the list of assets. 
-    /// This will be populated with the contents of the "Assets" folder and allow users to select assets for processing.
+    /// The titled panel that hosts the assets tree view.
     /// </summary>
-    internal DynamicLayout Content { get; }
+    internal Control Content { get; }
 
     /// <summary>
     /// The constructor initializes the asset view, setting up the tree view and loading sample assets for demonstration purposes.
     /// </summary>
     public AssetView(Context context)
     {
-        // Create a tree view for assets
-        Content = new DynamicLayout()
+        _context = context;
+
+        _treeView = new TreeGridView
         {
-            Width = Theme.SIDE_PANELS_WIDTH - Theme.PADDING * 2,
-            Height = -1, 
+            ShowHeader = false,
+            AllowMultipleSelection = false,
+            Border = BorderType.None,
         };
-        Content.BeginVertical();
-        _treeView = new TreeGridView();
-        Content.AddRow(_treeView);
-        Content.EndVertical();
 
         // Add a column to the tree view
         _treeView.Columns.Add(new GridColumn
         {
             HeaderText = "Assets",
+            AutoSize = true,
             DataCell = new ImageTextCell(0, 1)
         });
 
         // Set up tree view event handlers
         _treeView.SelectionChanged += OnAssetSelectionChanged;
-        _context = context;
 
-        //// Initialize with sample data
-        //LoadSampleAssets();
+        Content = new GroupBox
+        {
+            Text = "Assets",
+            Font = SystemFonts.Bold(),
+            Padding = new Padding(Theme.PADDING),
+            Content = _treeView,
+        };
     }
 
     public void Refresh()
@@ -62,7 +64,7 @@ internal class AssetView
             {
                 var thumbnail = Icons.ImageIcon;
                 var item = new ImageTreeGridItem(
-                    fileOrFolder.PathOrFileName,
+                    fileOrFolder.PathOrFileName ?? string.Empty,
                     fileOrFolder,
                     thumbnail
                 );
@@ -71,7 +73,7 @@ internal class AssetView
             else if (fileOrFolder.IsJson || fileOrFolder.IsXml)
             {
                 var item = new ImageTreeGridItem(
-                    fileOrFolder.PathOrFileName,
+                    fileOrFolder.PathOrFileName ?? string.Empty,
                     fileOrFolder,
                     Icons.FileIcon
                 );

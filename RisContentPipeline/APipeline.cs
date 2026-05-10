@@ -7,7 +7,7 @@ public abstract class APipeline : IPipeline
 {
     private readonly string[] _sourceTypes;
     private readonly string[] _targetTypes;
-    
+
     /// <summary>
     /// The constructor takes the source and target types that this pipeline can process.
     /// </summary>
@@ -20,19 +20,22 @@ public abstract class APipeline : IPipeline
         _sourceTypes = sourceTypes;
         _targetTypes = targetTypes;
     }
-    
+
+    /// <inheritdoc/>
+    public string Name { get; }
+
     /// <inheritdoc/>
     public string Name { get; } 
     
     /// <inheritdoc/>
     public IReadOnlyList<string> SourceTypes => _sourceTypes;
-    
+
     /// <inheritdoc/>
     public IReadOnlyList<string> TargetTypes => _targetTypes;
 
     /// <inheritdoc/>
     public bool CanConvert(string sourceType, string targetType)
-        => _sourceTypes.Contains(sourceType) && _targetTypes.Contains(targetType);
+        => _sourceTypes.Contains(sourceType) && (_targetTypes.Contains(targetType) || _targetTypes.Contains(IPipeline.ANY_TYPE));
 
     /// <inheritdoc/>
     public abstract PipelineResult Convert(object source, object? options);
