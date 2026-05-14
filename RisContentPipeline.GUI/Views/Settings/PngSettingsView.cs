@@ -1,11 +1,22 @@
 using Eto.Drawing;
 using Eto.Forms;
 using RisContentPipeline.GUI.Data;
+using RisContentPipeline.GUI.Settings;
+using RisContentPipeline.GUI.TreeGridItems;
 
 namespace RisContentPipeline.GUI.Views.Settings;
 
 public class PngSettingsView
 {
+    private static readonly Dictionary<int, Ktx2BasisUEncodingQuality> _encodingQualityMap = new()
+    {
+        { 0, Ktx2BasisUEncodingQuality.Lowest },
+        { 1, Ktx2BasisUEncodingQuality.Low },
+        { 2, Ktx2BasisUEncodingQuality.Medium },
+        { 3, Ktx2BasisUEncodingQuality.High },
+        { 4, Ktx2BasisUEncodingQuality.Best },
+    };
+    
     /// <summary>
     /// Adds rows describing the supplied <paramref name="imageContainer"/> to the
     /// given <paramref name="tableLayout"/>. Includes editable export settings on
@@ -19,7 +30,7 @@ public class PngSettingsView
         AddSectionHeader(tableLayout, "Export");
 
         // TEXTURE MODE DROPDOWN
-        string[] textureModes = ["Basis UASTC", "Basis ETC1S"];
+        string[] textureModes = [ "Basis ETC1S", "Basis UASTC"];
         var textureMode = imageContainer.Ktx2ExportSettings.UseUastc ? textureModes[0] : textureModes[1];
         var textureModeDropdown = new DropDown
         {
@@ -38,6 +49,30 @@ public class PngSettingsView
             new Label { Text = "Texture Mode" },
             new TableCell(textureModeDropdown, scaleWidth: true)
         ));
+
+        // Encoding Quality
+        if (textureMode == textureModes[0] || textureMode == textureModes[1])
+        {
+            var qualityDropDown = new DropDown();
+            qualityDropDown.DataStore =
+            [
+                Ktx2BasisUEncodingQuality.Lowest,
+                Ktx2BasisUEncodingQuality.Low,
+                Ktx2BasisUEncodingQuality.Medium,
+                Ktx2BasisUEncodingQuality.High,
+                Ktx2BasisUEncodingQuality.Best
+            ];
+            qualityDropDown.SelectedIndex = 2;
+            qualityDropDown.SelectedIndexChanged += (sender, e) =>
+            {
+                imageContainer.Ktx2ExportSettings.QualityLevel = _encodingQualityMap[qualityDropDown.SelectedIndex];
+            };
+
+            tableLayout.Rows.Add(new TableRow(
+                new Label() { Text = "Encoding Quality" },
+                qualityDropDown
+            ));
+        }
 
         // GENERATE MIPMAPS
         var generateMipmapsCheckBox = new CheckBox

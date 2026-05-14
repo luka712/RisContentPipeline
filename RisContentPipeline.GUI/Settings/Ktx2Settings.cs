@@ -11,6 +11,18 @@
     }
 
     /// <summary>
+    /// The enum representing the encoding quality for the KTX2 textures.
+    /// </summary>
+    internal enum Ktx2BasisUEncodingQuality : uint
+    {
+        Lowest = 32,
+        Low = 64,
+        Medium = 128,
+        High = 196,
+        Best = 255
+    }
+
+    /// <summary>
     /// This class represents the settings related to KTX2 texture conversion, specifically the choice between UASTC and ETC1S compression formats.
     /// </summary>
     internal class Ktx2Settings
@@ -34,6 +46,19 @@
         /// The default value is Basis.
         /// </summary>
         public Ktx2EncodingTarget EncodeTarget { get; set; }
+        
+        /// <summary>
+        /// The encoding quality for the KTX2 textures.
+        /// Low values result in smaller file sizes, but may result in lower quality.
+        /// High values result in larger file sizes, but may result in better quality.
+        /// Common:
+        /// Lowest - 32
+        /// Low - 64
+        /// Medium - 128
+        /// High - 196
+        /// Best - 255
+        /// </summary>
+        public Ktx2BasisUEncodingQuality QualityLevel { get; set; } = Ktx2BasisUEncodingQuality.Medium;
 
         /// <summary>
         /// Copies the current settings.
@@ -45,7 +70,8 @@
             {
                 UseUastc = UseUastc,
                 EncodeTarget = EncodeTarget,
-                GenerateMipmaps = GenerateMipmaps
+                GenerateMipmaps = GenerateMipmaps,
+                QualityLevel = QualityLevel,
             };
         }
     }

@@ -1,0 +1,43 @@
+body {
+  margin: 0;
+  background: #111;
+  color: #eee;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+}
+
+#ui {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 360px;
+  background: rgba(0,0,0,0.8);
+  padding: 16px;
+  border-radius: 8px;
+  z-index: 10;
+}
+
+#dropZone {
+  border: 2px dashed #666;
+  padding: 20px;
+  text-align: center;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+#dropZone.hover {
+  border-color: #00ccff;
+}
+
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 13px;
+  margin-top: 10px;
+  max-height: 400px;
+  overflow: auto;
+}
+
+canvas {
+  display: block;
+}

@@ -32,13 +32,20 @@ public class Ktx2Pipeline : APipeline
         {
             throw new FileNotFoundException($"File not found: {sourceFilePath}");
         }
-        
+
         Ktx2PipelineOptions pipelineOptions = options as Ktx2PipelineOptions ?? new Ktx2PipelineOptions();
         
-        var image = _stbImageLoader.Load(sourceFilePath, 4);
+        int alignment = 0;
+        if (pipelineOptions.UniversalBasisCompression)
+        {
+            alignment = 4;
+        }
+        
+        
+        var image = _stbImageLoader.Load(sourceFilePath, 4, align: alignment);
         var data = image.Bytes;
-        var width = (uint)image.Width;
-        var height = (uint)image.Height;
+        var width = image.Width + (alignment - 1) & ~(alignment - 1);
+        var height = image.Height + (alignment - 1) & ~(alignment - 1);
         var channels = image.Channels;
         var genMipmaps = pipelineOptions.GenerateMipmaps;
         
@@ -59,19 +66,19 @@ public class Ktx2Pipeline : APipeline
         // Create KTX2 texture with RGBA8 format
         Ktx2Texture texture = new Ktx2Texture(new KtxTextureCreateInfo
         {
-            BaseHeight = height,
-            BaseWidth = width,
-            VkFormat = VkFormat.R8G8B8A8_UNORM,
+            BaseHeight = (uint) height,
+            BaseWidth = (uint) width,
+            VkFormat = channels == 4 ? VkFormat.R8G8B8A8_UNORM : VkFormat.R8G8B8_UNORM,
             NumLevels = (uint) mipLevels
-        });
+        }, KtxTextureCreateStorage.ALLOC_STORAGE);
 
         texture.SetImageFromMemory(0, 0, 0, data, (uint)data.Length);
 
         // If we have mip levels.
         if (genMipmaps)
         {
-            var sourceWidth = (int)width;
-            var sourceHeight = (int)height;
+            var sourceWidth = width;
+            var sourceHeight = height;
             var targetWidth = sourceWidth / 2;
             var targetHeight = sourceHeight / 2;
             var mipData = data;
@@ -99,6 +106,7 @@ public class Ktx2Pipeline : APipeline
             texture.CompressBasis(new KtxBasisParams()
             {
                 Uastc = pipelineOptions.UseUastc,
+                QualityLevel = pipelineOptions.QualityLevel
             });
         }
 

@@ -275,16 +275,17 @@ namespace RisContentPipeline.GUI
             {
                 var image = fileOrFolder.Image;
                 var ktx2Settings = image.Ktx2ExportSettings;
-                var filePath = Path.Combine(BuildDirectory, Path.GetFileNameWithoutExtension(fileOrFolder.PathOrFileName!));
-                PipelineSystem.StoreSourceAsset("png", "ktx", new Ktx2PipelineSource()
+                var filePath = Path.Combine(AppContext.BaseDirectory, BuildDirectory, Path.GetFileNameWithoutExtension(fileOrFolder.PathOrFileName!));
+                PipelineSystem.StoreSourceAsset("png", "ktx2", new Ktx2PipelineSource()
                 {
                     FilePath = fileOrFolder.AbsolutePathOrFileName,
                 }, new Ktx2PipelineOptions()
                 {
                     GenerateMipmaps = ktx2Settings.GenerateMipmaps,
                     OutputPath = $"{filePath}.ktx2",
-                    UniversalBasisCompression = Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.Basis,
-                    UseUastc = Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.Basis && ktx2Settings.UseUastc,
+                    UniversalBasisCompression = ktx2Settings.EncodeTarget == Ktx2EncodingTarget.Basis,
+                    UseUastc = ktx2Settings.EncodeTarget == Ktx2EncodingTarget.Basis && ktx2Settings.UseUastc,
+                    QualityLevel = (uint) ktx2Settings.QualityLevel,
                 });
             }
             else if (fileOrFolder.IsJson)

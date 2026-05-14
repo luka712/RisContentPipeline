@@ -114,7 +114,7 @@ namespace RisContentPipeline.GUI.Windows
             // KTX Settings
             _encodeTargetDropDown = new DropDown
             {
-                DataStore = Enum.GetNames(typeof(Ktx2EncodingTarget)),
+                DataStore = [ "Basis ETC1S", "Basis UASTC"],
                 SelectedIndex = (int)_context.Ktx2GlobalSettings.EncodeTarget,
                 ToolTip = "Select the target encoding format for KTX2 textures. " +
                           "Basis will encode textures to Basis format during the build process, " +
@@ -133,25 +133,45 @@ namespace RisContentPipeline.GUI.Windows
                 Enabled = _context.Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.Basis,
             };
 
-            var layout = new TableLayout
+            var ktx2GroupBox = new GroupBox { Text = "KTX2 Settings" };
+            var ktx2Layout = new TableLayout()
             {
                 Padding = new Padding(Theme.PADDING * 2),
                 Spacing = Theme.FormSpacing,
                 Rows =
                 {
                     new TableRow(
-                        new Label { Text = "Build Directory" },
-                        new TableCell(_buildDirectoryTextBox, scaleWidth: true),
-                        browseBuildDirButton),
-                    new TableRow(
-                        new Label { Text = "KTX2 Encoding Target" },
+                        new Label { Text = "Texture Mode"},
                         new TableCell(_encodeTargetDropDown, scaleWidth: true),
                         null),
                     new TableRow(
                         new Label { Text = "Use UASTC Base" },
                         new TableCell(_useUastcCheckBox, scaleWidth: true),
                         null),
-                    new TableRow { ScaleHeight = true },
+                }
+            };
+            ktx2GroupBox.Content = ktx2Layout;
+
+            var layout = new DynamicLayout()
+            {
+                Padding = new Padding(Theme.PADDING * 2),
+                Spacing = Theme.FormSpacing,
+                Rows =
+                {
+                    new DynamicRow(new GroupBox()
+                    {
+                        Text = "Build Directory",
+                        Content = new DynamicLayout()
+                        {
+                            Padding = new Padding(Theme.PADDING * 2),
+                            Spacing = Theme.FormSpacing,
+                            Rows = {
+                                new DynamicRow(_buildDirectoryTextBox, browseBuildDirButton),
+                            }
+                        }
+                    }),
+                    new DynamicRow([ktx2GroupBox], xscale: true),
+                    new DynamicRow(null, yscale: true),
                 }
             };
 
