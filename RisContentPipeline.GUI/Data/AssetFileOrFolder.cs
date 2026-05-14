@@ -89,15 +89,20 @@ namespace RisContentPipeline.GUI.Data
         }
 
         /// <summary>
-        /// Indicates if file is JSON file.
+        /// Indicates if a file is JSON file.
         /// </summary>
         public bool IsJson => PathOrFileName?.EndsWith(".json") == true;
 
         /// <summary>
-        /// Indices if file is XML file.
+        /// Indices if the file is an XML file.
         /// </summary>
         public bool IsXml => PathOrFileName?.EndsWith(".xml") == true;
 
+        /// <summary>
+        /// Indicates if a file is an image file.
+        /// </summary>
+        public bool IsImage => Image != null;
+        
         /// <summary>
         /// The child folders or files of this folder. 
         /// </summary>

@@ -11,6 +11,27 @@
     <None Update="InternalScripts\texture_packer_json_png_to_ktx2.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Ktx2BrowserViewerContent\assets\index-BM5uSvM7.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Ktx2BrowserViewerContent\assets\index-BFha7WHA.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Ktx2BrowserViewerContent\assets\index-B69YwLMV.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Ktx2BrowserViewerContent\assets\index-DbYn0ZPC.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Ktx2BrowserViewerContent\favicon.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Ktx2BrowserViewerContent\icons.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Ktx2BrowserViewerContent\index.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 
@@ -20,6 +41,8 @@
 
   <ItemGroup>
     <PackageReference Include="Eto.Forms" Version="2.11.0" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.3.10" />
+    <PackageReference Include="Photino.NET" Version="4.0.16" />
     <PackageReference Include="pythonnet" Version="3.0.3" />
   </ItemGroup>
 

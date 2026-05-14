@@ -6,38 +6,19 @@ body {
   overflow: hidden;
 }
 
-#ui {
+#root {
+}
+
+#viewer-canvas {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 0;
+  left: 0;
+}
+
+#pane {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
   width: 360px;
-  background: rgba(0,0,0,0.8);
-  padding: 16px;
-  border-radius: 8px;
-  z-index: 10;
-}
-
-#dropZone {
-  border: 2px dashed #666;
-  padding: 20px;
-  text-align: center;
-  margin-top: 10px;
-  cursor: pointer;
-}
-
-#dropZone.hover {
-  border-color: #00ccff;
-}
-
-pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-size: 13px;
-  margin-top: 10px;
-  max-height: 400px;
-  overflow: auto;
-}
-
-canvas {
-  display: block;
 }

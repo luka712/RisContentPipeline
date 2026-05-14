@@ -1,6 +1,7 @@
 ﻿using Eto.Drawing;
 using Eto.Forms;
 using RisContentPipeline.GUI.TreeGridItems;
+using RisContentPipeline.GUI.Windows;
 
 namespace RisContentPipeline.GUI.Views;
 
@@ -12,8 +13,10 @@ internal class AssetView
     private readonly Context _context;
     private readonly TreeGridView _treeView;
 
+    private ImageViewerWindow? _imageViewerWindow;
+
     /// <summary>
-    /// The titled panel that hosts the assets tree view.
+    /// The titled panel that hosts the asset tree view.
     /// </summary>
     internal Control Content { get; }
 
@@ -31,6 +34,7 @@ internal class AssetView
             Border = BorderType.None,
         };
 
+
         // Add a column to the tree view
         _treeView.Columns.Add(new GridColumn
         {
@@ -41,6 +45,7 @@ internal class AssetView
 
         // Set up tree view event handlers
         _treeView.SelectionChanged += OnAssetSelectionChanged;
+        _treeView.CellDoubleClick += OnAssetDoubleClick;
 
         Content = new GroupBox
         {
@@ -93,6 +98,23 @@ internal class AssetView
         if (_treeView.SelectedItem is ImageTreeGridItem selectedItem && selectedItem.FileOrFolder != null)
         {
             _context.OnItemSelected?.Invoke(selectedItem.FileOrFolder);
+        }
+    }
+
+    private void OnAssetDoubleClick(object? sender, EventArgs e)
+    {
+        // If it's image item, we want to open the image viewer.
+        if (_treeView.SelectedItem is ImageTreeGridItem { FileOrFolder.IsImage: true } selectedItem)
+        {
+            // If disposed, set to null in order to recreate.
+            if (_imageViewerWindow?.IsDisposed == true)
+            {
+                _imageViewerWindow = null;
+            }
+            
+            _imageViewerWindow ??= new Windows.ImageViewerWindow(_context);
+            _imageViewerWindow.Show();
+            _imageViewerWindow.ImageItem = selectedItem.FileOrFolder;
         }
     }
 }

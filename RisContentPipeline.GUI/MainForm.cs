@@ -3,6 +3,7 @@ using Eto.Drawing;
 using RisContentPipeline.GUI.Services;
 using RisContentPipeline.GUI.Views;
 using System.ComponentModel;
+using RisContentPipeline.GUI.Controls;
 
 
 namespace RisContentPipeline.GUI;
@@ -26,6 +27,7 @@ public sealed class MainForm : Form
 
     public MainForm()
     {
+        
         Icons.Load();
 
         Title = "RisContentPipeline";
@@ -160,6 +162,27 @@ public sealed class MainForm : Form
             imageViewerWindow.Show();
         };
         windowsMenu.Items.Add(imageViewerCommand);
+        
+        // - KTX2 Viewer
+        var ktx2ViewerCommand = new Command
+        {
+            MenuText = "&KTX2 Viewer",
+            Shortcut = Application.Instance.CommonModifier | Keys.K,
+        };
+        ktx2ViewerCommand.Executed += (sender, e) =>
+        {
+            // Linux has issues with default Eto WebView, so we use Photino instead.
+            // if (OperatingSystem.IsLinux())
+            // {
+            //     var ktx2ViewerWindow = new PhotinoWebView();
+            // }
+            // else
+            {
+                var ktx2ViewerWindow = new Windows.Ktx2ViewerWindow(_context);
+                ktx2ViewerWindow.Show();
+            }
+        };
+        windowsMenu.Items.Add(ktx2ViewerCommand);
 
         var helpMenu = new ButtonMenuItem { Text = "&Help" };
         helpMenu.Items.Add(new Command { MenuText = "&About..." });
