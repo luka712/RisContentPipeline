@@ -21,6 +21,9 @@ public class PipelineSystem : IPipelineSystem
     [
         new Ktx2Pipeline()
     ];
+    
+    /// <inheritdoc/>
+    public IReadOnlyList<IPipeline> Pipelines => _pipelines;
 
     /// <inheritdoc/>
     public IReadOnlyList<QueuedPipelineItem> QueuedItems

@@ -37,13 +37,11 @@ public sealed class MainForm : Form
         MinimumSize = new Size(900, 540);
         Resizable = true;
         _context.LoadSession();
-        
-        
 
         // Create a menu
         Menu = CreateMenu();
 
-        // Create an actions bar
+        // Create an action bar
         _actionsBar = new ActionsBarView(this, _context);
         _actionsBar.FileAdded += OnFileAdded;
         _actionsBar.FolderAdded += OnFolderAdded;
@@ -118,7 +116,14 @@ public sealed class MainForm : Form
         Content = rootLayout;
         
         StartServer();
+    }
 
+    /// <inheritdoc/>
+    protected override void OnShown(EventArgs e)
+    {
+        base.OnShown(e);
+        _scriptsView.Refresh();
+        _messageView.Refresh();
     }
 
     private void StartServer()

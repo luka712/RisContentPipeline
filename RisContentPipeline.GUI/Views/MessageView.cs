@@ -53,12 +53,8 @@ namespace RisContentPipeline.GUI.Views
             buildLogger.OnSuccessLog += msg => AddMessage(msg, Icons.CheckIcon);
             buildLogger.OnErrorLog += msg => AddMessage(msg, Icons.FileIcon);
             buildLogger.OnInfoLog += msg => AddMessage(msg, Icons.InfoIcon);
-
-            _context.OnBuildStarted += () =>
-            {
-                _rootItem.Children.Clear();
-            };
-
+            buildLogger.OnWarnLog += msg => AddMessage(msg, Icons.CheckIcon);
+            
             // Wrap the tree view in a titled GroupBox for clearer visual separation
             Content = new GroupBox
             {
@@ -67,6 +63,11 @@ namespace RisContentPipeline.GUI.Views
                 Padding = new Padding(Theme.PADDING),
                 Content = _messagesTreeView,
             };
+        }
+
+        internal void Refresh()
+        {
+            _messagesTreeView.ReloadData();
         }
 
         /// <summary>

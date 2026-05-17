@@ -38,5 +38,9 @@ def convert(source, options) -> dict:
     return create_success_result()
     
 def before_build():
+    
+   if api.has_pipeline("texture_packer_json"):
+      return
+    
    # Add pipeline that will convert json to any other json type.
    api.add_pipeline("texture_packer_json", ["json"], ["*", "json"], convert )

@@ -16,7 +16,7 @@ namespace RisContentPipeline.GUI
     /// list of build scripts and the global KTX2 settings, and is also responsible for
     /// loading/saving the user session and orchestrating the build process.
     /// </summary>
-    internal class Context
+    internal class Context : IDisposable
     {
         // ----- Static configuration -----------------------------------------------------
 
@@ -46,6 +46,7 @@ namespace RisContentPipeline.GUI
         public IPipelineSystem PipelineSystem = new PipelineSystem();
 
         private readonly StbImageLoader _stbImageLoader = new StbImageLoader();
+        private PythonIntegration? _pythonIntegration;
         private readonly List<Script> _buildScripts = [];
         private readonly List<Script> _internalScripts = [];
 
@@ -237,16 +238,16 @@ namespace RisContentPipeline.GUI
         /// </summary>
         internal void Build()
         {
-            using var pythonIntegration = new PythonIntegration(this);
             if (BuildScripts.Any())
             {
-                pythonIntegration.Initialize();
+                _pythonIntegration = _pythonIntegration ?? new PythonIntegration(this);
+                _pythonIntegration.Initialize();
             }
 
             // Run before build scripts.
             foreach (var script in BuildScripts)
             {
-                pythonIntegration.BeforeBuild(script);
+                _pythonIntegration?.BeforeBuild(script);
             }
 
             OnBuildStarted?.Invoke();
@@ -266,7 +267,7 @@ namespace RisContentPipeline.GUI
             // Run after build scripts.
             foreach (var script in BuildScripts)
             {
-                pythonIntegration.AfterBuild(script);
+                _pythonIntegration?.AfterBuild(script);
             }
         }
 
@@ -385,6 +386,12 @@ namespace RisContentPipeline.GUI
                 {
                     foreach (var scriptPath in session.BuildScripts.Distinct())
                     {
+                        if (!File.Exists(scriptPath))
+                        {
+                            MessageLogger.WarnAsync($"Build script '{scriptPath}' cannot be found.");
+                            continue;
+                        }
+                        
                         AddBuildScript(new Script(scriptPath));
                     }
                 }
@@ -495,6 +502,10 @@ namespace RisContentPipeline.GUI
             return null;
         }
 
-
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            _pythonIntegration?.Dispose();
+        }
     }
 }

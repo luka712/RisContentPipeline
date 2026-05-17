@@ -100,6 +100,11 @@ namespace RisContentPipeline.GUI.Scripting.Python
             string[] target,
             Func<object, object?, Dictionary<string, object>> convertAction)
         {
+            if (has_pipeline(name))
+            {
+                throw new ArgumentException($"Pipeline with name '{name}' already exists.");
+            }
+            
             PipelineResult Callback(object obj, object? opt)
             {
                 if (obj is GenericPipelineSource genericObj)
@@ -129,6 +134,14 @@ namespace RisContentPipeline.GUI.Scripting.Python
             _pipelineSystem.AddPipeline(pipeline);
             return pipeline;
         }
+
+        /// <summary>
+        /// Checks if a pipeline with the given name exists.
+        /// </summary>
+        /// <param name="name">The pipeline name.</param>
+        /// <returns><c>true</c> if a pipeline with same name is already added.</returns>
+        public bool has_pipeline(string name)
+            => _pipelineSystem.Pipelines.Any(x => x.Name == name);
 
         /// <summary>
         /// Registers a Python-defined pipeline with the underlying <see cref="IPipelineSystem"/>.

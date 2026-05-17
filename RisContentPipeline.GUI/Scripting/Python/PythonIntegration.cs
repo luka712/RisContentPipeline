@@ -17,7 +17,10 @@ internal sealed class PythonIntegration : IDisposable
     private bool _initialized;
     private bool _disposed;
     private readonly PythonScriptingApi _api;
+    private  PyObject? _pyApi;
 
+    private Dictionary<string, PyObject> _scriptModules = new();
+    
     /// <summary>
     /// The constructor takes a Context object which provides access to the content pipeline's build directory and other relevant information.
     /// </summary>
@@ -148,10 +151,24 @@ internal sealed class PythonIntegration : IDisposable
         {
             using (Py.GIL())
             {
-                ImportModules();
                 scriptName = Path.GetFileNameWithoutExtension(scriptName);
-                dynamic script = Py.Import(scriptName);
-                script.api = _api;
+
+                // Try to get already loaded and saved script.
+                if (!_scriptModules.TryGetValue(scriptName, out var script))
+                {
+                    script = Py.Import(scriptName);
+                    _scriptModules.Add(scriptName, script);
+                }
+                
+                if (_pyApi is null)
+                {
+                    _pyApi = _api.ToPython();
+                }
+
+                if (!script.HasAttr("api"))
+                {
+                    script.SetAttr("api", _pyApi);
+                }
 
                 if (script.HasAttr(hookName))
                 {
@@ -161,60 +178,8 @@ internal sealed class PythonIntegration : IDisposable
         }
         catch (PythonException ex)
         {
-            throw new Exception($"Python module '{scriptName}' error in '{hookName}': {ex.Message}", ex);
-        }
-    }
-
-    public void ProcessAsset(Script pythonScript, AssetFileOrFolder fileOrFolder)
-    {
-        if (!_initialized)
-        {
-            throw new InvalidOperationException("Python runtime not initialized. Call Initialize() first.");
-        }
-
-        if (_disposed)
-            throw new ObjectDisposedException(nameof(PythonIntegration));
-
-        _api.current_asset = new Data.PythonAssetFile(fileOrFolder);
-
-        Directory.CreateDirectory(_context.BuildDirectory);
-        var scriptName = pythonScript.FilePath;
-
-        try
-        {
-            using (Py.GIL())
-            {
-                ImportModules();
-                scriptName = scriptName.Split('/').Last().Split('\\').Last().Replace(".py", "");
-                ;
-                dynamic script = Py.Import(scriptName);
-                script.api = _api;
-                dynamic builtins = Py.Import("builtins");
-
-
-                dynamic pyResult = script.process_asset();
-
-                if (!pyResult["success"])
-                {
-                    _context.MessageLogger.Success($"Error during '{script}' processing: {pyResult["error"]}");
-                }
-
-                if (_api.current_asset.IsDirty)
-                {
-                    // If the content was modified, save it back to the original file
-                    var modifiedContent = _api.current_asset.content;
-                    if (modifiedContent != null)
-                    {
-                        File.WriteAllText(fileOrFolder.AbsolutePathOrFileName, modifiedContent);
-                        _context.MessageLogger.Success(
-                            $"Modified content saved back to '{fileOrFolder.AbsolutePathOrFileName}'.");
-                    }
-                }
-            }
-        }
-        catch (PythonException ex)
-        {
-            throw new Exception($"Python module '{scriptName}' error: {ex.Message}", ex);
+            string msg = $"Python module '{scriptName}' error in '{hookName}': {ex.Message}";
+            _context.MessageLogger.Error(msg);
         }
     }
 

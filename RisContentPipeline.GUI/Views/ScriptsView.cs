@@ -13,7 +13,7 @@ internal class ScriptsView
     private readonly TreeGridView _treeView;
 
     /// <summary>
-    /// The titled panel that hosts the scripts tree view.
+    /// The titled panel that hosts the script tree view.
     /// </summary>
     internal Control Content { get; }
 
@@ -47,7 +47,7 @@ internal class ScriptsView
     {
         _context = context;
 
-        _treeView = new TreeGridView
+        _treeView = new()
         {
             ShowHeader = false,
             AllowMultipleSelection = false,
@@ -83,10 +83,12 @@ internal class ScriptsView
         };
 
         _context.OnBuildScriptAdded += (_, _) => Refresh();
-        Refresh();
     }
 
-    public void Refresh()
+    /// <summary>
+    /// Refreshes the script tree view.
+    /// </summary>
+    internal void Refresh()
     {
         // Create a placeholder icon for the root folder
         var rootItem = new ImageTreeGridItem("Scripts", null, Icons.FolderIcon);

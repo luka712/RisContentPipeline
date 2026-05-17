@@ -10,9 +10,10 @@ namespace RisContentPipeline.GUI.Services
     /// </summary>
     internal class MessageLogger
     {
-        private readonly List<string> _successLogs = new List<string>();
-        private readonly List<string> _errorLogs = new List<string>();
-        private readonly List<string> _infoLogs = new List<string>();
+        private readonly List<string> _successLogs = new();
+        private readonly List<string> _errorLogs = new ();
+        private readonly List<string> _infoLogs = new ();
+        private readonly List<string> _warnLogs = new();
 
         /// <summary>
         /// When a message is pushed, this event is triggered with the message as a parameter.
@@ -28,6 +29,11 @@ namespace RisContentPipeline.GUI.Services
         /// This event is triggered when an informational message is pushed to the logger.
         /// </summary>
         public event Action<string>? OnInfoLog;
+        
+        /// <summary>
+        /// This event is triggered when a warning message is pushed to the logger.
+        /// </summary>
+        public event Action<string>? OnWarnLog;
 
         /// <summary>
         /// Pushes an informational message to the logger.
@@ -48,6 +54,28 @@ namespace RisContentPipeline.GUI.Services
             Application.Instance.AsyncInvoke(() =>
             {
                 Info(message);
+            });
+        }
+
+        /// <summary>
+        /// Pushes a warning message to the logger.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        public void Warn(string message)
+        {
+            _warnLogs.Add(message);
+            OnWarnLog?.Invoke(message);
+        }
+
+        /// <summary>
+        /// Pushes a warning message to the logger from an asynchronous context.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        public void WarnAsync(string message)
+        {
+            Application.Instance.AsyncInvoke(() =>
+            {
+                Warn(message);
             });
         }
 

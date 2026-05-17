@@ -51,6 +51,11 @@ public interface IPipelineSystem
     IReadOnlyList<QueuedPipelineItem> QueuedItems { get; }
     
     /// <summary>
+    /// The registered pipelines.
+    /// </summary>
+    IReadOnlyList<IPipeline> Pipelines { get; }
+    
+    /// <summary>
     /// The event that is called when the conversion of all stored sources is started.
     /// </summary>
     event EventHandler<ConvertStartEventArgs>? OnConvertAllStarted;
