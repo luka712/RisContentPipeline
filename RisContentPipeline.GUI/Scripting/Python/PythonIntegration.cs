@@ -128,7 +128,7 @@ internal sealed class PythonIntegration : IDisposable
     /// </summary>
     /// <param name="pythonScript">The user-supplied <see cref="Script"/>.</param>
     /// <exception cref="InvalidOperationException">Thrown when the Python runtime has not been initialized.</exception>
-    /// <exception cref="ObjectDisposedException">Thrown when this instance has already been disposed.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown when this instance has already been disposed of.</exception>
     /// <exception cref="Exception">Thrown wrapping any <see cref="PythonException"/> raised by the script.</exception>
     public void AfterBuild(Script pythonScript)
     {
@@ -196,7 +196,7 @@ internal sealed class PythonIntegration : IDisposable
 
                 if (!pyResult["success"])
                 {
-                    _context.BuildLogger.Success($"Error during '{script}' processing: {pyResult["error"]}");
+                    _context.MessageLogger.Success($"Error during '{script}' processing: {pyResult["error"]}");
                 }
 
                 if (_api.current_asset.IsDirty)
@@ -206,7 +206,7 @@ internal sealed class PythonIntegration : IDisposable
                     if (modifiedContent != null)
                     {
                         File.WriteAllText(fileOrFolder.AbsolutePathOrFileName, modifiedContent);
-                        _context.BuildLogger.Success(
+                        _context.MessageLogger.Success(
                             $"Modified content saved back to '{fileOrFolder.AbsolutePathOrFileName}'.");
                     }
                 }

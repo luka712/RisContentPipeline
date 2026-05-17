@@ -106,15 +106,9 @@ internal class AssetView
         // If it's image item, we want to open the image viewer.
         if (_treeView.SelectedItem is ImageTreeGridItem { FileOrFolder.IsImage: true } selectedItem)
         {
-            // If disposed, set to null in order to recreate.
-            if (_imageViewerWindow?.IsDisposed == true)
-            {
-                _imageViewerWindow = null;
-            }
-            
-            _imageViewerWindow ??= new Windows.ImageViewerWindow(_context);
+            _imageViewerWindow = new (_context);
             _imageViewerWindow.Show();
-            _imageViewerWindow.ImageItem = selectedItem.FileOrFolder;
+            _imageViewerWindow.FilePath = selectedItem.FileOrFolder.AbsolutePathOrFileName;
         }
     }
 }

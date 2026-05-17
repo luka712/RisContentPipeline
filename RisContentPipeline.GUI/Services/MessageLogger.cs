@@ -8,7 +8,7 @@ namespace RisContentPipeline.GUI.Services
     /// It allows other parts of the application to subscribe to message events and receive updates when new messages are pushed.
     /// This can be used to display status updates, errors, or other relevant information to the user in real-time as assets are processed.
     /// </summary>
-    internal class BuildLogger
+    internal class MessageLogger
     {
         private readonly List<string> _successLogs = new List<string>();
         private readonly List<string> _errorLogs = new List<string>();

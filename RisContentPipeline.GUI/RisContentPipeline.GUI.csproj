@@ -17,10 +17,10 @@
     <None Update="Ktx2BrowserViewerContent\assets\index-BFha7WHA.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Ktx2BrowserViewerContent\assets\index-B69YwLMV.js">
+    <None Update="Ktx2BrowserViewerContent\assets\index-DbYn0ZPC.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Ktx2BrowserViewerContent\assets\index-DbYn0ZPC.css">
+    <None Update="Ktx2BrowserViewerContent\assets\index-DHZnm0mt.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Ktx2BrowserViewerContent\favicon.svg">
@@ -30,6 +30,21 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Ktx2BrowserViewerContent\index.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="_image_viewer\assets\index-DbYn0ZPC.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="_image_viewer\assets\index-DHZnm0mt.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="_image_viewer\favicon.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="_image_viewer\icons.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="_image_viewer\index.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -77,6 +92,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="_image_viewer\" />
     <Folder Include="UserScripts\" />
   </ItemGroup>
 

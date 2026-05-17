@@ -18,6 +18,11 @@ public class ConvertStartEventArgs
 public class OnItemConversionFinishEventArgs
 {
     /// <summary>
+    /// The queued item that was converted.
+    /// </summary>
+    public QueuedPipelineItem Item { get; internal set; } = null!;
+
+    /// <summary>
     /// The result of the conversion of the item.
     /// </summary>
     public PipelineResult Result { get; internal set; } = new();
@@ -40,6 +45,11 @@ public class ConvertEndedEventArgs
 /// </summary>
 public interface IPipelineSystem
 {
+    /// <summary>
+    /// The items currently queued for conversion.
+    /// </summary>
+    IReadOnlyList<QueuedPipelineItem> QueuedItems { get; }
+    
     /// <summary>
     /// The event that is called when the conversion of all stored sources is started.
     /// </summary>
@@ -69,13 +79,19 @@ public interface IPipelineSystem
     /// <param name="targetType">The target type. Add '*' to accept any target type.</param>
     /// <param name="source">The source object.</param>
     /// <param name="options">The options.</param>
-    void StoreSourceAsset(string sourceType, string targetType, object source, object? options);
+    QueuedPipelineItem StoreSourceAsset(string sourceType, string targetType, object source, object? options);
+    
+    /// <summary>
+    /// Store item for later processing.
+    /// </summary>
+    /// <param name="item">The <see cref="PipelineConversionItem"/>.</param>
+    QueuedPipelineItem StoreSourceAsset(PipelineConversionItem item);
     
     /// <summary>
     /// Convert all stored sources to targets.
     /// </summary>
     /// <returns>The list of all results.</returns>
-    IReadOnlyList<PipelineResult> ConvertAll();
+    Task<IReadOnlyList<PipelineResult>> ConvertAllAsync();
 
     /// <summary>
     /// Convert a single source to a target.
@@ -85,6 +101,13 @@ public interface IPipelineSystem
     /// <param name="source">The source.</param>
     /// <param name="options">The compilation options.</param>
     PipelineResult Convert(string sourceType, string targetType, object source, object? options);
+    
+    /// <summary>
+    /// Convert a single source to a target.
+    /// </summary>
+    /// <param name="item">The <see cref="PipelineConversionItem"/>.</param>
+    /// <returns>The <see cref="PipelineResult"/>.</returns>
+    PipelineResult Convert(PipelineConversionItem item);    
 
     /// <summary>
     /// Removes all stored source assets without affecting registered pipelines.

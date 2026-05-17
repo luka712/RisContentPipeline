@@ -4,30 +4,32 @@ using RisContentPipeline.GUI.Services;
 using RisContentPipeline.GUI.Views;
 using System.ComponentModel;
 using RisContentPipeline.GUI.Controls;
-
+using RisContentPipeline.GUI.Views.Inspector;
+using RisContentPipeline.GUI.Windows;
 
 namespace RisContentPipeline.GUI;
 
 /// <summary>
 /// The main application window.
-/// Hosts the actions bar at the top, three resizable columns of views in the middle
+/// Hosts the action bar at the top, three resizable columns of views in the middle
 /// (assets/scripts | inspector + build output | settings), and a status bar at the bottom.
 /// </summary>
 public sealed class MainForm : Form
 {
     private readonly Context _context = new();
+    private LocalWebServer _server;
 
+    
     private readonly ActionsBarView _actionsBar;
     private readonly AssetView _assetView;
     private readonly ScriptsView _scriptsView;
-    private readonly BuildView _buildView;
+    private readonly MessageView _messageView;
     private readonly SettingsView _settingsView;
     private readonly InspectorView _inspectorView;
     private readonly Label _statusLabel = new() { Text = "Ready" };
 
     public MainForm()
     {
-        
         Icons.Load();
 
         Title = "RisContentPipeline";
@@ -35,6 +37,8 @@ public sealed class MainForm : Form
         MinimumSize = new Size(900, 540);
         Resizable = true;
         _context.LoadSession();
+        
+        
 
         // Create a menu
         Menu = CreateMenu();
@@ -46,7 +50,7 @@ public sealed class MainForm : Form
 
         _assetView = new AssetView(_context);
         _scriptsView = new ScriptsView(_context);
-        _buildView = new BuildView(_context);
+        _messageView = new MessageView(_context);
         _settingsView = new SettingsView(_context);
         _inspectorView = new InspectorView(this, _context);
 
@@ -67,7 +71,7 @@ public sealed class MainForm : Form
         {
             Orientation = Orientation.Vertical,
             Panel1 = _inspectorView.Content,
-            Panel2 = _buildView.Content,
+            Panel2 = _messageView.Content,
             Position = Theme.CLIENT_HEIGHT - Theme.BUILD_OUTPUT_HEIGHT - 80,
             FixedPanel = SplitterFixedPanel.Panel2,
         };
@@ -112,15 +116,25 @@ public sealed class MainForm : Form
         rootLayout.Add(statusBar);
 
         Content = rootLayout;
+        
+        StartServer();
+
+    }
+
+    private void StartServer()
+    {
+        string contentFolder = Path.Combine(AppContext.BaseDirectory, "_image_viewer");
+        _server = new LocalWebServer(_context.MessageLogger, contentFolder, port: _context.LocalServerPort);
+        _ = _server.StartAsync();
     }
 
     /// <summary>
-    /// Mirrors interesting <see cref="BuildLogger"/> events into the status bar so the
+    /// Mirrors interesting <see cref="MessageLogger"/> events into the status bar so the
     /// user always has a quick read-out of the last action.
     /// </summary>
     private void WireBuildLoggerToStatus()
     {
-        var logger = _context.BuildLogger;
+        var logger = _context.MessageLogger;
         logger.OnInfoLog += msg => UpdateStatus(msg);
         logger.OnSuccessLog += msg => UpdateStatus(msg);
         logger.OnErrorLog += msg => UpdateStatus($"Error: {msg}");
@@ -158,31 +172,10 @@ public sealed class MainForm : Form
         };
         imageViewerCommand.Executed += (sender, e) =>
         {
-            var imageViewerWindow = new Windows.ImageViewerWindow(_context);
+            var imageViewerWindow = new ImageViewerWindow(_context);
             imageViewerWindow.Show();
         };
         windowsMenu.Items.Add(imageViewerCommand);
-        
-        // - KTX2 Viewer
-        var ktx2ViewerCommand = new Command
-        {
-            MenuText = "&KTX2 Viewer",
-            Shortcut = Application.Instance.CommonModifier | Keys.K,
-        };
-        ktx2ViewerCommand.Executed += (sender, e) =>
-        {
-            // Linux has issues with default Eto WebView, so we use Photino instead.
-            // if (OperatingSystem.IsLinux())
-            // {
-            //     var ktx2ViewerWindow = new PhotinoWebView();
-            // }
-            // else
-            {
-                var ktx2ViewerWindow = new Windows.Ktx2ViewerWindow(_context);
-                ktx2ViewerWindow.Show();
-            }
-        };
-        windowsMenu.Items.Add(ktx2ViewerCommand);
 
         var helpMenu = new ButtonMenuItem { Text = "&Help" };
         helpMenu.Items.Add(new Command { MenuText = "&About..." });

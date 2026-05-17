@@ -61,14 +61,19 @@ namespace RisContentPipeline.GUI
 
             PipelineSystem.OnConvertAllStarted += (sender, args) =>
             {
-                BuildLogger.InfoAsync($"Build started. Total items: {args.TotalItems}");
+                MessageLogger.InfoAsync($"Build started. Total items: {args.TotalItems}");
             };
 
             PipelineSystem.OnConvertAllFinished += (sender, args) =>
             {
-                BuildLogger.InfoAsync($"Build finished. Total items: {args.TotalItems}");
+                MessageLogger.InfoAsync($"Build finished. Total items: {args.TotalItems}");
             };
         }
+
+        /// <summary>
+        /// The port used for local server communication.
+        /// </summary>
+        internal int LocalServerPort = 8787;
 
         /// <summary>
         /// The list of internal Python scripts that are included with the content pipeline.
@@ -86,12 +91,12 @@ namespace RisContentPipeline.GUI
         /// <summary>
         /// Fires when a new build script is added to the context.
         /// </summary>
-        public EventHandler<Script>? OnBuildScriptAdded;
+        public event EventHandler<Script>? OnBuildScriptAdded;
 
         /// <summary>
         /// Fires when a build script is removed from the context.
         /// </summary>
-        public EventHandler<Script>? OnBuildScriptRemoved;
+        public event EventHandler<Script>? OnBuildScriptRemoved;
 
         public IReadOnlyList<AssetFileOrFolder> FilesOrFolders => _filesOrFolders;
 
@@ -103,7 +108,7 @@ namespace RisContentPipeline.GUI
         /// <summary>
         /// The messanger instance for sending messages during the asset processing workflow.
         /// </summary>
-        public BuildLogger BuildLogger { get; } = new BuildLogger();
+        public MessageLogger MessageLogger { get; } = new MessageLogger();
 
         /// <summary>
         /// The global settings related to KTX2 texture conversion.
@@ -245,7 +250,7 @@ namespace RisContentPipeline.GUI
             }
 
             OnBuildStarted?.Invoke();
-            BuildLogger.Clear();
+            MessageLogger.Clear();
 
             // Make sure we don't accumulate stored assets from previous builds.
             PipelineSystem.ClearStoredAssets();
@@ -256,7 +261,7 @@ namespace RisContentPipeline.GUI
                 QueueFileForBuild(fileOrFolder);
             }
 
-            PipelineSystem.ConvertAll();
+            _ = PipelineSystem.ConvertAllAsync();
 
             // Run after build scripts.
             foreach (var script in BuildScripts)
@@ -271,11 +276,15 @@ namespace RisContentPipeline.GUI
         /// <param name="fileOrFolder">The asset to be queued for processing.</param>
         private void QueueFileForBuild(AssetFileOrFolder fileOrFolder)
         {
+            var fileName = fileOrFolder.PathOrFileName;
+            if (string.IsNullOrEmpty(fileName))
+                return;
+
             if (fileOrFolder.Image != null)
             {
                 var image = fileOrFolder.Image;
                 var ktx2Settings = image.Ktx2ExportSettings;
-                var filePath = Path.Combine(AppContext.BaseDirectory, BuildDirectory, Path.GetFileNameWithoutExtension(fileOrFolder.PathOrFileName!));
+                var filePath = Path.Combine(AppContext.BaseDirectory, BuildDirectory, Path.GetFileNameWithoutExtension(fileName));
                 PipelineSystem.StoreSourceAsset("png", "ktx2", new Ktx2PipelineSource()
                 {
                     FilePath = fileOrFolder.AbsolutePathOrFileName,
@@ -290,7 +299,7 @@ namespace RisContentPipeline.GUI
             }
             else if (fileOrFolder.IsJson)
             {
-                var fileType = fileOrFolder.PathOrFileName?.Split('.')?.LastOrDefault();
+                var fileType = fileName.Split('.').LastOrDefault();
                 if (fileType != null)
                 {
                     PipelineSystem.StoreSourceAsset(fileType, IPipeline.ANY_TYPE, new GenericPipelineSource()
@@ -313,23 +322,23 @@ namespace RisContentPipeline.GUI
         {
             return Task.Run(() =>
             {
-                BuildLogger.InfoAsync($"Processing image: '{file.PathOrFileName}'");
+                MessageLogger.InfoAsync($"Processing image: '{file.PathOrFileName}'");
 
                 var source = file.Image;
                 if (source == null)
                 {
-                    BuildLogger.ErrorAsync($"No image data found for file: '{file.PathOrFileName}'");
+                    MessageLogger.ErrorAsync($"No image data found for file: '{file.PathOrFileName}'");
                     return;
                 }
 
-                var filePath = Path.Combine(BuildDirectory, Path.GetFileNameWithoutExtension(file.PathOrFileName));
+                var filePath = Path.Combine(BuildDirectory, Path.GetFileNameWithoutExtension(file.PathOrFileName ?? string.Empty));
                 try
                 {
                     // Convert the image to KTX2 format using the content pipeline's texture processing pipeline
                     // and save the output to the specified build directory with a .ktx2 extension.
                     var ktxPipelineSource = new Ktx2PipelineSource()
                     {
-                        FilePath = source.FilePath,
+                        FilePath = source.FilePath ?? string.Empty,
                     };
 
                     var ktxPipelineOptions = new Ktx2PipelineOptions()
@@ -343,17 +352,17 @@ namespace RisContentPipeline.GUI
 
                     if (!result.Success)
                     {
-                        BuildLogger.ErrorAsync($"Failed to convert image '{file.PathOrFileName}' to KTX2 format.");
+                        MessageLogger.ErrorAsync($"Failed to convert image '{file.PathOrFileName}' to KTX2 format.");
                         return;
                     }
                 }
                 catch (Exception ex)
                 {
-                    BuildLogger.ErrorAsync($"Error processing image '{file.PathOrFileName}': {ex.Message}");
+                    MessageLogger.ErrorAsync($"Error processing image '{file.PathOrFileName}': {ex.Message}");
                     return;
                 }
 
-                BuildLogger.SuccessAsync(
+                MessageLogger.SuccessAsync(
                     $"'{file.PathOrFileName}' has been converted to KTX2 format. Output file: '{filePath}.ktx2'");
             });
         }
@@ -382,7 +391,7 @@ namespace RisContentPipeline.GUI
             }
             catch (Exception ex)
             {
-                BuildLogger.Error($"Failed to load session from '{SESSION_FILE}': {ex.Message}");
+                MessageLogger.Error($"Failed to load session from '{SESSION_FILE}': {ex.Message}");
             }
         }
 
@@ -409,16 +418,16 @@ namespace RisContentPipeline.GUI
                 if (Directory.Exists(BuildDirectory))
                 {
                     Directory.Delete(BuildDirectory, recursive: true);
-                    BuildLogger.Info($"Cleaned build directory: '{BuildDirectory}'");
+                    MessageLogger.Info($"Cleaned build directory: '{BuildDirectory}'");
                 }
                 else
                 {
-                    BuildLogger.Info($"Nothing to clean. Build directory does not exist: '{BuildDirectory}'");
+                    MessageLogger.Info($"Nothing to clean. Build directory does not exist: '{BuildDirectory}'");
                 }
             }
             catch (Exception ex)
             {
-                BuildLogger.Error($"Failed to clean build directory '{BuildDirectory}': {ex.Message}");
+                MessageLogger.Error($"Failed to clean build directory '{BuildDirectory}': {ex.Message}");
             }
         }
 

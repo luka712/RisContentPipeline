@@ -1,9 +1,14 @@
 using System.Net;
+using RisContentPipeline.GUI.Services;
 
 namespace RisContentPipeline.GUI.Controls;
 
-public class LocalWebServer : IDisposable
+/// <summary>
+/// The local web server that serves the content of the <see cref="AssetView"/>.
+/// </summary>
+internal class LocalWebServer : IDisposable
 {
+    private readonly MessageLogger _messageLogger;
     private readonly HttpListener _listener;
     private readonly string _rootPath;
     private readonly int _port;
@@ -11,20 +16,29 @@ public class LocalWebServer : IDisposable
 
     public int Port => _port;
 
-    public LocalWebServer(string rootPath, int port = 8080)
+    public LocalWebServer(MessageLogger messageLogger, string rootPath, int port)
     {
+        _messageLogger = messageLogger;
         _rootPath = rootPath;
         _port = port;
         _listener = new HttpListener();
         _listener.Prefixes.Add($"http://localhost:{port}/");
     }
+    
+    /// <summary>
+    /// Indicates whether the server is listening for requests.
+    /// </summary>
+    internal bool IsListening => _listener.IsListening;
 
-    public async Task StartAsync()
+    /// <summary>
+    /// Starts the local web server.
+    /// </summary>
+    public Task StartAsync()
     {
         _listener.Start();
-        Console.WriteLine($"🌐 Local server running at http://localhost:{_port}");
+        _messageLogger.Info($"🌐 Local server running at http://localhost:{_port}");
 
-        _ = Task.Run(async () =>
+        return Task.Run(async () =>
         {
             while (!_cts.Token.IsCancellationRequested)
             {

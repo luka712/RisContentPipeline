@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RisContentPipeline.Generic
+﻿namespace RisContentPipeline.Generic
 {
     /// <summary>
     /// The <see cref="GenericPipelineOptions"/> class is a placeholder for any options or settings that may be needed for the generic content pipeline.

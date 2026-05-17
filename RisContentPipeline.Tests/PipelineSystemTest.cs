@@ -31,7 +31,7 @@ public class PipelineSystemTest
     /// Store multiple conversions and execute them all.
     /// </summary>
     [Fact]
-    public void Test_StoreAndExecute()
+    public async Task Test_StoreAndExecute()
     {
         var pipelineSystem = new PipelineSystem();
         pipelineSystem.StoreSourceAsset("png", "ktx2",  new Ktx2PipelineSource()
@@ -52,7 +52,7 @@ public class PipelineSystemTest
             OutputPath = "Data/output_system_test_b.ktx2"
         });
 
-        var results = pipelineSystem.ConvertAll();
+        var results = await pipelineSystem.ConvertAllAsync();
         
         Assert.True(results.All(x => x.Success));
         Assert.True(File.Exists("Data/output_system_test_a.ktx2"));

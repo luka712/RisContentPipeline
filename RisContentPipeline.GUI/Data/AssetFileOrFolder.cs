@@ -80,7 +80,7 @@ namespace RisContentPipeline.GUI.Data
                 // Validate that the content is valid JSON
                 JsonDocument.Parse(content);
                 _content = content;
-                File.WriteAllText(PathOrFileName, _content);
+                File.WriteAllText(AbsolutePathOrFileName, _content);
             }
             catch (Exception ex)
             {

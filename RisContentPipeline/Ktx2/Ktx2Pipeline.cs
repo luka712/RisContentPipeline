@@ -18,6 +18,17 @@ public class Ktx2Pipeline : APipeline
     {
     }
 
+    /// <summary>
+    /// Aligns <paramref name="value"/> up to the nearest multiple of <paramref name="alignment"/>.
+    /// If <paramref name="alignment"/> is zero the original value is returned unchanged.
+    /// </summary>
+    private static int AlignUp(int value, int alignment)
+    {
+        if (alignment <= 0)
+            return value;
+        return (value + (alignment - 1)) & ~(alignment - 1);
+    }
+
     /// <inheritdoc/>
     public override PipelineResult Convert(object source, object? options)
     {
@@ -44,8 +55,8 @@ public class Ktx2Pipeline : APipeline
         
         var image = _stbImageLoader.Load(sourceFilePath, 4, align: alignment);
         var data = image.Bytes;
-        var width = image.Width + (alignment - 1) & ~(alignment - 1);
-        var height = image.Height + (alignment - 1) & ~(alignment - 1);
+        var width = AlignUp(image.Width, alignment);
+        var height = AlignUp(image.Height, alignment);
         var channels = image.Channels;
         var genMipmaps = pipelineOptions.GenerateMipmaps;
         

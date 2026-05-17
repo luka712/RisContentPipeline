@@ -1,14 +1,16 @@
 ﻿using Eto.Drawing;
 using Eto.Forms;
+using RisContentPipeline.GUI.Services;
 
 namespace RisContentPipeline.GUI.Views
 {
     /// <summary>
-    /// Renders build output messages produced by the <see cref="Services.BuildLogger"/>.
+    /// Renders build various messages produced by the <see cref="MessageLogger"/>.
     /// </summary>
-    internal class BuildView
+    internal class MessageView
     {
         private readonly Context _context;
+        private readonly TreeGridView _messagesTreeView;
         private readonly TreeGridItem _rootItem;
 
         /// <summary>
@@ -17,18 +19,13 @@ namespace RisContentPipeline.GUI.Views
         public Panel Content { get; }
 
         /// <summary>
-        /// Gets the underlying tree view for advanced styling.
-        /// </summary>
-        public TreeGridView BuildOutputTreeView { get; }
-
-        /// <summary>
         /// The constructor.
         /// </summary>
-        /// <param name="context">The context for the build view, which provides access to the messanger for receiving build messages.</param>
-        public BuildView(Context context)
+        /// <param name="context">The context for the message view, which provides access to the messenger for receiving build messages.</param>
+        public MessageView(Context context)
         {
             _context = context;
-            BuildOutputTreeView = new TreeGridView
+            _messagesTreeView = new TreeGridView
             {
                 ShowHeader = true,
                 AllowMultipleSelection = false,
@@ -36,9 +33,9 @@ namespace RisContentPipeline.GUI.Views
             };
 
             // Add a column to the tree view
-            BuildOutputTreeView.Columns.Add(new GridColumn
+            _messagesTreeView.Columns.Add(new GridColumn
             {
-                HeaderText = "Build Output",
+                HeaderText = "Messages",
                 AutoSize = true,
                 DataCell = new ImageTextCell(0, 1),
             });
@@ -46,13 +43,13 @@ namespace RisContentPipeline.GUI.Views
             // Create a placeholder root item that hosts every log entry as a child.
             _rootItem = new TreeGridItem
             {
-                Values = [Icons.FolderIcon, "Build Output"],
+                Values = [Icons.FolderIcon, "Message"],
                 Expanded = true,
             };
 
-            BuildOutputTreeView.DataStore = _rootItem;
+            _messagesTreeView.DataStore = _rootItem;
 
-            var buildLogger = context.BuildLogger;
+            var buildLogger = context.MessageLogger;
             buildLogger.OnSuccessLog += msg => AddMessage(msg, Icons.CheckIcon);
             buildLogger.OnErrorLog += msg => AddMessage(msg, Icons.FileIcon);
             buildLogger.OnInfoLog += msg => AddMessage(msg, Icons.InfoIcon);
@@ -68,7 +65,7 @@ namespace RisContentPipeline.GUI.Views
                 Text = "Build Output",
                 Font = SystemFonts.Bold(),
                 Padding = new Padding(Theme.PADDING),
-                Content = BuildOutputTreeView,
+                Content = _messagesTreeView,
             };
         }
 
@@ -84,8 +81,8 @@ namespace RisContentPipeline.GUI.Views
                 Values = [icon, message]
             });
 
-            // Refresh data store so newly-added rows are visible.
-            BuildOutputTreeView.ReloadData();
+            // Refresh data store so newly added rows are visible.
+            _messagesTreeView.ReloadData();
         }
     }
 }

@@ -1,19 +1,18 @@
 ﻿using Eto.Drawing;
 using Eto.Forms;
 using System.ComponentModel;
-using RisContentPipeline.GUI.Controls;
-using RisContentPipeline.GUI.Data;
-
 
 namespace RisContentPipeline.GUI.Windows
 {
+    /// <summary>
+    /// Creates the browser-based image viewer.
+    /// </summary>
     internal class ImageViewerWindow : Form
     {
-        private readonly WebView _webView;
-        private readonly LocalWebServer _server;
+        private WebView _webView;
         private bool _documentLoaded;
-
-        private Action? _documentLoadAction;
+        private Action? _documentLoadedCallback;
+        private string _filePath;
         
         /// <summary>
         /// The constructor.
@@ -21,25 +20,20 @@ namespace RisContentPipeline.GUI.Windows
         /// <param name="context">The <see cref="Context"/>.</param>
         internal ImageViewerWindow(Context context)
         {
-            string contentFolder = Path.Combine(AppContext.BaseDirectory, "Ktx2BrowserViewerContent");
-            _server = new LocalWebServer(contentFolder, port: 8080);
-            _ = _server.StartAsync();
-
             Title = "Image Viewer";
-
             Resizable = true;
             ClientSize = new Size(1000, 800);
-            
+
             _webView = new WebView()
             {
                 Size = new Size(400, 400),
-                Url = new Uri("http://localhost:8080"),
+                Url = new Uri($"http://localhost:{context.LocalServerPort}"),
             };
-            
+
             _webView.DocumentLoaded += (sender, e) =>
             {
                 _documentLoaded = true;
-                _documentLoadAction?.Invoke();
+                _documentLoadedCallback?.Invoke();
             };
 
             // --- Main Layout ---
@@ -54,52 +48,57 @@ namespace RisContentPipeline.GUI.Windows
             };
         }
 
-        private AssetFileOrFolder? _imageItem;
 
-        private Task LoadImageAsync(AssetFileOrFolder item)
+        private Task LoadImageAsync(string filePath)
         {
+            var isKtx2 = filePath.EndsWith(".ktx2");
+            var isPng = filePath.EndsWith(".png");
+
+            // js function from viewer to call.
+            var jsFunction = isKtx2 ? "loadKtx2TextureFromBase64" : "loadPngTextureFromBase64";
+
             return Task.Run(() =>
             {
-                string filePath = item.AbsolutePathOrFileName!;
                 byte[] data = File.ReadAllBytes(filePath);
                 string base64 = Convert.ToBase64String(data);
-                Application.Instance.Invoke(() =>
+                
+                if (!_documentLoaded)
                 {
-                    if (!_documentLoaded)
+                    _documentLoadedCallback = () =>
                     {
-                       _documentLoadAction = () => _webView.ExecuteScript($"window.loadPngTextureFromBase64('{base64}');");
-                    }
-                    else
-                    {
-                        _webView.ExecuteScript($"window.loadPngTextureFromBase64('{base64}');");
-                    }
-                });
-            });
-        }
-        
-        public AssetFileOrFolder? ImageItem
-        {
-            get => _imageItem;
-            set
-            {
-                if (value?.IsImage == true)
-                {
-                    _imageItem = value;
-                    _ = LoadImageAsync(_imageItem);
+                        // Wait a bit until script is ready.
+                        _webView.ExecuteScript($@"
+                        var __tryLoad = function() {{
+                            if(!window.{jsFunction}) {{
+                                setTimeout(__tryLoad, 250);
+                            }}
+                            else {{
+                                window.{jsFunction}('{base64}');
+                            }}                  
+                        }}
+                        __tryLoad();
+                        ");
+                    };
                 }
                 else
                 {
-                    throw new InvalidOperationException("ImageItem must be an image.");
+                    // Must be on UI thread.
+                    Application.Instance.Invoke(() => _webView.ExecuteScript($"window.{jsFunction}('{base64}');"));
                 }
-            }
+            });
         }
 
-        /// <inheritdoc/>
-        protected override void OnClosing(CancelEventArgs e)
+        /// <summary>
+        /// The file path to the image to display.
+        /// </summary>
+        public string FilePath
         {
-            base.OnClosing(e);
-            _webView.Dispose();
-            _server.Dispose();
+            get => _filePath;
+            set
+            {
+                _filePath = value;
+                _ = LoadImageAsync(_filePath);
+            }
         }
     }
 }

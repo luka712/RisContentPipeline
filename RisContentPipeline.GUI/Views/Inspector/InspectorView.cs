@@ -1,7 +1,7 @@
 using Eto.Drawing;
 using Eto.Forms;
 
-namespace RisContentPipeline.GUI.Views
+namespace RisContentPipeline.GUI.Views.Inspector
 {
     /// <summary>
     /// Hosts the central inspector tabs (Converter, Batch Queue, Settings).
@@ -9,6 +9,7 @@ namespace RisContentPipeline.GUI.Views
     internal class InspectorView
     {
         private readonly Context _context;
+        private readonly BuildView _buildView; 
 
         /// <summary>
         /// The titled panel that hosts the inspector tab control.
@@ -27,22 +28,22 @@ namespace RisContentPipeline.GUI.Views
             var tabs = new TabControl();
             tabs.Pages.Add(new TabPage
             {
-                Text = "Converter",
+                Text = "Build",
                 Padding = new Padding(Theme.PADDING),
-                Content = CreatePlaceholder("Converter UI here"),
+                Content = new BuildView(context).Content
             });
-            tabs.Pages.Add(new TabPage
-            {
-                Text = "Batch Queue",
-                Padding = new Padding(Theme.PADDING),
-                Content = CreatePlaceholder("Queue UI here"),
-            });
-            tabs.Pages.Add(new TabPage
-            {
-                Text = "Settings",
-                Padding = new Padding(Theme.PADDING),
-                Content = CreatePlaceholder("Settings UI here"),
-            });
+            // tabs.Pages.Add(new TabPage
+            // {
+            //     Text = "Batch Queue",
+            //     Padding = new Padding(Theme.PADDING),
+            //     Content = CreatePlaceholder("Queue UI here"),
+            // });
+            // tabs.Pages.Add(new TabPage
+            // {
+            //     Text = "Settings",
+            //     Padding = new Padding(Theme.PADDING),
+            //     Content = CreatePlaceholder("Settings UI here"),
+            // });
 
             Content = new GroupBox
             {
