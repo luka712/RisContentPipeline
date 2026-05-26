@@ -11,9 +11,9 @@ namespace RisContentPipeline.GUI.Windows
     {
         private WebView _webView;
         private bool _documentLoaded;
-        private Action? _documentLoadedCallback;
+        private Queue<Action?> _documentLoadedCallbacks = new();
         private string _filePath;
-        
+
         /// <summary>
         /// The constructor.
         /// </summary>
@@ -33,7 +33,10 @@ namespace RisContentPipeline.GUI.Windows
             _webView.DocumentLoaded += (sender, e) =>
             {
                 _documentLoaded = true;
-                _documentLoadedCallback?.Invoke();
+                while (_documentLoadedCallbacks.Count > 0)
+                {
+                    _documentLoadedCallbacks.Dequeue()?.Invoke();
+                }
             };
 
             // --- Main Layout ---
@@ -49,6 +52,10 @@ namespace RisContentPipeline.GUI.Windows
         }
 
 
+        /// <summary>
+        /// Loads the image into the browser viewer.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
         private Task LoadImageAsync(string filePath)
         {
             var isKtx2 = filePath.EndsWith(".ktx2");
@@ -56,15 +63,17 @@ namespace RisContentPipeline.GUI.Windows
 
             // js function from viewer to call.
             var jsFunction = isKtx2 ? "loadKtx2TextureFromBase64" : "loadPngTextureFromBase64";
+            
+            var fileName = Path.GetFileName(filePath);
 
             return Task.Run(() =>
             {
                 byte[] data = File.ReadAllBytes(filePath);
                 string base64 = Convert.ToBase64String(data);
-                
+
                 if (!_documentLoaded)
                 {
-                    _documentLoadedCallback = () =>
+                    var _documentLoadedCallback = () =>
                     {
                         // Wait a bit until script is ready.
                         _webView.ExecuteScript($@"
@@ -73,12 +82,14 @@ namespace RisContentPipeline.GUI.Windows
                                 setTimeout(__tryLoad, 250);
                             }}
                             else {{
-                                window.{jsFunction}('{base64}');
+                                window.{jsFunction}('{base64}', '{fileName}');
                             }}                  
                         }}
                         __tryLoad();
                         ");
                     };
+
+                    _documentLoadedCallbacks.Enqueue(_documentLoadedCallback);
                 }
                 else
                 {
@@ -88,17 +99,28 @@ namespace RisContentPipeline.GUI.Windows
             });
         }
 
+
         /// <summary>
-        /// The file path to the image to display.
+        /// Laods collection of images into the browser viewer.
         /// </summary>
-        public string FilePath
+        /// <param name="filePaths">The file paths.</param>
+        public void View(string[] filePaths)
         {
-            get => _filePath;
-            set
+            Show();
+            foreach (var filePath in filePaths)
             {
-                _filePath = value;
-                _ = LoadImageAsync(_filePath);
+                _ = LoadImageAsync(filePath);
             }
+        }
+
+        /// <summary>
+        /// Laods collection of images into the browser viewer.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
+        public void View(string filePath)
+        {
+            Show();
+            _ = LoadImageAsync(filePath);
         }
     }
 }

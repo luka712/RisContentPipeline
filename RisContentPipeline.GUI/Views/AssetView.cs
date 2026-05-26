@@ -107,8 +107,7 @@ internal class AssetView
         if (_treeView.SelectedItem is ImageTreeGridItem { FileOrFolder.IsImage: true } selectedItem)
         {
             _imageViewerWindow = new (_context);
-            _imageViewerWindow.Show();
-            _imageViewerWindow.FilePath = selectedItem.FileOrFolder.AbsolutePathOrFileName;
+            _imageViewerWindow.View(selectedItem.FileOrFolder.AbsolutePathOrFileName);
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿
-
-namespace RisContentPipeline.GUI
+﻿namespace RisContentPipeline.GUI
 {
     public class Session
     {

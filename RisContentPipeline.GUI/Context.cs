@@ -7,6 +7,7 @@ using RisKtx2;
 using System.Text.Json;
 using RisContentPipeline.Ktx2;
 using RisContentPipeline.Generic;
+using RisContentPipeline.GUI.Persistance;
 
 namespace RisContentPipeline.GUI
 {
@@ -36,6 +37,11 @@ namespace RisContentPipeline.GUI
         /// The path of the JSON file used to persist the session between application runs.
         /// </summary>
         private const string SESSION_FILE = "session.json";
+        
+        /// <summary>
+        /// The path of the JSON file used to persist the preferences between application runs.
+        /// </summary>
+        private const string PREFERENCES_FILE = "preferences.json";
 
         // ----- Fields -------------------------------------------------------------------
 
@@ -112,9 +118,9 @@ namespace RisContentPipeline.GUI
         public MessageLogger MessageLogger { get; } = new MessageLogger();
 
         /// <summary>
-        /// The global settings related to KTX2 texture conversion.
+        /// The preferences for the content pipeline app.
         /// </summary>
-        public Ktx2Settings Ktx2GlobalSettings { get; set; } = new();
+        public Preferences Preferences { get; private set; } = new ();
 
         /// <summary>
         /// The list of scripts to be executed during the build process.
@@ -213,7 +219,7 @@ namespace RisContentPipeline.GUI
                 Image = new ImageContainer()
                 {
                     FilePath = filePath,
-                    Ktx2ExportSettings = Ktx2GlobalSettings.Copy()
+                    Ktx2ExportSettings = Preferences.Ktx2GlobalSettings.Copy()
                 }
             };
             _filesOrFolders.Add(fileOrFolder);
@@ -238,6 +244,11 @@ namespace RisContentPipeline.GUI
         /// </summary>
         internal void Build()
         {
+            if (!Directory.Exists(BuildDirectory))
+            {
+                Directory.CreateDirectory(BuildDirectory);
+            }
+
             if (BuildScripts.Any())
             {
                 _pythonIntegration = _pythonIntegration ?? new PythonIntegration(this);
@@ -285,7 +296,10 @@ namespace RisContentPipeline.GUI
             {
                 var image = fileOrFolder.Image;
                 var ktx2Settings = image.Ktx2ExportSettings;
-                var filePath = Path.Combine(AppContext.BaseDirectory, BuildDirectory, Path.GetFileNameWithoutExtension(fileName));
+                var filePath = Path.Combine(AppContext.BaseDirectory, BuildDirectory,
+                    Path.GetFileNameWithoutExtension(fileName));
+                var uastc = ktx2Settings.EncodeTarget == Ktx2EncodingTarget.BASIS_UASTC;
+
                 PipelineSystem.StoreSourceAsset("png", "ktx2", new Ktx2PipelineSource()
                 {
                     FilePath = fileOrFolder.AbsolutePathOrFileName,
@@ -293,9 +307,10 @@ namespace RisContentPipeline.GUI
                 {
                     GenerateMipmaps = ktx2Settings.GenerateMipmaps,
                     OutputPath = $"{filePath}.ktx2",
-                    UniversalBasisCompression = ktx2Settings.EncodeTarget == Ktx2EncodingTarget.Basis,
-                    UseUastc = ktx2Settings.EncodeTarget == Ktx2EncodingTarget.Basis && ktx2Settings.UseUastc,
-                    QualityLevel = (uint) ktx2Settings.QualityLevel,
+                    UniversalBasisCompression = ktx2Settings.EncodeTarget == Ktx2EncodingTarget.BASIS_ETC1S
+                                                || uastc,
+                    UseUastc = uastc,
+                    QualityLevel = (uint)ktx2Settings.QualityLevel,
                 });
             }
             else if (fileOrFolder.IsJson)
@@ -308,7 +323,8 @@ namespace RisContentPipeline.GUI
                         FilePath = fileOrFolder.AbsolutePathOrFileName,
                     }, new GenericPipelineOptions()
                     {
-                        OutputPath = Path.Combine(BuildDirectory, Path.GetFileName(fileOrFolder.AbsolutePathOrFileName)),
+                        OutputPath =
+                            Path.Combine(BuildDirectory, Path.GetFileName(fileOrFolder.AbsolutePathOrFileName)),
                     });
                 }
             }
@@ -332,7 +348,8 @@ namespace RisContentPipeline.GUI
                     return;
                 }
 
-                var filePath = Path.Combine(BuildDirectory, Path.GetFileNameWithoutExtension(file.PathOrFileName ?? string.Empty));
+                var filePath = Path.Combine(BuildDirectory,
+                    Path.GetFileNameWithoutExtension(file.PathOrFileName ?? string.Empty));
                 try
                 {
                     // Convert the image to KTX2 format using the content pipeline's texture processing pipeline
@@ -342,10 +359,14 @@ namespace RisContentPipeline.GUI
                         FilePath = source.FilePath ?? string.Empty,
                     };
 
+                    var uastcEncoding = Preferences.Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.BASIS_UASTC;
+
                     var ktxPipelineOptions = new Ktx2PipelineOptions()
                     {
                         GenerateMipmaps = source.Ktx2ExportSettings.GenerateMipmaps,
-                        UniversalBasisCompression = Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.Basis,
+                        UniversalBasisCompression = Preferences.Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.BASIS_ETC1S
+                                                    || uastcEncoding,
+                        UseUastc = uastcEncoding,
                         OutputPath = $"{filePath}.ktx2",
                     };
 
@@ -391,9 +412,34 @@ namespace RisContentPipeline.GUI
                             MessageLogger.WarnAsync($"Build script '{scriptPath}' cannot be found.");
                             continue;
                         }
-                        
+
                         AddBuildScript(new Script(scriptPath));
                     }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageLogger.Error($"Failed to load session from '{SESSION_FILE}': {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Loads the user preferences from <see cref="PREFERENCES_FILE"/>, restoring
+        /// </summary>
+        public async Task LoadPreferencesAsync()
+        {
+            if (!File.Exists(PREFERENCES_FILE))
+            {
+                return;
+            }
+            
+            try
+            {
+                string jsonContent = await File.ReadAllTextAsync(PREFERENCES_FILE);
+                var preferences = JsonSerializer.Deserialize<Preferences>(jsonContent);
+                if (preferences != null)
+                {
+                    Preferences = preferences;
                 }
             }
             catch (Exception ex)
@@ -411,6 +457,15 @@ namespace RisContentPipeline.GUI
 
             string jsonContent = JsonSerializer.Serialize(session);
             File.WriteAllText(SESSION_FILE, jsonContent);
+        }
+
+        /// <summary>
+        /// Saves the current preferences to <see cref="PREFERENCES_FILE"/>.
+        /// </summary>
+        public Task SavePreferencesAsync()
+        {
+            string jsonContent = JsonSerializer.Serialize(Preferences);
+            return File.WriteAllTextAsync(PREFERENCES_FILE, jsonContent);
         }
 
         /// <summary>

@@ -21,6 +21,7 @@ import { extractKtx2Info } from '../texture-info.js';
 import { UIConfig } from './ui-config.js';
 import {GpuPanel} from "./gpu-panel.ts";
 import {TexturePropertiesPanel} from "./texture-properties-panel.ts";
+import {TextureListPanel} from "./texture-list-panel.ts";
 
 // ---------------------------------------------------------------------------
 
@@ -51,10 +52,13 @@ export class UiManager {
                 });
         }
 
+        this.textureListPanel = new TextureListPanel(this._pane);
         new GpuPanel(this._pane, renderer);
         this.texturePropertiesPanel = new TexturePropertiesPanel(this._pane);
 
     }
+
+    public  readonly  textureListPanel: TextureListPanel;
 
     public readonly texturePropertiesPanel: TexturePropertiesPanel;
 

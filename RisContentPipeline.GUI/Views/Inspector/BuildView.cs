@@ -14,7 +14,7 @@ internal class BuildView
 {
     private const int SOURCE_COLUMN = 1;
     private const int TARGET_COLUMN = 5;
-    
+
     private readonly Context _context;
     private readonly TreeGridView _treeView;
     private readonly TreeGridItem _rootItem;
@@ -64,7 +64,7 @@ internal class BuildView
         {
             HeaderText = "Target",
             AutoSize = true,
-            DataCell = new ImageTextCell(4,TARGET_COLUMN),
+            DataCell = new ImageTextCell(4, TARGET_COLUMN),
         });
 
         _rootItem = new TreeGridItem
@@ -83,11 +83,11 @@ internal class BuildView
             Content = _treeView,
         };
     }
-    
+
     /// <summary>
     /// Invoked when a target is selected.
     /// </summary>
-    internal event Action<object> OnTargetSelected; 
+    internal event Action<object> OnTargetSelected;
 
     private void WireSystemEvents()
     {
@@ -141,11 +141,11 @@ internal class BuildView
 
         return source.ToString() ?? "Unknown";
     }
-    
+
     private static string GetTargetDisplay(QueuedPipelineItem pipelineQueue)
     {
         var result = pipelineQueue.Result;
-        
+
         if (result?.Success != true)
         {
             return "";
@@ -182,17 +182,14 @@ internal class BuildView
         var treeGridItem = (TreeGridItem)gridCellMouseEventArgs.Item;
         var source = treeGridItem.Values[SOURCE_COLUMN];
         var target = treeGridItem.Values[TARGET_COLUMN];
-        
-        // If it's target double-click.
-        if (gridCellMouseEventArgs.Column == 3 || gridCellMouseEventArgs.Column == 4 || gridCellMouseEventArgs.Column == 5)
+
+        // If it's target double-click, load both images in the viewer.
+        if (!String.IsNullOrEmpty(target.ToString()))
         {
-            if (!String.IsNullOrEmpty(target.ToString()))
-            {
-                var imageViewer = new ImageViewerWindow(_context);
-                string filePath = Path.Combine(AppContext.BaseDirectory, "Build", target.ToString());
-                imageViewer.Show();
-                imageViewer.FilePath = filePath;
-            }
+            var imageViewer = new ImageViewerWindow(_context);
+            var sourceFilePath = source.ToString();
+            var destFilePath = Path.Combine(AppContext.BaseDirectory, "Build", target.ToString());
+            imageViewer.View([destFilePath, sourceFilePath]);
         }
     }
 }

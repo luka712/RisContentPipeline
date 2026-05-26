@@ -19,10 +19,10 @@
  * @module main
  */
 
-import { UiManager } from './ui/ui-manager';
-import { TextureLoader } from './texture-loader.js';
-import { TextureViewer } from './viewer.js';
-
+import {UiManager} from './ui/ui-manager';
+import {type LoadedTexture, TextureLoader} from './texture-loader.js';
+import {TextureViewer} from './viewer.js';
+import {TextureList} from "./texture-list.ts";
 
 
 // ---------------------------------------------------------------------------
@@ -30,7 +30,7 @@ import { TextureViewer } from './viewer.js';
 // ---------------------------------------------------------------------------
 
 const canvas = document.getElementById('viewer-canvas') as HTMLCanvasElement;
-const viewer = new TextureViewer({ canvas });
+const viewer = new TextureViewer({canvas});
 
 // ---------------------------------------------------------------------------
 // Loader (KTX2 + PNG)
@@ -45,6 +45,8 @@ const ui = new UiManager(viewer.renderer, {
     useAddButton: true,
 });
 
+const textureList = new TextureList(ui, viewer);
+
 
 // ---------------------------------------------------------------------------
 // File loading pipeline
@@ -57,12 +59,10 @@ ui.onFileAdded(async (file) => {
         textureLoader.loadKtx2(
             file,
             (result) => {
-                viewer.setTexture(result.texture, result.meta);
-                ui.texturePropertiesPanel.updateTexture(result.texture, result.meta);
-
-                if (result.ktxContainer) {
-                    ui.updateKtx2(result.ktxContainer);
+                result.texture.userData = {
+                    name: file.name,
                 }
+                textureList.addKtx2Texture(result);
             },
             (err) => console.error('KTX2 load error:', err),
         );
@@ -70,9 +70,10 @@ ui.onFileAdded(async (file) => {
         textureLoader.loadImage(
             file,
             (result) => {
-                viewer.setTexture(result.texture, result.meta);
-                ui.texturePropertiesPanel.updateTexture(result.texture, result.meta);
-                ui.clearKtx2();
+                result.texture.userData = {
+                    name: file.name,
+                }
+                textureList.addTexture(result);
             },
             (err) => console.error('Image load error:', err),
         );
@@ -105,13 +106,14 @@ function base64ToBlob(base64: string, mimeType: string): Blob {
         bytes[i] = binary.charCodeAt(i);
     }
 
-    return new Blob([bytes], { type: mimeType });
+    return new Blob([bytes], {type: mimeType});
 }
 
 /**
  * Global entry point for loading a KTX2 texture from a base64-encoded string.
  *
  * @param base64 - Raw base64 or data-URL prefixed string.
+ * @param name - The optional name for texture.
  *
  * @example
  * ```js
@@ -119,16 +121,15 @@ function base64ToBlob(base64: string, mimeType: string): Blob {
  * ```
  */
 // @ts-ignore
-window.loadKtx2TextureFromBase64 = function (base64: string): void {
+window.loadKtx2TextureFromBase64 = function ( base64: string, name: string = "Unknown"): void {
     const blob = base64ToBlob(base64, 'application/octet-stream');
     textureLoader.loadKtx2(
         blob,
         (result) => {
-            viewer.setTexture(result.texture, result.meta);
-            ui.texturePropertiesPanel.updateTexture(result.texture, result.meta);
-            if (result.ktxContainer) {
-                ui.updateKtx2(result.ktxContainer);
-            }
+            result.texture.userData = {
+                name: name
+            };
+            textureList.addKtx2Texture(result);
         },
         (err) => console.error('Base64 KTX2 load error:', err),
     );
@@ -138,6 +139,7 @@ window.loadKtx2TextureFromBase64 = function (base64: string): void {
  * Global entry point for loading a PNG texture from a base64-encoded string.
  *
  * @param base64 - Raw base64 or data-URL prefixed string.
+ * @param name - The optional name for texture.
  *
  * @example
  * ```js
@@ -145,15 +147,21 @@ window.loadKtx2TextureFromBase64 = function (base64: string): void {
  * ```
  */
 // @ts-ignore
-window.loadPngTextureFromBase64 = function (base64: string): void {
+window.loadPngTextureFromBase64 = function (base64: string, name: string = "Unknown"): void {
     const blob = base64ToBlob(base64, 'image/png');
     textureLoader.loadImage(
         blob,
         (result) => {
-            viewer.setTexture(result.texture, result.meta);
-            ui.texturePropertiesPanel.updateTexture(result.texture, result.meta);
-            ui.clearKtx2();
+            result.texture.userData = {
+                name: name
+            }
+            textureList.addTexture(result);
         },
         (err) => console.error('Base64 PNG load error:', err),
     );
 };
+
+// @ts-ignore
+window.clearAllTextures = function(){
+    textureList.clear();
+}

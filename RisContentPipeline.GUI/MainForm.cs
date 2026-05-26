@@ -36,6 +36,7 @@ public sealed class MainForm : Form
         ClientSize = new Size(Theme.CLIENT_WIDTH, Theme.CLIENT_HEIGHT);
         MinimumSize = new Size(900, 540);
         Resizable = true;
+        _ = _context.LoadPreferencesAsync();
         _context.LoadSession();
 
         // Create a menu

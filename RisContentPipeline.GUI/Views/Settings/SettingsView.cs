@@ -12,6 +12,7 @@ namespace RisContentPipeline.GUI.Views;
 /// </summary>
 internal class SettingsView
 {
+    private readonly Context _context;
     private readonly Scrollable _scrollable;
     private TableLayout _tableLayout;
     private AssetFileOrFolder? _selectedFileOrFolder;
@@ -27,6 +28,8 @@ internal class SettingsView
     /// <param name="context">The <see cref="Context"/>.</param>
     public SettingsView(Context context)
     {
+        _context = context;
+        
         _tableLayout = CreateTableLayout();
         _tableLayout.Rows.Add(new TableRow(new Label
         {
@@ -114,6 +117,6 @@ internal class SettingsView
             new Label { Text = imageContainer.FileName }
         ));
 
-        PngSettingsView.Create(imageContainer, _tableLayout);
+        PngSettingsView.Create(_context, imageContainer, _tableLayout);
     }
 }

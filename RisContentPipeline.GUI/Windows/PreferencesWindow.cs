@@ -5,7 +5,7 @@ using RisContentPipeline.GUI.Settings;
 namespace RisContentPipeline.GUI.Windows
 {
     /// <summary>
-    /// The preferences dialog. Lets the user edit build settings, general settings,
+    /// The preferences' dialog. Lets the user edit build settings, general settings,
     /// and appearance settings. Settings are committed to the <see cref="Context"/>
     /// when the user clicks <c>OK</c>; <c>Cancel</c> closes without saving.
     /// </summary>
@@ -18,7 +18,10 @@ namespace RisContentPipeline.GUI.Windows
 
         // KTX2 settings
         private DropDown _encodeTargetDropDown = null!;
-        private CheckBox _useUastcCheckBox = null!;
+        private CheckBox _generateMipmapsCheckBox = null!;
+        private DropDown _encodingQualityDropdown = null!;
+
+        private Ktx2Settings _ktx2SettingsPreferences = new();
 
         /// <summary>
         /// The constructor.
@@ -33,6 +36,10 @@ namespace RisContentPipeline.GUI.Windows
             ClientSize = new Size(640, 420);
             MinimumSize = new Size(480, 320);
             Padding = new Padding(Theme.PADDING * 2);
+            
+            _ktx2SettingsPreferences.EncodeTarget = _context.Preferences.Ktx2GlobalSettings.EncodeTarget;
+            _ktx2SettingsPreferences.GenerateMipmaps = _context.Preferences.Ktx2GlobalSettings.GenerateMipmaps;
+            _ktx2SettingsPreferences.QualityLevel = _context.Preferences.Ktx2GlobalSettings.QualityLevel;
 
             // ---- Tabs ---------------------------------------------------------
             var buildSettingsTab = AddBuildSettings();
@@ -45,11 +52,15 @@ namespace RisContentPipeline.GUI.Windows
             };
 
             // ---- Buttons ------------------------------------------------------
+            
             var okButton = new Button { Text = "OK", Width = 90 };
             okButton.Click += (sender, e) => ApplySettingsAndClose();
 
             var cancelButton = new Button { Text = "Cancel", Width = 90 };
             cancelButton.Click += (sender, e) => Close();
+            
+            var applyButton = new Button { Text = "Apply", Width = 90 };
+            applyButton.Click += (sender, e) => ApplySettings();
 
             DefaultButton = okButton;
             AbortButton = cancelButton;
@@ -64,6 +75,7 @@ namespace RisContentPipeline.GUI.Windows
                     new StackLayoutItem(null, expand: true),
                     okButton,
                     cancelButton,
+                    applyButton,
                 }
             };
 
@@ -81,15 +93,18 @@ namespace RisContentPipeline.GUI.Windows
             Content = root;
         }
 
-        private void ApplySettingsAndClose()
+        private void ApplySettings()
         {
             _context.BuildDirectory = _buildDirectoryTextBox.Text ?? _context.BuildDirectory;
-            _context.Ktx2GlobalSettings = new()
-            {
-                UseUastc = _useUastcCheckBox.Checked == true,
-                EncodeTarget = (Ktx2EncodingTarget)_encodeTargetDropDown.SelectedIndex,
-            };
-
+            _context.Preferences.Ktx2GlobalSettings.EncodeTarget = _ktx2SettingsPreferences.EncodeTarget;
+            _context.Preferences.Ktx2GlobalSettings.GenerateMipmaps = _ktx2SettingsPreferences.GenerateMipmaps;
+            _context.Preferences.Ktx2GlobalSettings.QualityLevel = _ktx2SettingsPreferences.QualityLevel;
+            _ = _context.SavePreferencesAsync();
+        }
+        
+        private void ApplySettingsAndClose()
+        {
+            ApplySettings();
             Close();
         }
 
@@ -114,24 +129,38 @@ namespace RisContentPipeline.GUI.Windows
             // KTX Settings
             _encodeTargetDropDown = new DropDown
             {
-                DataStore = [ "Basis ETC1S", "Basis UASTC"],
-                SelectedIndex = (int)_context.Ktx2GlobalSettings.EncodeTarget,
+                DataStore = [ "No Encoding", "Basis ETC1S", "Basis UASTC"],
+                SelectedIndex = (int)_context.Preferences.Ktx2GlobalSettings.EncodeTarget,
                 ToolTip = "Select the target encoding format for KTX2 textures. " +
                           "Basis will encode textures to Basis format during the build process, " +
                           "while NoEncoding will process textures as-is.",
             };
             _encodeTargetDropDown.SelectedIndexChanged += (sender, e) =>
             {
-                var selectedTarget = (Ktx2EncodingTarget)_encodeTargetDropDown.SelectedIndex;
-                _useUastcCheckBox.Enabled = selectedTarget == Ktx2EncodingTarget.Basis;
+                var selectedTarget = (Ktx2EncodingTarget) _encodeTargetDropDown.SelectedIndex;
+                _ktx2SettingsPreferences.EncodeTarget = selectedTarget;
             };
 
-            _useUastcCheckBox = new CheckBox
+            _encodingQualityDropdown = new DropDown()
             {
-                Checked = _context.Ktx2GlobalSettings.UseUastc,
-                ToolTip = "Check to use UASTC base, uncheck to use ETC1S base.",
-                Enabled = _context.Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.Basis,
+                DataStore = ["Lowest", "Low", "Medium", "High", "Best"],
+                SelectedIndex = Ktx2SettingsLookup.GetIndex(_ktx2SettingsPreferences.QualityLevel),
+                ToolTip = "Select the desired encoding quality for the KTX2 texture."
             };
+            _encodingQualityDropdown.SelectedIndexChanged += (sender, e) =>
+            {
+                var selectedQuality =
+                    Ktx2SettingsLookup.GetEncodingQualityLevel(_encodingQualityDropdown.SelectedIndex);
+                _ktx2SettingsPreferences.QualityLevel = selectedQuality;
+            };
+            
+            _generateMipmapsCheckBox = new CheckBox
+            {
+                Checked = _ktx2SettingsPreferences.GenerateMipmaps,
+                ToolTip = "Should mipmaps be generated for the KTX2 texture?.",
+            };
+            _generateMipmapsCheckBox.CheckedChanged += (sender, e) =>
+                _ktx2SettingsPreferences.GenerateMipmaps = _generateMipmapsCheckBox.Checked == true;
 
             var ktx2GroupBox = new GroupBox { Text = "KTX2 Settings" };
             var ktx2Layout = new TableLayout()
@@ -145,8 +174,12 @@ namespace RisContentPipeline.GUI.Windows
                         new TableCell(_encodeTargetDropDown, scaleWidth: true),
                         null),
                     new TableRow(
-                        new Label { Text = "Use UASTC Base" },
-                        new TableCell(_useUastcCheckBox, scaleWidth: true),
+                        new Label { Text = "Encoding Quality", ToolTip = "Select the desired encoding quality for the KTX2 texture."},
+                        new TableCell(_encodingQualityDropdown, scaleWidth: true),
+                        null),
+                    new TableRow(
+                        new Label { Text = "Generate Mipmaps" },
+                        new TableCell(_generateMipmapsCheckBox, scaleWidth: true),
                         null),
                 }
             };
