@@ -9,12 +9,20 @@
 
   <ItemGroup>
     <PackageReference Include="Eto.Platform.Wpf" Version="2.11.0" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3967.48" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="..\Python\win-x64\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="python-3.11.8\**" />
+    <EmbeddedResource Remove="python-3.11.8\**" />
+    <None Remove="..\Python\win-x64\python-3.11.8\Lib\**" />
+    <None Remove="python-3.11.8\**" />
   </ItemGroup>
 
 

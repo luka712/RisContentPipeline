@@ -26,7 +26,7 @@ namespace RisContentPipeline.GUI.Windows
 
             _webView = new WebView()
             {
-                Size = new Size(400, 400),
+                Size = new Size(1000, 1000),
                 Url = new Uri($"http://localhost:{context.LocalServerPort}"),
             };
 
@@ -66,9 +66,14 @@ namespace RisContentPipeline.GUI.Windows
             
             var fileName = Path.GetFileName(filePath);
 
-            return Task.Run(() =>
+            if(!File.Exists(filePath))
             {
-                byte[] data = File.ReadAllBytes(filePath);
+                throw new FileNotFoundException($"File '{filePath}' not found.", filePath);
+            }
+
+            return Task.Run(async () =>
+            {
+                byte[] data = await File.ReadAllBytesAsync(filePath);
                 string base64 = Convert.ToBase64String(data);
 
                 if (!_documentLoaded)

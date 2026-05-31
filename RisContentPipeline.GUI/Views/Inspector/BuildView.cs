@@ -3,6 +3,7 @@ using RisContentPipeline.Generic;
 using RisContentPipeline.GUI.Windows;
 using RisContentPipeline.Ktx2;
 using RisKtx2;
+using System.Dynamic;
 
 namespace RisContentPipeline.GUI.Views.Inspector;
 
@@ -14,6 +15,8 @@ internal class BuildView
 {
     private const int SOURCE_COLUMN = 1;
     private const int TARGET_COLUMN = 5;
+    private const int FULL_SOURCE_PATH_COLUMN = 6;
+    private const int FULL_TARGET_PATH_COLUMN = 7;
 
     private readonly Context _context;
     private readonly TreeGridView _treeView;
@@ -67,6 +70,22 @@ internal class BuildView
             DataCell = new ImageTextCell(4, TARGET_COLUMN),
         });
 
+        // Hidden columns for storing full paths for double-click actions.
+        _treeView.Columns.Add(new GridColumn
+        {
+            HeaderText = "Full Source Path",
+            AutoSize = true,
+            DataCell = new TextBoxCell(FULL_SOURCE_PATH_COLUMN),
+            Visible = false,
+        });
+        _treeView.Columns.Add(new GridColumn
+        {
+            HeaderText = "Full Target Path",
+            AutoSize = true,
+            DataCell = new TextBoxCell(FULL_TARGET_PATH_COLUMN),
+            Visible = false,
+        });
+
         _rootItem = new TreeGridItem
         {
             Values = [Icons.FolderIcon, "Converter Jobs", "", ""],
@@ -107,14 +126,14 @@ internal class BuildView
         {
             WireItemEvents(queuedItem);
 
-            var sourcePath = GetSourceDisplay(queuedItem.Item.Source);
+            GetSourceDisplay(queuedItem.Item.Source, out string sourceDisplayName, out string fullSourcePath);
             var conversion = $"{queuedItem.Item.SourceType} → {queuedItem.Item.TargetType}";
             var status = GetStatusText(queuedItem);
-            var targetPath = GetTargetDisplay(queuedItem);
+            GetTargetDisplay(queuedItem, out string displayTargetPath, out string fullTargetPath);
 
             _rootItem.Children.Add(new TreeGridItem
             {
-                Values = [Icons.FileIcon, sourcePath, conversion, status, Icons.FileIcon, targetPath],
+                Values = [Icons.FileIcon, sourceDisplayName, conversion, status, Icons.FileIcon, displayTargetPath, fullSourcePath, fullTargetPath],
             });
         }
 
@@ -130,31 +149,48 @@ internal class BuildView
         item.OnConversionFinished += (s, e) => _context.AsyncInvoke(Refresh);
     }
 
-    private static string GetSourceDisplay(object source)
+    private static void GetSourceDisplay(object source, out string displayName, out string fullFilePath)
     {
         if (source is Ktx2PipelineSource ktx2Source)
-            return Path.GetFileName(ktx2Source.FilePath);
+        {
+            fullFilePath = Path.GetFullPath(ktx2Source.FilePath);
+            displayName = Path.GetFileName(fullFilePath);
+            return;
+        }
         if (source is GenericPipelineSource genericSource)
-            return Path.GetFileName(genericSource.FilePath);
-        if (source is string str)
-            return str;
+        {
+            fullFilePath = Path.GetFullPath(genericSource.FilePath);
+            displayName = Path.GetFileName(fullFilePath);
+            return;
+        }
 
-        return source.ToString() ?? "Unknown";
+        if (source is string str)
+        {
+            displayName = str;
+            fullFilePath = str;
+            return;
+        }
+
+        displayName = "Unknown";
+        fullFilePath = displayName;
     }
 
-    private static string GetTargetDisplay(QueuedPipelineItem pipelineQueue)
+    private static void GetTargetDisplay(QueuedPipelineItem pipelineQueue, out string displayName, out string fullFilePath)
     {
         var result = pipelineQueue.Result;
+        displayName = "";
+        fullFilePath = "";
 
         if (result?.Success != true)
         {
-            return "";
+            return;
         }
 
         if (pipelineQueue.Item.Options is Ktx2PipelineOptions ktx2Options)
         {
-            var filePath = Path.GetFileName(ktx2Options.OutputPath);
-            return filePath;
+            fullFilePath = Path.GetFullPath(ktx2Options.OutputPath);
+            displayName = Path.GetFileName(fullFilePath);
+            return;
         }
 
         throw new NotImplementedException();
@@ -180,15 +216,15 @@ internal class BuildView
     private void OnCellDoubleClick(object? cell, GridCellMouseEventArgs gridCellMouseEventArgs)
     {
         var treeGridItem = (TreeGridItem)gridCellMouseEventArgs.Item;
-        var source = treeGridItem.Values[SOURCE_COLUMN];
-        var target = treeGridItem.Values[TARGET_COLUMN];
+        var fullSourcePath = treeGridItem.Values[FULL_SOURCE_PATH_COLUMN];
+        var fullTargetPath = treeGridItem.Values[FULL_TARGET_PATH_COLUMN];
 
         // If it's target double-click, load both images in the viewer.
-        if (!String.IsNullOrEmpty(target.ToString()))
+        if (!String.IsNullOrEmpty(fullTargetPath.ToString()))
         {
             var imageViewer = new ImageViewerWindow(_context);
-            var sourceFilePath = source.ToString();
-            var destFilePath = Path.Combine(AppContext.BaseDirectory, "Build", target.ToString());
+            var sourceFilePath = fullSourcePath.ToString();
+            var destFilePath = Path.Combine(AppContext.BaseDirectory, "Build", fullTargetPath.ToString());
             imageViewer.View([destFilePath, sourceFilePath]);
         }
     }
