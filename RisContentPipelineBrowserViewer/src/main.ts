@@ -14,6 +14,8 @@
  * ```js
  * window.loadKtx2TextureFromBase64('AAAAFAAA...');
  * window.loadPngTextureFromBase64('iVBORw0KGgo...');
+ * window.loadKtx2TextureFromBytes(new Uint8Array([...]));
+ * window.loadPngTextureFromBytes(new Uint8Array([...]));
  * ```
  *
  * @module main
@@ -120,7 +122,6 @@ function base64ToBlob(base64: string, mimeType: string): Blob {
  * window.loadKtx2TextureFromBase64('AAAAFAAA...');
  * ```
  */
-// @ts-ignore
 window.loadKtx2TextureFromBase64 = function ( base64: string, name: string = "Unknown"): void {
     const blob = base64ToBlob(base64, 'application/octet-stream');
     textureLoader.loadKtx2(
@@ -146,7 +147,6 @@ window.loadKtx2TextureFromBase64 = function ( base64: string, name: string = "Un
  * window.loadPngTextureFromBase64('iVBORw0KGgo...');
  * ```
  */
-// @ts-ignore
 window.loadPngTextureFromBase64 = function (base64: string, name: string = "Unknown"): void {
     const blob = base64ToBlob(base64, 'image/png');
     textureLoader.loadImage(
@@ -161,7 +161,58 @@ window.loadPngTextureFromBase64 = function (base64: string, name: string = "Unkn
     );
 };
 
-// @ts-ignore
+/**
+ * Global entry point for loading a KTX2 texture from raw bytes.
+ *
+ * @param bytes - Uint8Array containing the KTX2 file data.
+ * @param name - The optional name for texture (defaults to "Unknown").
+ *
+ * @example
+ * ```js
+ * const bytes = new Uint8Array([...]); // Your KTX2 file bytes
+ * window.loadKtx2TextureFromBytes(bytes, 'MyTexture');
+ * ```
+ */
+window.loadKtx2TextureFromBytes = function (bytes: Uint8Array, name: string = "Unknown"): void {
+    const blob = new Blob([bytes as any], { type: 'application/octet-stream' });
+    textureLoader.loadKtx2(
+        blob,
+        (result) => {
+            result.texture.userData = {
+                name: name
+            };
+            textureList.addKtx2Texture(result);
+        },
+        (err) => console.error('Bytes KTX2 load error:', err),
+    );
+};
+
+/**
+ * Global entry point for loading a PNG texture from raw bytes.
+ *
+ * @param bytes - Uint8Array containing the PNG file data.
+ * @param name - The optional name for texture (defaults to "Unknown").
+ *
+ * @example
+ * ```js
+ * const bytes = new Uint8Array([...]); // Your PNG file bytes
+ * window.loadPngTextureFromBytes(bytes, 'MyTexture');
+ * ```
+ */
+window.loadPngTextureFromBytes = function (bytes: Uint8Array, name: string = "Unknown"): void {
+    const blob = new Blob([bytes as any], { type: 'image/png' });
+    textureLoader.loadImage(
+        blob,
+        (result) => {
+            result.texture.userData = {
+                name: name
+            };
+            textureList.addTexture(result);
+        },
+        (err) => console.error('Bytes PNG load error:', err),
+    );
+};
+
 window.clearAllTextures = function(){
     textureList.clear();
 }
