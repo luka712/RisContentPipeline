@@ -31,8 +31,8 @@ public sealed class MainForm : Form
     public MainForm()
     {
         Icons.Load();
-
-        Title = "RisContentPipeline";
+        Title = Constants.APP_NAME;
+        Icon = new Icon(Constants.ICO_ICON_FILE_PATH);
         ClientSize = new Size(Theme.CLIENT_WIDTH, Theme.CLIENT_HEIGHT);
         MinimumSize = new Size(900, 540);
         Resizable = true;

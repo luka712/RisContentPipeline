@@ -6,6 +6,8 @@ internal static class Program
     [STAThread]
     private static void Main()
     {
-        new Application(Eto.Platform.Detect).Run(new MainForm());
+        var app = new Application(Eto.Platform.Detect);
+        app.BadgeLabel = Constants.APP_NAME;
+        app.Run(new MainForm());
     }
 }
