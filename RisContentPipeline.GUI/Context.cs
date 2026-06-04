@@ -310,7 +310,7 @@ namespace RisContentPipeline.GUI
                     UniversalBasisCompression = ktx2Settings.EncodeTarget == Ktx2EncodingTarget.BASIS_ETC1S
                                                 || uastc,
                     UseUastc = uastc,
-                    QualityLevel = (uint)ktx2Settings.QualityLevel,
+                    QualityLevel =ktx2Settings.GetQualityLevelValue(),
                 });
             }
             else if (fileOrFolder.IsJson)

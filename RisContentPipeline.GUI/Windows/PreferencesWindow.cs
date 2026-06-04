@@ -1,5 +1,6 @@
 ﻿using Eto.Drawing;
 using Eto.Forms;
+using RisContentPipeline.GUI.Controls;
 using RisContentPipeline.GUI.Settings;
 
 namespace RisContentPipeline.GUI.Windows
@@ -17,9 +18,9 @@ namespace RisContentPipeline.GUI.Windows
         private TextBox _buildDirectoryTextBox = null!;
 
         // KTX2 settings
-        private DropDown _encodeTargetDropDown = null!;
+        private TextureModeDropdown _encodeTargetDropDown = null!;
         private CheckBox _generateMipmapsCheckBox = null!;
-        private DropDown _encodingQualityDropdown = null!;
+        private EncodingQualityDropdown _encodingQualityDropdown = null!;
 
         private Ktx2Settings _ktx2SettingsPreferences = new();
 
@@ -127,38 +128,19 @@ namespace RisContentPipeline.GUI.Windows
             };
 
             // KTX Settings
-            _encodeTargetDropDown = new DropDown
-            {
-                DataStore = [ "No Encoding", "Basis ETC1S", "Basis UASTC"],
-                SelectedIndex = (int)_context.Preferences.Ktx2GlobalSettings.EncodeTarget,
-                ToolTip = "Select the target encoding format for KTX2 textures. " +
-                          "Basis will encode textures to Basis format during the build process, " +
-                          "while NoEncoding will process textures as-is.",
-            };
+            _encodeTargetDropDown = new(_context.Preferences.Ktx2GlobalSettings.EncodeTarget);
             _encodeTargetDropDown.SelectedIndexChanged += (sender, e) =>
             {
                 var selectedTarget = (Ktx2EncodingTarget) _encodeTargetDropDown.SelectedIndex;
                 _ktx2SettingsPreferences.EncodeTarget = selectedTarget;
             };
 
-            _encodingQualityDropdown = new DropDown()
-            {
-                DataStore = ["Lowest", "Low", "Medium", "High", "Best"],
-                SelectedIndex = Ktx2SettingsLookup.GetIndex(_ktx2SettingsPreferences.QualityLevel),
-                ToolTip = "Select the desired encoding quality for the KTX2 texture."
-            };
-            _encodingQualityDropdown.SelectedIndexChanged += (sender, e) =>
-            {
-                var selectedQuality =
-                    Ktx2SettingsLookup.GetEncodingQualityLevel(_encodingQualityDropdown.SelectedIndex);
-                _ktx2SettingsPreferences.QualityLevel = selectedQuality;
-            };
+            _encodingQualityDropdown =
+                new EncodingQualityDropdown(_ktx2SettingsPreferences.QualityLevel);
+            _encodingQualityDropdown.EncodingQualityLevelChanged += (_, qualityLevel) =>
+                _ktx2SettingsPreferences.QualityLevel = qualityLevel;
             
-            _generateMipmapsCheckBox = new CheckBox
-            {
-                Checked = _ktx2SettingsPreferences.GenerateMipmaps,
-                ToolTip = "Should mipmaps be generated for the KTX2 texture?.",
-            };
+            _generateMipmapsCheckBox = new GenerateMipmapsCheckbox(_ktx2SettingsPreferences.GenerateMipmaps);
             _generateMipmapsCheckBox.CheckedChanged += (sender, e) =>
                 _ktx2SettingsPreferences.GenerateMipmaps = _generateMipmapsCheckBox.Checked == true;
 
@@ -170,15 +152,15 @@ namespace RisContentPipeline.GUI.Windows
                 Rows =
                 {
                     new TableRow(
-                        new Label { Text = "Texture Mode"},
+                        new TextureModeLabel(),
                         new TableCell(_encodeTargetDropDown, scaleWidth: true),
                         null),
                     new TableRow(
-                        new Label { Text = "Encoding Quality", ToolTip = "Select the desired encoding quality for the KTX2 texture."},
+                        new EncodingQualityLabel(),
                         new TableCell(_encodingQualityDropdown, scaleWidth: true),
                         null),
                     new TableRow(
-                        new Label { Text = "Generate Mipmaps" },
+                        new Label(),
                         new TableCell(_generateMipmapsCheckBox, scaleWidth: true),
                         null),
                 }
