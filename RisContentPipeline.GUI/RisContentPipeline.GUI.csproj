@@ -38,12 +38,6 @@
     <None Update="_image_viewer\assets\index-DHZnm0mt.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="_image_viewer\favicon.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="_image_viewer\icons.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="_image_viewer\index.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -52,6 +46,9 @@
     </None>
     <None Update="Resources\Icon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="_image_viewer\assets\index-fbv59vtX.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
@@ -98,7 +95,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="_image_viewer\" />
     <Folder Include="UserScripts\" />
   </ItemGroup>
 
