@@ -149,7 +149,14 @@ public sealed class MainForm : Form
     private MenuBar CreateMenu()
     {
         var fileMenu = new ButtonMenuItem { Text = "&File" };
-        fileMenu.Items.Add(new Command { MenuText = "E&xit", Shortcut = Application.Instance.CommonModifier | Keys.Q });
+        
+        var exitCommand = new Command 
+        { 
+            MenuText = "E&xit", 
+            Shortcut = Application.Instance.CommonModifier | Keys.Q 
+        };
+        exitCommand.Executed += (sender, e) => Application.Instance.Quit();
+        fileMenu.Items.Add(exitCommand);
 
         // EDIT
         var editMenu = new ButtonMenuItem { Text = "&Edit" };
@@ -184,7 +191,14 @@ public sealed class MainForm : Form
         windowsMenu.Items.Add(imageViewerCommand);
 
         var helpMenu = new ButtonMenuItem { Text = "&Help" };
-        helpMenu.Items.Add(new Command { MenuText = "&About..." });
+        
+        var aboutCommand = new Command { MenuText = "&About..." };
+        aboutCommand.Executed += (sender, e) =>
+        {
+            var aboutWindow = new AboutWindow();
+            aboutWindow.ShowModal(this);
+        };
+        helpMenu.Items.Add(aboutCommand);
 
         return new MenuBar
         {

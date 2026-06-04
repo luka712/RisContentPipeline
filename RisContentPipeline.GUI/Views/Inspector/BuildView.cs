@@ -193,7 +193,16 @@ internal class BuildView
             return;
         }
 
-        throw new NotImplementedException();
+        if (pipelineQueue.Item.Options is GenericPipelineOptions genericOptions)
+        {
+            fullFilePath = Path.GetFullPath(genericOptions.OutputPath);
+            displayName = Path.GetFileName(fullFilePath);
+            return;
+        }
+
+        // Fallback for unknown pipeline types
+        displayName = "Unknown";
+        fullFilePath = "";
     }
 
     private static string GetStatusText(QueuedPipelineItem item)

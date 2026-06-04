@@ -26,7 +26,10 @@
         BEST
     }
 
-    // TODO: doc comment
+    /// <summary>
+    /// Internal lookup class for mapping encoding quality levels to their numeric values
+    /// for different KTX2 encoding targets (UASTC and ETC1S).
+    /// </summary>
     internal class Ktx2SettingsLookup
     {
         private static readonly Dictionary<Ktx2EncodingQuality, uint> _encodingQualityMapUastc = new()

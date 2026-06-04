@@ -147,8 +147,7 @@ namespace RisContentPipeline.GUI
         /// <summary>
         /// Removes a build script from the list of scripts to be executed during the build process.
         /// </summary>
-        /// <param name="scriptToRemove">The script name.</param>
-        /// <exception cref="NotImplementedException"></exception>
+        /// <param name="name">The script name.</param>
         internal void RemoveBuildScript(string name)
         {
             var script = _buildScripts.FirstOrDefault(s => s.Name == name);
@@ -162,7 +161,6 @@ namespace RisContentPipeline.GUI
         /// Removes a build script from the list of scripts to be executed during the build process.
         /// </summary>
         /// <param name="script">The <see cref="Script"/>.</param>
-        /// <exception cref="NotImplementedException"></exception>
         internal void RemoveBuildScript(Script script)
         {
             if (_buildScripts.Remove(script))
