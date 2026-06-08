@@ -420,3 +420,9 @@ FodyWeavers.xsd
 
 # RisContentPipelineBrowserViewer
 RisContentPipelineBrowserViewer/dist
+
+# WiX Installer - generated files
+RisContentPipeline.Windows.Installer/HarvestedComponents.wxs
+RisContentPipeline.Windows.Installer/publish/
+RisContentPipeline.Windows.Installer/build.log
+check_and_build.ps1

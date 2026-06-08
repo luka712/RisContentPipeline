@@ -1,0 +1,11 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <Fragment>
+
+    <ComponentGroup Id="AppComponents" Directory="INSTALLFOLDER">
+      <Files Include="../RisContentPipeline.GUI.Windows/bin/Release/net10.0-windows/win-x64/publish/**" />
+    </ComponentGroup>
+
+  </Fragment>
+
+</Wix>

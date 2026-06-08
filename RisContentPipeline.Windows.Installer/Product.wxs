@@ -1,0 +1,56 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <Package Name="RisContentPipeline"
+           Manufacturer="ErkapicLuka"
+           Version="$(var.ProductVersion)"
+           UpgradeCode="8D2F3A10-4C2B-4A5D-9F12-3B1C9A0E7D55">
+
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="RisContentPipeline"/>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="RisContentPipeline" />
+    </StandardDirectory>
+
+    <Feature Id="MainFeature" Level="1">
+      <ComponentGroupRef Id="AppComponents"/>
+      <ComponentGroupRef Id="ShortcutComponents"/>
+    </Feature>
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version is already installed." />
+
+  </Package>
+
+  <Fragment>
+    <ComponentGroup Id="ShortcutComponents">
+      <Component Id="StartMenuShortcutComponent" Directory="ApplicationProgramsFolder">
+        <Shortcut Id="StartMenuShortcut"
+                  Name="RisContentPipeline"
+                  Target="[INSTALLFOLDER]RisContentPipeline.GUI.Windows.exe"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <RemoveFolder Id="RemoveProgramMenuDir" Directory="ApplicationProgramsFolder" On="uninstall" />
+        <RegistryValue Root="HKLM"
+                       Key="Software\ErkapicLuka\RisContentPipeline"
+                       Name="StartMenuShortcut"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+
+      <Component Id="DesktopShortcutComponent" Directory="DesktopFolder">
+        <Shortcut Id="DesktopShortcut"
+                  Name="RisContentPipeline"
+                  Target="[INSTALLFOLDER]RisContentPipeline.GUI.Windows.exe"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <RegistryValue Root="HKLM"
+                       Key="Software\ErkapicLuka\RisContentPipeline"
+                       Name="DesktopShortcut"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+</Wix>
