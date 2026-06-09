@@ -1,0 +1,40 @@
+# Build directories
+build/
+output/
+releases/
+
+# AppImage files
+*.AppImage
+*.AppImage.*
+
+# AppImage tools
+appimagetool-*.AppImage
+AppRun-*
+linuxdeploy-*.AppImage
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# Squashfs root (if extracted)
+squashfs-root/
+
+# Log files
+*.log
+build.log
+
+# Backup files
+*.bak
+*~
+
+# IDE specific
+.vscode/
+.idea/
+
+# Keep the scripts and documentation
+!build-appimage.sh
+!release.sh
+!README.md
+!.gitignore

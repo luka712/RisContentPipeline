@@ -21,4 +21,11 @@
   <ItemGroup>
     <Folder Include="python-3.11.8" />
   </ItemGroup>
+
+
+  <ItemGroup>
+    <None Update="Resources\Icon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
