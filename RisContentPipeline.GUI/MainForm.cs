@@ -32,7 +32,7 @@ public sealed class MainForm : Form
     {
         Icons.Load();
         Title = Constants.APP_NAME;
-        Icon = new Icon(Constants.ICO_ICON_FILE_PATH);
+        Icon = Constants.MAIN_ICON;
         ClientSize = new Size(Theme.CLIENT_WIDTH, Theme.CLIENT_HEIGHT);
         MinimumSize = new Size(900, 540);
         Resizable = true;

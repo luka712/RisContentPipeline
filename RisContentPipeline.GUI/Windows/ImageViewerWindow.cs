@@ -22,6 +22,7 @@ namespace RisContentPipeline.GUI.Windows
         {
             Title = "Image Viewer";
             Resizable = true;
+            Icon = Constants.MAIN_ICON;
             ClientSize = new Size(1000, 800);
 
             _webView = new WebView()

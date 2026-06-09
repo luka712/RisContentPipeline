@@ -1,32 +1,44 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ApplicationIcon>Resources/Icon.ico</ApplicationIcon>
+    <AssemblyName>RisContentPipelineApp</AssemblyName>
+    <Product>Ris Content Pipeline</Product>
+    <AssemblyTitle>Ris Content Pipeline App</AssemblyTitle>
   </PropertyGroup>
+
+  <Target Name="CopyPythonFolder" AfterTargets="Build">
+    <ItemGroup>
+      <PythonFiles Include="python-3.11.8\**\*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(PythonFiles)" DestinationFolder="$(OutputPath)python-3.11.8\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <ItemGroup>
+    <Compile Remove="python-3.11.8\**" />
+    <EmbeddedResource Remove="python-3.11.8\**" />
+    <None Remove="python-3.11.8\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Eto.Platform.Wpf" Version="2.11.0" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3967.48" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\Python\win-x64\**\*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="python-3.11.8\**" />
-    <EmbeddedResource Remove="python-3.11.8\**" />
-    <None Remove="..\Python\win-x64\python-3.11.8\Lib\**" />
-    <None Remove="python-3.11.8\**" />
-  </ItemGroup>
-
 
   <ItemGroup>
     <ProjectReference Include="..\RisContentPipeline.GUI\RisContentPipeline.GUI.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Update="Resources\Icon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

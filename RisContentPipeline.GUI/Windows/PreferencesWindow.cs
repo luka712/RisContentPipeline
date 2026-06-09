@@ -44,12 +44,13 @@ namespace RisContentPipeline.GUI.Windows
 
             // ---- Tabs ---------------------------------------------------------
             var buildSettingsTab = AddBuildSettings();
-            var generalTab = CreateGeneralTab();
-            var appearanceTab = CreateAppearanceTab();
+            // var generalTab = CreateGeneralTab();
+            // var appearanceTab = CreateAppearanceTab();
 
             var tabs = new TabControl
             {
-                Pages = { buildSettingsTab, generalTab, appearanceTab }
+               //  Pages = { buildSettingsTab, generalTab, appearanceTab }
+               Pages = { buildSettingsTab }
             };
 
             // ---- Buttons ------------------------------------------------------

@@ -13,6 +13,7 @@ public class AboutWindow : Dialog
     {
         Title = "About";
         Resizable = false;
+        Icon = Constants.MAIN_ICON;
         ClientSize = new Size(480, 360);
         Padding = new Padding(Theme.PADDING * 2);
 

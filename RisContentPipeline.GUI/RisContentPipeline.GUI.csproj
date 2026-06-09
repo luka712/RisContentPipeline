@@ -44,9 +44,6 @@
     <None Update="_image_viewer\assets\index-C6xMPnCl.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Icon.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="_image_viewer\assets\index-fbv59vtX.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -60,7 +57,6 @@
   <ItemGroup>
     <PackageReference Include="Eto.Forms" Version="2.11.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.3.10" />
-    <PackageReference Include="Photino.NET" Version="4.0.16" />
     <PackageReference Include="pythonnet" Version="3.0.3" />
   </ItemGroup>
 
