@@ -43,7 +43,7 @@ public class AboutWindow : Dialog
         // Version information
         var versionLabel = new Label
         {
-            Text = "Version 0.1.0",
+            Text = "Version 0.2.0",
             Font = new Font(SystemFont.Default, 11),
             TextAlignment = TextAlignment.Center,
         };

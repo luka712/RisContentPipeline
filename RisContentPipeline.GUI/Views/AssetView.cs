@@ -14,6 +14,7 @@ internal class AssetView
     private readonly TreeGridView _treeView;
 
     private ImageViewerWindow? _imageViewerWindow;
+    private ImageTreeGridItem? _rootItem;
 
     /// <summary>
     /// The titled panel that hosts the asset tree view.
@@ -32,6 +33,25 @@ internal class AssetView
             ShowHeader = false,
             AllowMultipleSelection = false,
             Border = BorderType.None,
+            ContextMenu = new ContextMenu()
+            {
+                Items =
+                {
+                    new ButtonMenuItem()
+                    {
+                        Text = "Open Image Viewer", Command = new Command((_, _) => OpenPngViewer())
+                    },
+                    new ButtonMenuItem()
+                    {
+                        Text = "Remove", Command = new Command((_, _) =>
+                        {
+                            var index = _treeView.SelectedRow;
+                            _context.RemoveFile(index);
+                            Refresh();
+                        })
+                    }
+                }
+            }
         };
 
 
@@ -59,7 +79,7 @@ internal class AssetView
     public void Refresh()
     {
         // Create a placeholder icon for the root folder
-        var rootItem = new ImageTreeGridItem("Assets", null, Icons.FolderIcon);
+        _rootItem = new ImageTreeGridItem("Assets", null, Icons.FolderIcon);
 
         var filesOrFolders = _context.FilesOrFolders.OrderBy(f => f.PathOrFileName).ToList();
         foreach (var fileOrFolder in filesOrFolders)
@@ -73,7 +93,7 @@ internal class AssetView
                     fileOrFolder,
                     thumbnail
                 );
-                rootItem.Children.Add(item);
+                _rootItem.Children.Add(item);
             }
             else if (fileOrFolder.IsJson || fileOrFolder.IsXml)
             {
@@ -82,15 +102,15 @@ internal class AssetView
                     fileOrFolder,
                     Icons.FileIcon
                 );
-                rootItem.Children.Add(item);
+                _rootItem.Children.Add(item);
             }
         }
 
         // Set the data store
-        _treeView.DataStore = rootItem;
+        _treeView.DataStore = _rootItem;
 
         // Expand the root
-        rootItem.Expanded = true;
+        _rootItem.Expanded = true;
     }
 
     private void OnAssetSelectionChanged(object? sender, EventArgs e)
@@ -103,10 +123,15 @@ internal class AssetView
 
     private void OnAssetDoubleClick(object? sender, EventArgs e)
     {
+        OpenPngViewer();
+    }
+
+    private void OpenPngViewer()
+    {
         // If it's image item, we want to open the image viewer.
         if (_treeView.SelectedItem is ImageTreeGridItem { FileOrFolder.IsImage: true } selectedItem)
         {
-            _imageViewerWindow = new (_context);
+            _imageViewerWindow = new(_context);
             _imageViewerWindow.View(selectedItem.FileOrFolder.AbsolutePathOrFileName);
         }
     }

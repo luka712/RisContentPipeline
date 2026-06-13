@@ -16,6 +16,12 @@ internal class LocalWebServer : IDisposable
 
     public int Port => _port;
 
+    /// <summary>
+    /// The constructor.
+    /// </summary>
+    /// <param name="messageLogger">The message logger.</param>
+    /// <param name="rootPath">The root path.</param>
+    /// <param name="port">The port of local server.</param>
     public LocalWebServer(MessageLogger messageLogger, string rootPath, int port)
     {
         _messageLogger = messageLogger;

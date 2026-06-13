@@ -18,8 +18,8 @@ public class PipelineSystemTest
         {
             FilePath = "Data/test.png"
         }, new Ktx2PipelineOptions()
-        {
-            UniversalBasisCompression = false,
+        { 
+            Encoding = Ktx2EncodingTarget.BASIS_UASTC,
             OutputPath = "Data/output_system_test.ktx2"
         });
 
@@ -39,7 +39,7 @@ public class PipelineSystemTest
             FilePath = "Data/test.png"
         }, new Ktx2PipelineOptions()
         {
-            UniversalBasisCompression = false,
+            Encoding = Ktx2EncodingTarget.BASIS_ETC1S,
             OutputPath = "Data/output_system_test_a.ktx2"
         });
         
@@ -48,7 +48,7 @@ public class PipelineSystemTest
             FilePath = "Data/test.png"
         }, new Ktx2PipelineOptions()
         {
-            UniversalBasisCompression = false,
+            Encoding = Ktx2EncodingTarget.BASIS_ETC1S,
             OutputPath = "Data/output_system_test_b.ktx2"
         });
 

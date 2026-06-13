@@ -28,7 +28,7 @@ namespace RisContentPipeline.GUI.Windows
             _webView = new WebView()
             {
                 Size = new Size(1000, 1000),
-                Url = new Uri($"http://localhost:{context.LocalServerPort}"),
+                Url = new Uri($"http://localhost:{context.Preferences.LocalServerPort}"),
             };
 
             _webView.DocumentLoaded += (sender, e) =>

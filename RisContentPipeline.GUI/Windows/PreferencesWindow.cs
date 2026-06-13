@@ -2,6 +2,7 @@
 using Eto.Forms;
 using RisContentPipeline.GUI.Controls;
 using RisContentPipeline.GUI.Settings;
+using RisContentPipeline.Ktx2;
 
 namespace RisContentPipeline.GUI.Windows
 {
@@ -44,13 +45,13 @@ namespace RisContentPipeline.GUI.Windows
 
             // ---- Tabs ---------------------------------------------------------
             var buildSettingsTab = AddBuildSettings();
-            // var generalTab = CreateGeneralTab();
+            var generalTab = CreateGeneralTab();
             // var appearanceTab = CreateAppearanceTab();
 
             var tabs = new TabControl
             {
                //  Pages = { buildSettingsTab, generalTab, appearanceTab }
-               Pages = { buildSettingsTab }
+               Pages = { buildSettingsTab, generalTab }
             };
 
             // ---- Buttons ------------------------------------------------------
@@ -199,10 +200,25 @@ namespace RisContentPipeline.GUI.Windows
             };
         }
 
-        private static TabPage CreateGeneralTab()
+        private TabPage CreateGeneralTab()
         {
-            var autoSaveCheckBox = new CheckBox { Text = "Enable Auto Save" };
-            var usernameTextBox = new TextBox { PlaceholderText = "Enter username" };
+            var portStepper = new NumericStepper()
+            {
+                MaxValue = 9999,
+                MinValue = 1000,
+                Value = _context.Preferences.LocalServerPort,
+                ToolTip = "The port the local web server will listen on. Restart the application to apply changes.",
+            };
+            portStepper.ValueChanged += (sender, e) =>
+            {
+                int value = (int)portStepper.Value;
+                if (_context.Preferences.LocalServerPort != value)
+                {
+                    _context.Preferences.LocalServerPort = value;
+                    _context.MessageLogger.Info($"Local server port changed to {value}. Restart the application to apply changes.");
+                    _context.SavePreferencesAsync();
+                }
+            };
 
             var layout = new TableLayout
             {
@@ -210,10 +226,9 @@ namespace RisContentPipeline.GUI.Windows
                 Spacing = Theme.FormSpacing,
                 Rows =
                 {
-                    new TableRow(autoSaveCheckBox, null),
                     new TableRow(
-                        new Label { Text = "Username:" },
-                        new TableCell(usernameTextBox, scaleWidth: true)),
+                        new Label { Text = "Port:" },
+                        new TableCell(portStepper, scaleWidth: true)),
                     new TableRow { ScaleHeight = true },
                 }
             };

@@ -20,7 +20,7 @@ public class Ktx2PipelineTest
       }, new Ktx2PipelineOptions()
       {
          GenerateMipmaps = true,
-         UniversalBasisCompression = true,
+         Encoding = Ktx2EncodingTarget.BASIS_UASTC,
          OutputPath = "Data/output_pipeline_test.ktx2"
       });
 

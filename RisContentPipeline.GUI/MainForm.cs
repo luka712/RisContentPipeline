@@ -28,6 +28,8 @@ public sealed class MainForm : Form
     private readonly InspectorView _inspectorView;
     private readonly Label _statusLabel = new() { Text = "Ready" };
 
+    private readonly Task _loadPreferencesTask;
+
     public MainForm()
     {
         Icons.Load();
@@ -36,7 +38,7 @@ public sealed class MainForm : Form
         ClientSize = new Size(Theme.CLIENT_WIDTH, Theme.CLIENT_HEIGHT);
         MinimumSize = new Size(900, 540);
         Resizable = true;
-        _ = _context.LoadPreferencesAsync();
+        _loadPreferencesTask = _context.LoadPreferencesAsync();
         _context.LoadSession();
 
         // Create a menu
@@ -116,7 +118,7 @@ public sealed class MainForm : Form
 
         Content = rootLayout;
         
-        StartServer();
+        _ = StartServerAsync();
     }
 
     /// <inheritdoc/>
@@ -127,10 +129,11 @@ public sealed class MainForm : Form
         _messageView.Refresh();
     }
 
-    private void StartServer()
+    private async Task StartServerAsync()
     {
         string contentFolder = Path.Combine(AppContext.BaseDirectory, "_image_viewer");
-        _server = new LocalWebServer(_context.MessageLogger, contentFolder, port: _context.LocalServerPort);
+        await _loadPreferencesTask;
+        _server = new LocalWebServer(_context.MessageLogger, contentFolder, port: _context.Preferences.LocalServerPort);
         _ = _server.StartAsync();
     }
 

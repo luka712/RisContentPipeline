@@ -47,7 +47,10 @@ public class Ktx2Pipeline : APipeline
         Ktx2PipelineOptions pipelineOptions = options as Ktx2PipelineOptions ?? new Ktx2PipelineOptions();
         
         int alignment = 0;
-        if (pipelineOptions.UniversalBasisCompression)
+        if (pipelineOptions.Encoding == Ktx2EncodingTarget.BASIS_UASTC 
+            || pipelineOptions.Encoding == Ktx2EncodingTarget.BASIS_ETC1S
+            || pipelineOptions.Encoding == Ktx2EncodingTarget.ASTC_4X4
+            )
         {
             alignment = 4;
         }
@@ -112,12 +115,31 @@ public class Ktx2Pipeline : APipeline
         }
 
         // Apply Basis Universal compression if parameters are provided
-        if (pipelineOptions.UniversalBasisCompression)
+        bool uastc = pipelineOptions.Encoding == Ktx2EncodingTarget.BASIS_UASTC;
+        bool etc1s = pipelineOptions.Encoding == Ktx2EncodingTarget.BASIS_ETC1S;
+        if (uastc || etc1s)
         {
-            texture.CompressBasis(new KtxBasisParams()
+            KtxBasisParams basisParams = new ()
             {
-                Uastc = pipelineOptions.UseUastc,
-                QualityLevel = pipelineOptions.QualityLevel
+                Uastc = uastc
+            };
+            
+            if (uastc)
+            {
+                basisParams.QualityLevel = pipelineOptions.UastcQuality;
+            }
+            else
+            {
+                basisParams.QualityLevel = pipelineOptions.QualityLevel;
+            }
+
+            texture.CompressBasis(basisParams);
+        }
+        else if (pipelineOptions.Encoding == Ktx2EncodingTarget.ASTC_4X4)
+        {
+            texture.CompressAstc(new KtxAstcParams()
+            {
+                QualityLevel = pipelineOptions.AstcQuality
             });
         }
 

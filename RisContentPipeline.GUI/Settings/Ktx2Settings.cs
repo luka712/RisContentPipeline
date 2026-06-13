@@ -1,17 +1,9 @@
-﻿namespace RisContentPipeline.GUI.Settings
-{
-    /// <summary>
-    /// The enum representing the target encoding format for KTX2 textures.
-    /// It indicates whether the textures should be encoded to Basis format during the build process or not.
-    /// </summary>
-    public enum Ktx2EncodingTarget
-    {
-        NO_ENCODING = 0,
+﻿using RisContentPipeline.Ktx2;
+using RisKtx2;
 
-        // ReSharper disable once InconsistentNaming
-        BASIS_ETC1S = 1,
-        BASIS_UASTC = 2,
-    }
+namespace RisContentPipeline.GUI.Settings
+{
+   
 
     /// <summary>
     /// The enum representing the encoding quality for the KTX2 textures.
@@ -50,11 +42,25 @@
             [Ktx2EncodingQuality.BEST] = 255,
         };
 
+        private static readonly Dictionary<Ktx2EncodingQuality, KtxPackAstcQualityLevels> _astcQualityMap = new()
+        {
+            [Ktx2EncodingQuality.LOWEST] = KtxPackAstcQualityLevels.FASTEST,
+            [Ktx2EncodingQuality.LOW] = KtxPackAstcQualityLevels.FAST,
+            [Ktx2EncodingQuality.MEDIUM] = KtxPackAstcQualityLevels.MEDIUM,
+            [Ktx2EncodingQuality.HIGH] = KtxPackAstcQualityLevels.THOROUGH,
+            [Ktx2EncodingQuality.BEST] = KtxPackAstcQualityLevels.EXHAUSTIVE,
+        };
+
         internal static uint GetEncodingQualityLevelValue(Ktx2EncodingTarget target, Ktx2EncodingQuality qualityLevel)
         {
             if (target == Ktx2EncodingTarget.BASIS_ETC1S)
             {
                 return _encodingQualityMapEtc1s[qualityLevel];
+            }
+
+            if (target == Ktx2EncodingTarget.ASTC_4X4)
+            {
+                return (uint) _astcQualityMap[qualityLevel];
             }
 
             return _encodingQualityMapUastc[qualityLevel];
@@ -93,7 +99,7 @@
         /// <returns>The value of quality level.</returns>
         public uint GetQualityLevelValue()
             => Ktx2SettingsLookup.GetEncodingQualityLevelValue(EncodeTarget, QualityLevel);
-
+        
         /// <summary>
         /// Copies the current settings.
         /// </summary>

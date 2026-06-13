@@ -3,6 +3,7 @@ using Eto.Forms;
 using RisContentPipeline.GUI.Controls;
 using RisContentPipeline.GUI.Data;
 using RisContentPipeline.GUI.Settings;
+using RisContentPipeline.Ktx2;
 
 namespace RisContentPipeline.GUI.Views.Settings;
 

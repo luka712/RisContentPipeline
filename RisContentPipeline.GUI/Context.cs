@@ -78,11 +78,6 @@ namespace RisContentPipeline.GUI
         }
 
         /// <summary>
-        /// The port used for local server communication.
-        /// </summary>
-        internal int LocalServerPort = 8787;
-
-        /// <summary>
         /// The list of internal Python scripts that are included with the content pipeline.
         /// The list is populated at construction time by <see cref="LoadInternalScripts"/>
         /// from the <see cref="INTERNAL_SCRIPTS_DIRECTORY"/> directory.
@@ -203,6 +198,15 @@ namespace RisContentPipeline.GUI
         }
 
         /// <summary>
+        /// Removes a file from the list of files or folders.
+        /// </summary>
+        /// <param name="index">The index where to remove.</param>
+        internal void RemoveFile(int index)
+        {
+            _filesOrFolders.RemoveAt(index);
+        }
+
+        /// <summary>
         /// Adds a PNG file to the list of files or folders.
         /// It loads the image from the specified file path and creates a FileOrFolder object with the loaded image, which is then added to the list of files or folders.
         /// </summary>
@@ -298,18 +302,34 @@ namespace RisContentPipeline.GUI
                     Path.GetFileNameWithoutExtension(fileName));
                 var uastc = ktx2Settings.EncodeTarget == Ktx2EncodingTarget.BASIS_UASTC;
 
-                PipelineSystem.StoreSourceAsset("png", "ktx2", new Ktx2PipelineSource()
-                {
-                    FilePath = fileOrFolder.AbsolutePathOrFileName,
-                }, new Ktx2PipelineOptions()
+                Ktx2PipelineOptions options = new()
                 {
                     GenerateMipmaps = ktx2Settings.GenerateMipmaps,
                     OutputPath = $"{filePath}.ktx2",
-                    UniversalBasisCompression = ktx2Settings.EncodeTarget == Ktx2EncodingTarget.BASIS_ETC1S
-                                                || uastc,
-                    UseUastc = uastc,
-                    QualityLevel =ktx2Settings.GetQualityLevelValue(),
-                });
+                    Encoding = ktx2Settings.EncodeTarget,
+                };
+
+                if (options.Encoding == Ktx2EncodingTarget.BASIS_ETC1S || uastc)
+                {
+                    if (uastc)
+                    {
+                        options.UastcQuality = ktx2Settings.GetQualityLevelValue();
+                    }
+                    else
+                    {
+                        options.QualityLevel = ktx2Settings.GetQualityLevelValue();
+                    }
+                }
+
+                if (options.Encoding == Ktx2EncodingTarget.ASTC_4X4)
+                {
+                    options.AstcQuality = (KtxPackAstcQualityLevels) ktx2Settings.GetQualityLevelValue();
+                }
+
+                PipelineSystem.StoreSourceAsset("png", "ktx2", new Ktx2PipelineSource()
+                {
+                    FilePath = fileOrFolder.AbsolutePathOrFileName,
+                }, options);
             }
             else if (fileOrFolder.IsJson)
             {
@@ -356,15 +376,11 @@ namespace RisContentPipeline.GUI
                     {
                         FilePath = source.FilePath ?? string.Empty,
                     };
-
-                    var uastcEncoding = Preferences.Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.BASIS_UASTC;
-
+                    
                     var ktxPipelineOptions = new Ktx2PipelineOptions()
                     {
                         GenerateMipmaps = source.Ktx2ExportSettings.GenerateMipmaps,
-                        UniversalBasisCompression = Preferences.Ktx2GlobalSettings.EncodeTarget == Ktx2EncodingTarget.BASIS_ETC1S
-                                                    || uastcEncoding,
-                        UseUastc = uastcEncoding,
+                        Encoding = Preferences.Ktx2GlobalSettings.EncodeTarget,
                         OutputPath = $"{filePath}.ktx2",
                     };
 
