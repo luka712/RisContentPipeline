@@ -13,6 +13,7 @@ internal class ActionsBarView
     private static readonly string[] _supportedFileExtensions = [".png", ".ktx2", ".json", ".xml"];
     private readonly Context _context;
 
+    private readonly Button _buildButton = new();
 
     /// <summary>
     /// Gets the panel control containing the action buttons.
@@ -45,14 +46,18 @@ internal class ActionsBarView
         var addFolderButton = CreateButton("Add Folder", "Add an existing folder and its contents to the project", 110);
         addFolderButton.Click += (sender, e) => ShowAddFolderDialog(parentWindow);
 
-        var buildButton = CreateButton("Build", "Build all assets in the project", 80);
-        buildButton.Click += (sender, e) => _context.Build();
+        _buildButton = CreateButton("Build", "Build all assets in the project", 80);
+        _buildButton.Click += (sender, e) => _context.BuildAsync();
+        
+        // Disable/Enable the build button based on the build status.
+        _context.OnBuildStarted += () => _buildButton.Enabled = false;
+        _context.OnBuildFinished += () => _buildButton.Enabled = true;
 
-        var rebuildButton = CreateButton("Rebuild", "Rebuild all assets in the project", 90);
-        rebuildButton.Click += (sender, e) => _context.Rebuild();
-
-        var cleanButton = CreateButton("Clean", "Clean all built assets", 80);
-        cleanButton.Click += (sender, e) => _context.Clean();
+        // var rebuildButton = CreateButton("Rebuild", "Rebuild all assets in the project", 90);
+        // rebuildButton.Click += (sender, e) => _context.Rebuild();
+        //
+        // var cleanButton = CreateButton("Clean", "Clean all built assets", 80);
+        // cleanButton.Click += (sender, e) => _context.Clean();
 
         var addBuildScript = CreateButton("Add Build Script", "Add a custom Python script to the build process", 140);
         addBuildScript.Click += (sender, e) =>
@@ -84,9 +89,7 @@ internal class ActionsBarView
                 CreateSeparator(),
                 addBuildScript,
                 new StackLayoutItem(null, expand: true), // flexible spacer
-                buildButton,
-                rebuildButton,
-                cleanButton,
+                _buildButton,
             }
         };
 

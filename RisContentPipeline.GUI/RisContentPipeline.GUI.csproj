@@ -32,19 +32,19 @@
     <None Update="Ktx2BrowserViewerContent\index.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="_image_viewer\assets\index-DbYn0ZPC.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="_image_viewer\assets\index-DHZnm0mt.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="_image_viewer\index.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="_image_viewer\assets\index-C6xMPnCl.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="_image_viewer\assets\index-fbv59vtX.js">
+    <None Update="_image_viewer\assets\index-DbYn0ZPC.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="_image_viewer\assets\index-DRJsa-2h.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="_image_viewer\index.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

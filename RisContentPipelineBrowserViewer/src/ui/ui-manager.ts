@@ -90,6 +90,8 @@ export class UiManager {
         this._disposeKtx2Folder();
 
         const info = extractKtx2Info(container);
+        debugger;
+        console.table(container)
 
 
         this._ktx2Folder = this._pane.addFolder({
@@ -123,7 +125,7 @@ export class UiManager {
         this._addReadonlyBinding(
             this._ktx2Folder,
             'Mip Levels',
-            info.mipLevels,
+            info.mipLevels.toFixed(0)
         );
         this._addReadonlyBinding(this._ktx2Folder, 'Total Data', info.totalDataKB);
         this._addReadonlyBinding(

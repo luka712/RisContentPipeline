@@ -31,11 +31,19 @@ public class Ktx2PipelineOptions
     public uint QualityLevel { get; set; } = 0;
 
     /// <summary>
-    /// The quality level for UASTC compression.
-    /// Between <c>0</c> and <c>4</c>, where <c>0</c> is the lowest quality and <c>4</c> is the highest quality.
-    /// By default, the quality level is set to <c>2</c>.
+    /// TODO: fix documentation
+    /// A set of <see cref="KtxUastcFlags"/> controlling UASTC encoding.
+    /// The most important value is the level given in the least-significant 4 bits which selects a speed vs. quality tradeoff
+    /// as shown in the following table:
+    /// Level/Speed | Quality: 
+    /// -----: |: -------:
+    /// KTX_PACK_UASTC_LEVEL_FASTEST | 43.45dB
+    /// KTX_PACK_UASTC_LEVEL_FASTER | 46.49dB
+    /// <see cref="KtxUastcFlags.LEVEL_DEFAULT"/> | 47.47dB
+    /// KTX_PACK_UASTC_LEVEL_SLOWER  | 48.01dB
+    /// KTX_PACK_UASTC_LEVEL_VERYSLOW | 48.24dB
     /// </summary>
-    public uint UastcQuality { get; set; } = 2;
+    public KtxUastcFlags UastcFlags { get; set; } = KtxUastcFlags.LEVEL_DEFAULT;
     
     /// <summary>
     /// Specifies whether to generate mipmaps for the KTX2 texture.

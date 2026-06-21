@@ -98,7 +98,7 @@ namespace RisContentPipeline.GUI.Windows
 
         private void ApplySettings()
         {
-            _context.BuildDirectory = _buildDirectoryTextBox.Text ?? _context.BuildDirectory;
+            _context.Preferences.BuildDirectory = _buildDirectoryTextBox.Text ?? _context.Preferences.BuildDirectory;
             _context.Preferences.Ktx2GlobalSettings.EncodeTarget = _ktx2SettingsPreferences.EncodeTarget;
             _context.Preferences.Ktx2GlobalSettings.GenerateMipmaps = _ktx2SettingsPreferences.GenerateMipmaps;
             _context.Preferences.Ktx2GlobalSettings.QualityLevel = _ktx2SettingsPreferences.QualityLevel;
@@ -116,7 +116,7 @@ namespace RisContentPipeline.GUI.Windows
             // Build Directory
             _buildDirectoryTextBox = new TextBox
             {
-                Text = _context.BuildDirectory,
+                Text = _context.Preferences.BuildDirectory,
                 PlaceholderText = "Build directory ...",
             };
             var browseBuildDirButton = new Button { Text = "Browse..." };
@@ -183,7 +183,7 @@ namespace RisContentPipeline.GUI.Windows
                             Padding = new Padding(Theme.PADDING * 2),
                             Spacing = Theme.FormSpacing,
                             Rows = {
-                                new DynamicRow(_buildDirectoryTextBox, browseBuildDirButton),
+                                new DynamicRow(browseBuildDirButton, _buildDirectoryTextBox),
                             }
                         }
                     }),

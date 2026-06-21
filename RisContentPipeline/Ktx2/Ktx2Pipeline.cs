@@ -56,7 +56,17 @@ public class Ktx2Pipeline : APipeline
         }
         
         
-        var image = _stbImageLoader.Load(sourceFilePath, 4, align: alignment);
+        var image = _stbImageLoader.Load(sourceFilePath, 4, VkFormat.R8G8B8A8_UNORM);
+        //
+        // if (image.Channels == 3)
+        // {
+        //     image = _stbImageLoader.Align(image, alignment);
+        // }
+        // else if (image.Channels != 4)
+        // {
+        //     throw new InvalidOperationException("Unsupported number of channels.");
+        // }
+        
         var data = image.Bytes;
         var width = AlignUp(image.Width, alignment);
         var height = AlignUp(image.Height, alignment);
@@ -77,12 +87,14 @@ public class Ktx2Pipeline : APipeline
             }
         }
 
+      
+
         // Create KTX2 texture with RGBA8 format
         Ktx2Texture texture = new Ktx2Texture(new KtxTextureCreateInfo
         {
             BaseHeight = (uint) height,
             BaseWidth = (uint) width,
-            VkFormat = channels == 4 ? VkFormat.R8G8B8A8_UNORM : VkFormat.R8G8B8_UNORM,
+            VkFormat = VkFormat.R8G8B8A8_UNORM,
             NumLevels = (uint) mipLevels
         }, KtxTextureCreateStorage.ALLOC_STORAGE);
 
@@ -123,10 +135,16 @@ public class Ktx2Pipeline : APipeline
             {
                 Uastc = uastc
             };
-            
+
+            // If we do not have alpha channel, set its value to 1.
+            if (channels == 3)
+            {
+                basisParams.InputSwizzle = ['r', 'g', 'b', '1'];
+            }
+
             if (uastc)
             {
-                basisParams.QualityLevel = pipelineOptions.UastcQuality;
+                basisParams.UastcFlags = pipelineOptions.UastcFlags;
             }
             else
             {

@@ -1,12 +1,17 @@
 using RisContentPipeline.GUI.Settings;
 
-namespace RisContentPipeline.GUI.Persistance;
+namespace RisContentPipeline.GUI.Model;
 
 /// <summary>
 /// The preferences for the application.
 /// </summary>
 public class Preferences
 {
+    /// <summary>
+    /// The directory where the build output is stored.
+    /// </summary>
+    public string BuildDirectory { get; set; } = Path.Combine(AppContext.BaseDirectory, "Build");
+    
     /// <summary>
     /// The port used for the local server.
     /// </summary>

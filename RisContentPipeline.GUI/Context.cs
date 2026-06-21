@@ -7,7 +7,7 @@ using RisKtx2;
 using System.Text.Json;
 using RisContentPipeline.Ktx2;
 using RisContentPipeline.Generic;
-using RisContentPipeline.GUI.Persistance;
+using RisContentPipeline.GUI.Model;
 
 namespace RisContentPipeline.GUI
 {
@@ -89,6 +89,11 @@ namespace RisContentPipeline.GUI
         /// This event is triggered when the build process starts.
         /// </summary>
         public event Action? OnBuildStarted;
+        
+        /// <summary>
+        /// This event is triggered when the build process finishes.
+        /// </summary>
+        public event Action? OnBuildFinished;
 
         /// <summary>
         /// Fires when a new build script is added to the context.
@@ -101,11 +106,6 @@ namespace RisContentPipeline.GUI
         public event EventHandler<Script>? OnBuildScriptRemoved;
 
         public IReadOnlyList<AssetFileOrFolder> FilesOrFolders => _filesOrFolders;
-
-        /// <summary>
-        /// The directory where the processed files will be saved. This is typically the "Build" folder in the content pipeline.
-        /// </summary>
-        public string BuildDirectory { get; set; } = "./Build";
 
         /// <summary>
         /// The messanger instance for sending messages during the asset processing workflow.
@@ -244,43 +244,55 @@ namespace RisContentPipeline.GUI
         /// pipeline system to avoid duplicate processing on successive builds.
         /// After conversion, each script's <c>after_build</c> callback is invoked.
         /// </summary>
-        internal void Build()
+        internal async Task BuildAsync()
         {
-            if (!Directory.Exists(BuildDirectory))
+            var buildDirectory = Preferences.BuildDirectory;
+            
+            try
             {
-                Directory.CreateDirectory(BuildDirectory);
+                if (!Directory.Exists(buildDirectory))
+                {
+                    Directory.CreateDirectory(buildDirectory);
+                }
+
+                if (BuildScripts.Any())
+                {
+                    _pythonIntegration = _pythonIntegration ?? new PythonIntegration(this);
+                    _pythonIntegration.Initialize();
+                }
+
+                // Run before build scripts.
+                foreach (var script in BuildScripts)
+                {
+                    _pythonIntegration?.BeforeBuild(script);
+                }
+
+                OnBuildStarted?.Invoke();
+                MessageLogger.Clear();
+
+                // Make sure we don't accumulate stored assets from previous builds.
+                PipelineSystem.ClearStoredAssets();
+
+                // Queue all files into the pipeline system.
+                foreach (var fileOrFolder in _filesOrFolders)
+                {
+                    QueueFileForBuild(fileOrFolder);
+                }
+
+                await PipelineSystem.ConvertAllAsync();
+
+                // Run after build scripts.
+                foreach (var script in BuildScripts)
+                {
+                    _pythonIntegration?.AfterBuild(script);
+                }
+                
+                OnBuildFinished?.Invoke();
             }
-
-            if (BuildScripts.Any())
+            catch (Exception ex)
             {
-                _pythonIntegration = _pythonIntegration ?? new PythonIntegration(this);
-                _pythonIntegration.Initialize();
-            }
-
-            // Run before build scripts.
-            foreach (var script in BuildScripts)
-            {
-                _pythonIntegration?.BeforeBuild(script);
-            }
-
-            OnBuildStarted?.Invoke();
-            MessageLogger.Clear();
-
-            // Make sure we don't accumulate stored assets from previous builds.
-            PipelineSystem.ClearStoredAssets();
-
-            // Queue all files into the pipeline system.
-            foreach (var fileOrFolder in _filesOrFolders)
-            {
-                QueueFileForBuild(fileOrFolder);
-            }
-
-            _ = PipelineSystem.ConvertAllAsync();
-
-            // Run after build scripts.
-            foreach (var script in BuildScripts)
-            {
-                _pythonIntegration?.AfterBuild(script);
+                MessageBox.Show($"Failed to build content: {ex.Message}", "Error", MessageBoxType.Error);
+                throw;
             }
         }
 
@@ -290,6 +302,8 @@ namespace RisContentPipeline.GUI
         /// <param name="fileOrFolder">The asset to be queued for processing.</param>
         private void QueueFileForBuild(AssetFileOrFolder fileOrFolder)
         {
+            var buildDirectory = Preferences.BuildDirectory;
+            
             var fileName = fileOrFolder.PathOrFileName;
             if (string.IsNullOrEmpty(fileName))
                 return;
@@ -298,8 +312,7 @@ namespace RisContentPipeline.GUI
             {
                 var image = fileOrFolder.Image;
                 var ktx2Settings = image.Ktx2ExportSettings;
-                var filePath = Path.Combine(AppContext.BaseDirectory, BuildDirectory,
-                    Path.GetFileNameWithoutExtension(fileName));
+                var filePath = Path.Combine(buildDirectory, Path.GetFileNameWithoutExtension(fileName));
                 var uastc = ktx2Settings.EncodeTarget == Ktx2EncodingTarget.BASIS_UASTC;
 
                 Ktx2PipelineOptions options = new()
@@ -313,7 +326,7 @@ namespace RisContentPipeline.GUI
                 {
                     if (uastc)
                     {
-                        options.UastcQuality = ktx2Settings.GetQualityLevelValue();
+                        options.UastcFlags = ktx2Settings.GetUastcQualityLevelValue();
                     }
                     else
                     {
@@ -341,8 +354,7 @@ namespace RisContentPipeline.GUI
                         FilePath = fileOrFolder.AbsolutePathOrFileName,
                     }, new GenericPipelineOptions()
                     {
-                        OutputPath =
-                            Path.Combine(BuildDirectory, Path.GetFileName(fileOrFolder.AbsolutePathOrFileName)),
+                        OutputPath = Path.Combine(buildDirectory, Path.GetFileName(fileOrFolder.AbsolutePathOrFileName)),
                     });
                 }
             }
@@ -355,6 +367,8 @@ namespace RisContentPipeline.GUI
 
         private Task HandleImageAsync(AssetFileOrFolder file)
         {
+            var builddirectory = Preferences.BuildDirectory;
+            
             return Task.Run(() =>
             {
                 MessageLogger.InfoAsync($"Processing image: '{file.PathOrFileName}'");
@@ -366,8 +380,7 @@ namespace RisContentPipeline.GUI
                     return;
                 }
 
-                var filePath = Path.Combine(BuildDirectory,
-                    Path.GetFileNameWithoutExtension(file.PathOrFileName ?? string.Empty));
+                var filePath = Path.Combine(builddirectory, Path.GetFileNameWithoutExtension(file.PathOrFileName ?? string.Empty));
                 try
                 {
                     // Convert the image to KTX2 format using the content pipeline's texture processing pipeline
@@ -479,41 +492,17 @@ namespace RisContentPipeline.GUI
         public Task SavePreferencesAsync()
         {
             string jsonContent = JsonSerializer.Serialize(Preferences);
-            return File.WriteAllTextAsync(PREFERENCES_FILE, jsonContent);
+            var filePath = Path.Combine(AppContext.BaseDirectory, PREFERENCES_FILE);
+            return File.WriteAllTextAsync(filePath, jsonContent);
         }
-
-        /// <summary>
-        /// Cleans the build directory by recursively deleting all generated artifacts.
-        /// Pipeline state and imported assets are preserved so a subsequent
-        /// <see cref="Build"/> can recreate the output from scratch.
-        /// </summary>
-        internal void Clean()
-        {
-            try
-            {
-                if (Directory.Exists(BuildDirectory))
-                {
-                    Directory.Delete(BuildDirectory, recursive: true);
-                    MessageLogger.Info($"Cleaned build directory: '{BuildDirectory}'");
-                }
-                else
-                {
-                    MessageLogger.Info($"Nothing to clean. Build directory does not exist: '{BuildDirectory}'");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageLogger.Error($"Failed to clean build directory '{BuildDirectory}': {ex.Message}");
-            }
-        }
+        
 
         /// <summary>
         /// Performs a clean and full re-build of all imported assets.
         /// </summary>
         internal void Rebuild()
         {
-            Clean();
-            Build();
+            BuildAsync();
         }
 
         /// <summary>

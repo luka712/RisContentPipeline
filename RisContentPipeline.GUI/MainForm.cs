@@ -26,7 +26,7 @@ public sealed class MainForm : Form
     private readonly MessageView _messageView;
     private readonly SettingsView _settingsView;
     private readonly InspectorView _inspectorView;
-    private readonly Label _statusLabel = new() { Text = "Ready" };
+    private readonly StatusBar _statusBar;
 
     private readonly Task _loadPreferencesTask;
 
@@ -54,9 +54,7 @@ public sealed class MainForm : Form
         _messageView = new MessageView(_context);
         _settingsView = new SettingsView(_context);
         _inspectorView = new InspectorView(this, _context);
-
-        WireBuildLoggerToStatus();
-
+        
         // ---- Left column: assets stacked above scripts (resizable vertically) ----
         var leftSplitter = new Splitter
         {
@@ -103,18 +101,13 @@ public sealed class MainForm : Form
         };
 
         // ---- Status bar ----
-        var statusBar = new Panel
-        {
-            BackgroundColor = SystemColors.ControlBackground,
-            Padding = new Padding(8, 4),
-            Content = _statusLabel,
-        };
-
+        _statusBar = new StatusBar(_context);
+        
         // ---- Root layout: actions bar / main / status bar ----
         var rootLayout = new DynamicLayout();
         rootLayout.Add(_actionsBar.Panel);
         rootLayout.Add(mainSplitter, yscale: true);
-        rootLayout.Add(statusBar);
+        rootLayout.Add(_statusBar.Panel);
 
         Content = rootLayout;
         
@@ -137,17 +130,7 @@ public sealed class MainForm : Form
         _ = _server.StartAsync();
     }
 
-    /// <summary>
-    /// Mirrors interesting <see cref="MessageLogger"/> events into the status bar so the
-    /// user always has a quick read-out of the last action.
-    /// </summary>
-    private void WireBuildLoggerToStatus()
-    {
-        var logger = _context.MessageLogger;
-        logger.OnInfoLog += msg => UpdateStatus(msg);
-        logger.OnSuccessLog += msg => UpdateStatus(msg);
-        logger.OnErrorLog += msg => UpdateStatus($"Error: {msg}");
-    }
+   
 
     private MenuBar CreateMenu()
     {
@@ -214,24 +197,18 @@ public sealed class MainForm : Form
     {
         _context.AsyncInvoke(() =>
         {
-            UpdateStatus($"Added file: {Path.GetFileName(filePath)}");
+            _statusBar.UpdateStatus($"Added file: {Path.GetFileName(filePath)}");
             _assetView.Refresh();
         });
     }
 
     private void OnFolderAdded(object? sender, string folderPath)
     {
-        UpdateStatus($"Added folder: {Path.GetFileName(folderPath)}");
+        _statusBar.UpdateStatus($"Added folder: {Path.GetFileName(folderPath)}");
         // _assetView.LoadAssetsFromDirectory(folderPath);
     }
 
-    private void UpdateStatus(string message)
-    {
-        if (_statusLabel != null)
-        {
-            _statusLabel.Text = message;
-        }
-    }
+   
 
     protected override void OnClosing(CancelEventArgs e)
     {

@@ -72,6 +72,15 @@ namespace RisContentPipeline.GUI.Settings
     /// </summary>
     public class Ktx2Settings
     {
+        private readonly Dictionary<Ktx2EncodingQuality, KtxPackAstcQualityLevels> _astcQualityMap = new()
+        {
+            [Ktx2EncodingQuality.LOWEST] = KtxPackAstcQualityLevels.FASTEST,
+            [Ktx2EncodingQuality.LOW] = KtxPackAstcQualityLevels.FAST,
+            [Ktx2EncodingQuality.MEDIUM] = KtxPackAstcQualityLevels.MEDIUM,
+            [Ktx2EncodingQuality.HIGH] = KtxPackAstcQualityLevels.THOROUGH,
+            [Ktx2EncodingQuality.BEST] = KtxPackAstcQualityLevels.EXHAUSTIVE,
+        };
+        
         /// <summary>
         /// If <c>true</c>, the KTX2 textures will be generated with mipmaps.
         /// </summary>
@@ -99,6 +108,16 @@ namespace RisContentPipeline.GUI.Settings
         /// <returns>The value of quality level.</returns>
         public uint GetQualityLevelValue()
             => Ktx2SettingsLookup.GetEncodingQualityLevelValue(EncodeTarget, QualityLevel);
+
+        /// <summary>
+        /// Gets the quality level value for the KTX2 texture,
+        /// based on the selected encoding target and encoding quality.
+        /// </summary>
+        /// <returns>The value of quality level.</returns>
+        public KtxUastcFlags GetUastcQualityLevelValue()
+        {
+            return (KtxUastcFlags) _astcQualityMap[QualityLevel];
+        }
         
         /// <summary>
         /// Copies the current settings.
