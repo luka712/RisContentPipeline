@@ -13,6 +13,11 @@ public class Constants
     public const string APP_NAME = "Ris Content Pipeline";
     
     /// <summary>
+    /// The name of the application data folder.
+    /// </summary>
+    public const string APP_DATA_FOLDER_NAME = "RisContentPipeline";
+    
+    /// <summary>
     /// The path to the application icon.
     /// </summary>
     public const string ICO_ICON_FILE_PATH = "Resources/Icon.ico";
