@@ -1,4 +1,5 @@
-﻿using RisContentPipeline.Ktx2;
+﻿using System.Text.Json.Serialization;
+using RisContentPipeline.Ktx2;
 using RisKtx2;
 
 namespace RisContentPipeline.GUI.Settings
@@ -84,6 +85,7 @@ namespace RisContentPipeline.GUI.Settings
         /// <summary>
         /// If <c>true</c>, the KTX2 textures will be generated with mipmaps.
         /// </summary>
+        [JsonPropertyName("generate_mipmaps")]
         public bool GenerateMipmaps { get; set; }
 
         /// <summary>
@@ -92,6 +94,7 @@ namespace RisContentPipeline.GUI.Settings
         /// If set to NoEncoding, the textures will not be encoded and will be processed as-is.
         /// The default value is Basis.
         /// </summary>
+        [JsonPropertyName("encode_target")]
         public Ktx2EncodingTarget EncodeTarget { get; set; } = Ktx2EncodingTarget.BASIS_UASTC;
 
         /// <summary>
@@ -99,6 +102,7 @@ namespace RisContentPipeline.GUI.Settings
         /// Low values result in smaller file sizes, but may result in lower quality.
         /// High values result in larger file sizes, but may result in better quality.
         /// </summary>
+        [JsonPropertyName("quality_level")]
         public Ktx2EncodingQuality QualityLevel { get; set; } = Ktx2EncodingQuality.MEDIUM;
 
         /// <summary>

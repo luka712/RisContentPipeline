@@ -43,8 +43,8 @@ internal class ActionsBarView
         var addFileButton = CreateButton("Add File", "Add an existing asset file to the project", 100);
         addFileButton.Click += (sender, e) => ShowAddFileDialog(parentWindow);
 
-        var addFolderButton = CreateButton("Add Folder", "Add an existing folder and its contents to the project", 110);
-        addFolderButton.Click += (sender, e) => ShowAddFolderDialog(parentWindow);
+        // var addFolderButton = CreateButton("Add Folder", "Add an existing folder and its contents to the project", 110);
+        // addFolderButton.Click += (sender, e) => ShowAddFolderDialog(parentWindow);
 
         _buildButton = CreateButton("Build", "Build all assets in the project", 80);
         _buildButton.Click += (sender, e) => _context.BuildAsync();
@@ -85,7 +85,7 @@ internal class ActionsBarView
             Items =
             {
                 addFileButton,
-                addFolderButton,
+               // addFolderButton,
                 CreateSeparator(),
                 addBuildScript,
                 new StackLayoutItem(null, expand: true), // flexible spacer

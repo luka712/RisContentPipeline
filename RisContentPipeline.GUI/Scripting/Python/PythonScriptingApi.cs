@@ -104,30 +104,40 @@ namespace RisContentPipeline.GUI.Scripting.Python
             {
                 throw new ArgumentException($"Pipeline with name '{name}' already exists.");
             }
-            
+
             PipelineResult Callback(object obj, object? opt)
             {
-                if (obj is GenericPipelineSource genericObj)
+                using (Py.GIL())
                 {
-                    var pyObj = PyObject.FromManagedObject(genericObj);
-                    pyObj.SetAttr("file_path", PyObject.FromManagedObject(genericObj.FilePath));
-                    obj = pyObj;
+                    if (obj is GenericPipelineSource genericObj)
+                    {
+                        var pyObj = PyObject.FromManagedObject(genericObj);
+                        pyObj.SetAttr("file_path", PyObject.FromManagedObject(genericObj.FilePath));
+                        obj = pyObj;
 
+                    }
+
+                    if (opt is GenericPipelineOptions genericOpt)
+                    {
+                        var pyOpt = PyObject.FromManagedObject(genericOpt);
+                        pyOpt.SetAttr("output_path", PyObject.FromManagedObject(genericOpt.OutputPath));
+                        opt = pyOpt;
+                    }
+
+                    var dict = convertAction(obj, opt);
+
+                    dict.TryGetValue("success", out object? success);
+                    dict.TryGetValue("message", out object? message);
+                    dict.TryGetValue("result", out object? result);
+
+
+                    return new PipelineResult()
+                    {
+                        Success = success is bool and true,
+                        ErrorMessage = message is string and { Length: > 0 } ? message.ToString() : null,
+                        Result = result
+                    };
                 }
-                if (opt is GenericPipelineOptions genericOpt)
-                {
-                    var pyOpt = PyObject.FromManagedObject(genericOpt);
-                    pyOpt.SetAttr("output_path", PyObject.FromManagedObject(genericOpt.OutputPath));
-                    opt = pyOpt;
-                }
-
-                var dict = convertAction(obj, opt);
-
-                dict.TryGetValue("success", out object? success);
-                dict.TryGetValue("message", out object? message);
-                dict.TryGetValue("result", out object? result);
-
-                return new PipelineResult() { Success = success is bool and true, ErrorMessage = message is string and { Length: > 0 } ? message.ToString() : null, Result = result };
             }
 
             var pipeline = new GenericPipeline(name, source, target, Callback);

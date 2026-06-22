@@ -86,6 +86,7 @@ public class StatusBar
                 _progressBarLabel.Text = "Build Finished  ";
                 var progress = (int)(_itemsProcessed / (double)_itemsCount * 100);
                 _progressBar.Value = progress;
+                _progressBar.Indeterminate = false;
             });
         };
     }

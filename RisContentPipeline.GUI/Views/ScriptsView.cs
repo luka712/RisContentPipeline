@@ -1,4 +1,5 @@
-﻿using Eto.Drawing;
+﻿using System.Globalization;
+using Eto.Drawing;
 using Eto.Forms;
 using RisContentPipeline.GUI.TreeGridItems;
 
@@ -18,13 +19,13 @@ internal class ScriptsView
     internal Control Content { get; }
 
     // Store the last clicked cell for context menu actions
-    private int? _lastClickedRow = null;
+    private int? _removeRowAtIndex = null;
 
     private void HandleRemoveScriptItem()
     {
-        if (_lastClickedRow.HasValue)
+        if (_removeRowAtIndex.HasValue)
         {
-            var item = _treeView.DataStore[_lastClickedRow.Value];
+            var item = _treeView.DataStore[_removeRowAtIndex.Value];
             if (item is TreeGridItem treeGridItem)
             {
                 var scriptName = treeGridItem.Values[1].ToString();
@@ -35,7 +36,6 @@ internal class ScriptsView
                     Refresh();
                 }
             }
-
         }
     }
 
@@ -53,13 +53,19 @@ internal class ScriptsView
             AllowMultipleSelection = false,
             Border = BorderType.None,
         };
-        _treeView.CellClick += (sender, args) => _lastClickedRow = args.Row;
+        _treeView.CellClick += (sender, args) => _removeRowAtIndex = args.Row;
 
         _treeView.ContextMenu = new ContextMenu
         {
             Items =
             {
-                new ButtonMenuItem { Text = "Remove Script", Command = new Command((_, __) => HandleRemoveScriptItem()) },
+                new ButtonMenuItem
+                {
+                    Text = "Remove Script", Command = new Command((_, __) =>
+                    {
+                        HandleRemoveScriptItem();
+                    })
+                },
             }
         };
 
@@ -68,7 +74,7 @@ internal class ScriptsView
         {
             HeaderText = "Scripts",
             AutoSize = true,
-            DataCell = new ImageTextCell(0, 1)
+            DataCell = new ImageTextCell(0, 1),
         });
 
         // Set up tree view event handlers
@@ -90,6 +96,8 @@ internal class ScriptsView
     /// </summary>
     internal void Refresh()
     {
+        _removeRowAtIndex = null;
+        
         // Create a placeholder icon for the root folder
         var rootItem = new ImageTreeGridItem("Scripts", null, Icons.FolderIcon);
 

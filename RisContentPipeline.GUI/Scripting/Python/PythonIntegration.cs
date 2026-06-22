@@ -12,7 +12,9 @@ internal sealed class PythonIntegration : IDisposable
     private const string INTERNAL_SCRIPTS_DIRECTORY = "InternalScripts";
     private const string USER_SCRIPTS_DIRECTORY = "UserScripts";
 
-    private readonly string _currentDirectory;
+    private readonly string _applicationDataDirectory;
+    private readonly string _appDirectory;
+    
     private readonly Context _context;
     private bool _initialized;
     private bool _disposed;
@@ -29,9 +31,8 @@ internal sealed class PythonIntegration : IDisposable
     {
         _context = context;
         _api = new(_context.PipelineSystem);
-        _currentDirectory = Path.GetDirectoryName(
-            Assembly.GetExecutingAssembly().Location
-        )!;
+        _appDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+        _applicationDataDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
     }
 
     /// <summary>
@@ -59,6 +60,7 @@ internal sealed class PythonIntegration : IDisposable
             // Initialize Python runtime
             Runtime.PythonDLL = pythonDllPath;
             PythonEngine.Initialize();
+            PythonEngine.BeginAllowThreads();
 
             // Add the Python script directory to Python's path
             using (Py.GIL())
@@ -77,23 +79,27 @@ internal sealed class PythonIntegration : IDisposable
     private void ImportModules()
     {
         dynamic sys = Py.Import("sys");
-        string scriptsDir = Path.GetFullPath(INTERNAL_SCRIPTS_DIRECTORY);
-        if (!Directory.Exists(scriptsDir))
+        
+        // Internal scripts are saved in the same directory as the application executable.
+        string internalScriptsDirectory = Path.GetFullPath(INTERNAL_SCRIPTS_DIRECTORY);
+        if (!Directory.Exists(internalScriptsDirectory))
         {
-            scriptsDir = Path.Combine(_currentDirectory, INTERNAL_SCRIPTS_DIRECTORY);
-            if (!Directory.Exists(scriptsDir))
+            internalScriptsDirectory = Path.Combine(_appDirectory, INTERNAL_SCRIPTS_DIRECTORY);
+            if (!Directory.Exists(internalScriptsDirectory))
             {
                 throw new InvalidOperationException($"Could not find '{INTERNAL_SCRIPTS_DIRECTORY}'.");
             }
         }
-
-        sys.path.append(scriptsDir);
-
-        string userScriptsDir = Path.GetFullPath(USER_SCRIPTS_DIRECTORY);
-        if (Directory.Exists(userScriptsDir))
+        
+        // User scripts are saved in the application data directory.
+        string userScriptsDirectory = Path.Combine(_applicationDataDirectory, USER_SCRIPTS_DIRECTORY);
+        if (!Directory.Exists(userScriptsDirectory))
         {
-            sys.path.append(userScriptsDir);
+            Directory.CreateDirectory(userScriptsDirectory);
         }
+
+        sys.path.append(internalScriptsDirectory);
+        sys.path.append(userScriptsDirectory);
     }
 
     private void AssertInitialized()
@@ -234,7 +240,7 @@ internal sealed class PythonIntegration : IDisposable
         if (!Directory.Exists(pythonExePath))
         {
             // Try a relative path
-            pythonExePath = Path.Combine(_currentDirectory, pythonExePath);
+            pythonExePath = Path.Combine(_appDirectory, pythonExePath);
             if (!Directory.Exists(pythonExePath))
             {
                 throw new DirectoryNotFoundException($"Python directory not found: {pythonExePath}");

@@ -3,10 +3,10 @@
 /// <summary>
 /// Represents a source file or folder in the generic pipeline.
 /// </summary>
-public record GenericPipelineSource
+public class GenericPipelineSource
 {
     /// <summary>
     /// The file path of the source file or folder.
     /// </summary>
-    public required string FilePath { get; init; }
+    public  string FilePath { get; set; } = string.Empty;
 }

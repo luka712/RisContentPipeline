@@ -3,6 +3,7 @@ using Eto.Drawing;
 using RisContentPipeline.GUI.Services;
 using RisContentPipeline.GUI.Views;
 using System.ComponentModel;
+using System.Globalization;
 using RisContentPipeline.GUI.Controls;
 using RisContentPipeline.GUI.Views.Inspector;
 using RisContentPipeline.GUI.Windows;
