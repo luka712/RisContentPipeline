@@ -315,6 +315,7 @@ namespace RisContentPipeline.GUI
                     GenerateMipmaps = ktx2Settings.GenerateMipmaps,
                     OutputPath = $"{filePath}.ktx2",
                     Encoding = ktx2Settings.EncodeTarget,
+                    FlipY = ktx2Settings.FlipY,
                 };
 
                 if (options.Encoding == Ktx2EncodingTarget.BASIS_ETC1S || uastc)
@@ -359,58 +360,6 @@ namespace RisContentPipeline.GUI
         internal void AsyncInvoke(Action action)
         {
             Application.Instance.AsyncInvoke(action);
-        }
-
-        private Task HandleImageAsync(AssetFileOrFolder file)
-        {
-            var builddirectory = Preferences.BuildDirectory;
-
-            return Task.Run(() =>
-            {
-                MessageLogger.InfoAsync($"Processing image: '{file.PathOrFileName}'");
-
-                var source = file.Image;
-                if (source == null)
-                {
-                    MessageLogger.ErrorAsync($"No image data found for file: '{file.PathOrFileName}'");
-                    return;
-                }
-
-                var filePath = Path.Combine(builddirectory,
-                    Path.GetFileNameWithoutExtension(file.PathOrFileName ?? string.Empty));
-                try
-                {
-                    // Convert the image to KTX2 format using the content pipeline's texture processing pipeline
-                    // and save the output to the specified build directory with a .ktx2 extension.
-                    var ktxPipelineSource = new Ktx2PipelineSource()
-                    {
-                        FilePath = source.FilePath ?? string.Empty,
-                    };
-
-                    var ktxPipelineOptions = new Ktx2PipelineOptions()
-                    {
-                        GenerateMipmaps = source.Ktx2ExportSettings.GenerateMipmaps,
-                        Encoding = Preferences.Ktx2GlobalSettings.EncodeTarget,
-                        OutputPath = $"{filePath}.ktx2",
-                    };
-
-                    var result = PipelineSystem.Convert("png", "ktx2", ktxPipelineSource, ktxPipelineOptions);
-
-                    if (!result.Success)
-                    {
-                        MessageLogger.ErrorAsync($"Failed to convert image '{file.PathOrFileName}' to KTX2 format.");
-                        return;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageLogger.ErrorAsync($"Error processing image '{file.PathOrFileName}': {ex.Message}");
-                    return;
-                }
-
-                MessageLogger.SuccessAsync(
-                    $"'{file.PathOrFileName}' has been converted to KTX2 format. Output file: '{filePath}.ktx2'");
-            });
         }
 
         /// <summary>

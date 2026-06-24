@@ -2,7 +2,6 @@
 using Eto.Forms;
 using RisContentPipeline.GUI.Modals;
 
-
 namespace RisContentPipeline.GUI.Views;
 
 /// <summary>
@@ -10,7 +9,13 @@ namespace RisContentPipeline.GUI.Views;
 /// </summary>
 internal class ActionsBarView
 {
-    private static readonly string[] _supportedFileExtensions = [".png", ".ktx2", ".json", ".xml"];
+    private static Dictionary<string, string[]> _filters = new()
+    {
+        ["Image Files"] = [".png"],
+        ["Files"] = [".png", ".json"],
+        ["All Files"] = [".*"]
+    };
+
     private readonly Context _context;
 
     private readonly Button _buildButton = new();
@@ -48,7 +53,7 @@ internal class ActionsBarView
 
         _buildButton = CreateButton("Build", "Build all assets in the project", 80);
         _buildButton.Click += (sender, e) => _context.BuildAsync();
-        
+
         // Disable/Enable the build button based on the build status.
         _context.OnBuildStarted += () => _buildButton.Enabled = false;
         _context.OnBuildFinished += () => _buildButton.Enabled = true;
@@ -127,8 +132,10 @@ internal class ActionsBarView
             MultiSelect = true
         };
 
-        dialog.Filters.Add(new FileFilter("Files", _supportedFileExtensions));
-        dialog.Filters.Add(new FileFilter("All Files", ".*"));
+        foreach(var kvp in _filters)
+        {
+            dialog.Filters.Add(new FileFilter(kvp.Key, kvp.Value));
+        }
 
         if (dialog.ShowDialog(parent) == DialogResult.Ok)
         {

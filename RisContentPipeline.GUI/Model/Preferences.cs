@@ -1,6 +1,9 @@
+using Eto.Forms;
+using RisContentPipeline.GUI.Settings;
+using System.IO;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using RisContentPipeline.GUI.Settings;
 
 namespace RisContentPipeline.GUI.Model;
 
@@ -14,21 +17,67 @@ public class Preferences
     /// </summary>
     internal const string PREFERENCES_FILE = "preferences.json";
 
-    private static string _preferencesFilePath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        Constants.APP_DATA_FOLDER_NAME,
-        PREFERENCES_FILE);
+    private static string _preferencesFilePath;
 
     /// <summary>
     /// The constructor.
     /// </summary>
     public Preferences()
     {
-        var appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        BuildDirectory = Path.Combine(appDataFolder, Constants.APP_DATA_FOLDER_NAME, "Build");
-        
+        BuildDirectory = GetDefaultBuildDirectory();
+        _preferencesFilePath = GetPreferencesFilePath();
+
         LocalServerPort = 8787;
-        Ktx2GlobalSettings = new ();
+        Ktx2GlobalSettings = new();
+    }
+
+    /// <summary>
+    /// Gets the directory that will act as default build directory for the application. If the directory does not exist, it will be created.
+    /// If the application is running in portable mode, the build directory will be created in the same directory as the application.
+    /// Otherwise, it will be created in the user's application data folder.
+    /// </summary>
+    /// <returns>The build directory</returns>
+    private string GetDefaultBuildDirectory()
+    {
+        var directory = Constants.PORTABLE_MODE ? AppContext.BaseDirectory : Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        if (!Constants.PORTABLE_MODE)
+        {
+            directory = Path.Combine(directory, Constants.APP_DATA_FOLDER_NAME);
+        }
+
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        directory = Path.Combine(directory, "Build");
+
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        return directory;
+    }
+
+    /// <summary>
+    /// Gets the path to the preferences file. 
+    /// If the application is running in portable mode, the preferences file will be created in the same directory as the application.
+    /// If the application is not running in portable mode, the preferences file will be created in the user's application data folder.
+    /// </summary>
+    /// <returns>The file path to the preferences file.</returns>
+    private string GetPreferencesFilePath()
+    {
+        var directory = Constants.PORTABLE_MODE ? AppContext.BaseDirectory : Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        if (!Constants.PORTABLE_MODE)
+        {
+            directory = Path.Combine(directory, Constants.APP_DATA_FOLDER_NAME);
+        }
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+        return Path.Combine(directory, PREFERENCES_FILE);
     }
 
     /// <summary>
@@ -48,7 +97,7 @@ public class Preferences
     /// </summary>
     [JsonPropertyName("ktx2_global_settings")]
     public Ktx2Settings Ktx2GlobalSettings { get; set; }
-    
+
     /// <summary>
     /// Loads the preferences from the preference file.
     /// </summary>

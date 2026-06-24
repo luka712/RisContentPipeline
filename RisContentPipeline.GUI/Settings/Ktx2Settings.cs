@@ -106,6 +106,12 @@ namespace RisContentPipeline.GUI.Settings
         public Ktx2EncodingQuality QualityLevel { get; set; } = Ktx2EncodingQuality.MEDIUM;
 
         /// <summary>
+        /// If <c>true</c>, the KTX2 textures will be flipped vertically during the conversion process.
+        /// </summary>
+        [JsonPropertyName("flip_y")]
+        public bool FlipY { get; set; } = false;
+
+        /// <summary>
         /// Gets the quality level value for the KTX2 texture,
         /// based on the selected encoding target and encoding quality.
         /// </summary>
@@ -134,6 +140,7 @@ namespace RisContentPipeline.GUI.Settings
                 EncodeTarget = EncodeTarget,
                 GenerateMipmaps = GenerateMipmaps,
                 QualityLevel = QualityLevel,
+                FlipY = FlipY
             };
         }
     }

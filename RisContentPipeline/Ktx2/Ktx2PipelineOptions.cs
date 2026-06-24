@@ -49,5 +49,10 @@ public class Ktx2PipelineOptions
     /// Specifies whether to generate mipmaps for the KTX2 texture.
     /// </summary>
     public bool GenerateMipmaps { get; set; } = false;
-    
+
+    /// <summary>
+    /// If <c>true</c> the image will be flipped vertically before encoding.
+    /// This is useful for some graphics APIs that have different coordinate systems.
+    /// </summary>
+    public bool FlipY { get; set; } = false;
 }
