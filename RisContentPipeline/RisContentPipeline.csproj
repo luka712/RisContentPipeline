@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RisKtx2" Version="0.2.0-preview.bf1eb7f" />
+    <PackageReference Include="RisKtx2" Version="0.2.1-preview.20260623195431" />
   </ItemGroup>
 
 </Project>

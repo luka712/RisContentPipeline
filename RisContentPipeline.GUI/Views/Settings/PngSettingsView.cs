@@ -22,6 +22,7 @@ public class PngSettingsView
         var encodingTarget = context.Preferences.Ktx2GlobalSettings.EncodeTarget;
         bool generateMipmaps = context.Preferences.Ktx2GlobalSettings.GenerateMipmaps;
         int qualityLevelIndex = (int) context.Preferences.Ktx2GlobalSettings.QualityLevel;
+        bool flipY = context.Preferences.Ktx2GlobalSettings.FlipY;
 
         // ----- Editable export settings ------------------------------------
         AddSectionHeader(tableLayout, "Export");
@@ -53,6 +54,15 @@ public class PngSettingsView
         tableLayout.Rows.Add(new TableRow(
             new Label(),
             generateMipmapsCheckBox
+        ));
+
+        // FLIP Y 
+        var flipYCheckBox = new FlipYCheckbox(flipY);
+        flipYCheckBox.CheckedChanged += (sender, e) =>
+            imageContainer.Ktx2ExportSettings.FlipY = flipYCheckBox.Checked == true;
+        tableLayout.Rows.Add(new TableRow(
+            new Label(),
+            flipYCheckBox
         ));
 
         // ----- Read-only metadata ------------------------------------------

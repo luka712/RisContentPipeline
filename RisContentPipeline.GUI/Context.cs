@@ -37,11 +37,6 @@ namespace RisContentPipeline.GUI
         /// The path of the JSON file used to persist the session between application runs.
         /// </summary>
         private const string SESSION_FILE = "session.json";
-        
-        /// <summary>
-        /// The path of the JSON file used to persist the preferences between application runs.
-        /// </summary>
-        private const string PREFERENCES_FILE = "preferences.json";
 
         // ----- Fields -------------------------------------------------------------------
 
@@ -89,7 +84,7 @@ namespace RisContentPipeline.GUI
         /// This event is triggered when the build process starts.
         /// </summary>
         public event Action? OnBuildStarted;
-        
+
         /// <summary>
         /// This event is triggered when the build process finishes.
         /// </summary>
@@ -115,7 +110,7 @@ namespace RisContentPipeline.GUI
         /// <summary>
         /// The preferences for the content pipeline app.
         /// </summary>
-        public Preferences Preferences { get; private set; } = new ();
+        public Preferences Preferences { get; private set; } = new();
 
         /// <summary>
         /// The list of scripts to be executed during the build process.
@@ -247,7 +242,7 @@ namespace RisContentPipeline.GUI
         internal async Task BuildAsync()
         {
             var buildDirectory = Preferences.BuildDirectory;
-            
+
             try
             {
                 if (!Directory.Exists(buildDirectory))
@@ -286,7 +281,7 @@ namespace RisContentPipeline.GUI
                 {
                     _pythonIntegration?.AfterBuild(script);
                 }
-                
+
                 OnBuildFinished?.Invoke();
             }
             catch (Exception ex)
@@ -303,7 +298,7 @@ namespace RisContentPipeline.GUI
         private void QueueFileForBuild(AssetFileOrFolder fileOrFolder)
         {
             var buildDirectory = Preferences.BuildDirectory;
-            
+
             var fileName = fileOrFolder.PathOrFileName;
             if (string.IsNullOrEmpty(fileName))
                 return;
@@ -320,6 +315,7 @@ namespace RisContentPipeline.GUI
                     GenerateMipmaps = ktx2Settings.GenerateMipmaps,
                     OutputPath = $"{filePath}.ktx2",
                     Encoding = ktx2Settings.EncodeTarget,
+                    FlipY = ktx2Settings.FlipY,
                 };
 
                 if (options.Encoding == Ktx2EncodingTarget.BASIS_ETC1S || uastc)
@@ -336,7 +332,7 @@ namespace RisContentPipeline.GUI
 
                 if (options.Encoding == Ktx2EncodingTarget.ASTC_4X4)
                 {
-                    options.AstcQuality = (KtxPackAstcQualityLevels) ktx2Settings.GetQualityLevelValue();
+                    options.AstcQuality = (KtxPackAstcQualityLevels)ktx2Settings.GetQualityLevelValue();
                 }
 
                 PipelineSystem.StoreSourceAsset("png", "ktx2", new Ktx2PipelineSource()
@@ -354,7 +350,8 @@ namespace RisContentPipeline.GUI
                         FilePath = fileOrFolder.AbsolutePathOrFileName,
                     }, new GenericPipelineOptions()
                     {
-                        OutputPath = Path.Combine(buildDirectory, Path.GetFileName(fileOrFolder.AbsolutePathOrFileName)),
+                        OutputPath =
+                            Path.Combine(buildDirectory, Path.GetFileName(fileOrFolder.AbsolutePathOrFileName)),
                     });
                 }
             }
@@ -363,57 +360,6 @@ namespace RisContentPipeline.GUI
         internal void AsyncInvoke(Action action)
         {
             Application.Instance.AsyncInvoke(action);
-        }
-
-        private Task HandleImageAsync(AssetFileOrFolder file)
-        {
-            var builddirectory = Preferences.BuildDirectory;
-            
-            return Task.Run(() =>
-            {
-                MessageLogger.InfoAsync($"Processing image: '{file.PathOrFileName}'");
-
-                var source = file.Image;
-                if (source == null)
-                {
-                    MessageLogger.ErrorAsync($"No image data found for file: '{file.PathOrFileName}'");
-                    return;
-                }
-
-                var filePath = Path.Combine(builddirectory, Path.GetFileNameWithoutExtension(file.PathOrFileName ?? string.Empty));
-                try
-                {
-                    // Convert the image to KTX2 format using the content pipeline's texture processing pipeline
-                    // and save the output to the specified build directory with a .ktx2 extension.
-                    var ktxPipelineSource = new Ktx2PipelineSource()
-                    {
-                        FilePath = source.FilePath ?? string.Empty,
-                    };
-                    
-                    var ktxPipelineOptions = new Ktx2PipelineOptions()
-                    {
-                        GenerateMipmaps = source.Ktx2ExportSettings.GenerateMipmaps,
-                        Encoding = Preferences.Ktx2GlobalSettings.EncodeTarget,
-                        OutputPath = $"{filePath}.ktx2",
-                    };
-
-                    var result = PipelineSystem.Convert("png", "ktx2", ktxPipelineSource, ktxPipelineOptions);
-
-                    if (!result.Success)
-                    {
-                        MessageLogger.ErrorAsync($"Failed to convert image '{file.PathOrFileName}' to KTX2 format.");
-                        return;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageLogger.ErrorAsync($"Error processing image '{file.PathOrFileName}': {ex.Message}");
-                    return;
-                }
-
-                MessageLogger.SuccessAsync(
-                    $"'{file.PathOrFileName}' has been converted to KTX2 format. Output file: '{filePath}.ktx2'");
-            });
         }
 
         /// <summary>
@@ -455,23 +401,17 @@ namespace RisContentPipeline.GUI
         /// </summary>
         public async Task LoadPreferencesAsync()
         {
-            if (!File.Exists(PREFERENCES_FILE))
-            {
-                return;
-            }
-            
             try
             {
-                string jsonContent = await File.ReadAllTextAsync(PREFERENCES_FILE);
-                var preferences = JsonSerializer.Deserialize<Preferences>(jsonContent);
-                if (preferences != null)
-                {
-                    Preferences = preferences;
-                }
+                Preferences = await Preferences.LoadAsync();
             }
             catch (Exception ex)
             {
-                MessageLogger.Error($"Failed to load session from '{SESSION_FILE}': {ex.Message}");
+#if DEBUG
+                MessageLogger.ErrorAsync($"Unable to load preferences: {ex.Message}");
+#else
+                MessageLogger.ErrorAsync($"Unable to load preferences.");
+#endif 
             }
         }
 
@@ -487,15 +427,13 @@ namespace RisContentPipeline.GUI
         }
 
         /// <summary>
-        /// Saves the current preferences to <see cref="PREFERENCES_FILE"/>.
+        /// Saves the current preferences.
         /// </summary>
         public Task SavePreferencesAsync()
         {
-            string jsonContent = JsonSerializer.Serialize(Preferences);
-            var filePath = Path.Combine(AppContext.BaseDirectory, PREFERENCES_FILE);
-            return File.WriteAllTextAsync(filePath, jsonContent);
+            return Preferences.SaveAsync();
         }
-        
+
 
         /// <summary>
         /// Performs a clean and full re-build of all imported assets.

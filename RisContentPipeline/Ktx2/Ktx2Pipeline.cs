@@ -54,8 +54,8 @@ public class Ktx2Pipeline : APipeline
         {
             alignment = 4;
         }
-        
-        
+
+        _stbImageLoader.VerticalFlip = pipelineOptions.FlipY;
         var image = _stbImageLoader.Load(sourceFilePath, 4, VkFormat.R8G8B8A8_UNORM);
         //
         // if (image.Channels == 3)
@@ -95,7 +95,7 @@ public class Ktx2Pipeline : APipeline
             BaseHeight = (uint) height,
             BaseWidth = (uint) width,
             VkFormat = VkFormat.R8G8B8A8_UNORM,
-            NumLevels = (uint) mipLevels
+            NumLevels = (uint) mipLevels,
         }, KtxTextureCreateStorage.ALLOC_STORAGE);
 
         texture.SetImageFromMemory(0, 0, 0, data, (uint)data.Length);
@@ -133,7 +133,8 @@ public class Ktx2Pipeline : APipeline
         {
             KtxBasisParams basisParams = new ()
             {
-                Uastc = uastc
+                Uastc = uastc,
+                ThreadCount = 0,
             };
 
             // If we do not have alpha channel, set its value to 1.

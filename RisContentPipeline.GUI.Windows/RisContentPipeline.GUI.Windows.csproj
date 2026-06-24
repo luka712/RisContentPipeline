@@ -35,6 +35,10 @@
     <ProjectReference Include="..\RisContentPipeline.GUI\RisContentPipeline.GUI.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="python-3.11.8" />
+    <Folder Include="runtimes" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Update="Resources\Icon.ico">

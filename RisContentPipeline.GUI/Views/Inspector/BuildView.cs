@@ -15,8 +15,9 @@ internal class BuildView
 {
     private const int SOURCE_COLUMN = 1;
     private const int TARGET_COLUMN = 5;
-    private const int FULL_SOURCE_PATH_COLUMN = 6;
-    private const int FULL_TARGET_PATH_COLUMN = 7;
+    private const int ERROR_COLUMN = 6;
+    private const int FULL_SOURCE_PATH_COLUMN = 7;
+    private const int FULL_TARGET_PATH_COLUMN = 8;
 
     private readonly Context _context;
     private readonly TreeGridView _treeView;
@@ -69,19 +70,23 @@ internal class BuildView
             AutoSize = true,
             DataCell = new ImageTextCell(4, TARGET_COLUMN),
         });
+        _treeView.Columns.Add(new GridColumn()
+        {
+            HeaderText = "Error",
+            AutoSize = true,
+            DataCell = new TextBoxCell( ERROR_COLUMN),
+        });
 
         // Hidden columns for storing full paths for double-click actions.
         _treeView.Columns.Add(new GridColumn
         {
             HeaderText = "Full Source Path",
-            AutoSize = true,
             DataCell = new TextBoxCell(FULL_SOURCE_PATH_COLUMN),
             Visible = false,
         });
         _treeView.Columns.Add(new GridColumn
         {
             HeaderText = "Full Target Path",
-            AutoSize = true,
             DataCell = new TextBoxCell(FULL_TARGET_PATH_COLUMN),
             Visible = false,
         });
@@ -128,12 +133,12 @@ internal class BuildView
 
             GetSourceDisplay(queuedItem.Item.Source, out string sourceDisplayName, out string fullSourcePath);
             var conversion = $"{queuedItem.Item.SourceType} → {queuedItem.Item.TargetType}";
-            var status = GetStatusText(queuedItem);
+            GetStatusText(queuedItem, out string status, out string? error);
             GetTargetDisplay(queuedItem, out string displayTargetPath, out string fullTargetPath);
-
+            
             _rootItem.Children.Add(new TreeGridItem
             {
-                Values = [Icons.FileIcon, sourceDisplayName, conversion, status, Icons.FileIcon, displayTargetPath, fullSourcePath, fullTargetPath],
+                Values = [Icons.FileIcon, sourceDisplayName, conversion, status, Icons.FileIcon, displayTargetPath, error, fullSourcePath, fullTargetPath],
             });
         }
 
@@ -205,21 +210,28 @@ internal class BuildView
         fullFilePath = "";
     }
 
-    private static string GetStatusText(QueuedPipelineItem item)
+    private static void GetStatusText(QueuedPipelineItem item, out string statusText, out string? error)
     {
+        error = item.Result?.ErrorMessage;
+        
         if (item.IsFinished)
         {
             if (item.Result?.Success == true)
-                return "Done";
-            return "Error";
+            {
+                statusText = "Done";
+                return;
+            }
+            statusText = "Error";
+            return;
         }
 
         if (item.IsStarted)
         {
-            return "Converting...";
+            statusText = "Converting...";
+            return;
         }
 
-        return "Pending";
+        statusText = "Pending";
     }
 
     private void OnCellDoubleClick(object? cell, GridCellMouseEventArgs gridCellMouseEventArgs)

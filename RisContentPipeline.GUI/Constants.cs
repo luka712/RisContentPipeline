@@ -8,9 +8,19 @@ namespace RisContentPipeline.GUI;
 public class Constants
 {
     /// <summary>
+    /// If <c>true</c> the application will use local folders for storing settings and data, instead of the standard application data folder.
+    /// </summary>
+    public const Boolean PORTABLE_MODE = true;
+
+    /// <summary>
     /// The name of the application.
     /// </summary>
     public const string APP_NAME = "Ris Content Pipeline";
+    
+    /// <summary>
+    /// The name of the application data folder.
+    /// </summary>
+    public const string APP_DATA_FOLDER_NAME = "RisContentPipeline";
     
     /// <summary>
     /// The path to the application icon.

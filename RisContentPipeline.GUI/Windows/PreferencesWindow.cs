@@ -22,6 +22,7 @@ namespace RisContentPipeline.GUI.Windows
         private TextureModeDropdown _encodeTargetDropDown = null!;
         private CheckBox _generateMipmapsCheckBox = null!;
         private EncodingQualityDropdown _encodingQualityDropdown = null!;
+        private CheckBox _flipYCheckBox = null!;
 
         private Ktx2Settings _ktx2SettingsPreferences = new();
 
@@ -38,10 +39,11 @@ namespace RisContentPipeline.GUI.Windows
             ClientSize = new Size(640, 420);
             MinimumSize = new Size(480, 320);
             Padding = new Padding(Theme.PADDING * 2);
-            
+
             _ktx2SettingsPreferences.EncodeTarget = _context.Preferences.Ktx2GlobalSettings.EncodeTarget;
             _ktx2SettingsPreferences.GenerateMipmaps = _context.Preferences.Ktx2GlobalSettings.GenerateMipmaps;
             _ktx2SettingsPreferences.QualityLevel = _context.Preferences.Ktx2GlobalSettings.QualityLevel;
+            _ktx2SettingsPreferences.FlipY = _context.Preferences.Ktx2GlobalSettings.FlipY;
 
             // ---- Tabs ---------------------------------------------------------
             var buildSettingsTab = AddBuildSettings();
@@ -50,18 +52,18 @@ namespace RisContentPipeline.GUI.Windows
 
             var tabs = new TabControl
             {
-               //  Pages = { buildSettingsTab, generalTab, appearanceTab }
-               Pages = { buildSettingsTab, generalTab }
+                //  Pages = { buildSettingsTab, generalTab, appearanceTab }
+                Pages = { buildSettingsTab, generalTab }
             };
 
             // ---- Buttons ------------------------------------------------------
-            
+
             var okButton = new Button { Text = "OK", Width = 90 };
             okButton.Click += (sender, e) => ApplySettingsAndClose();
 
             var cancelButton = new Button { Text = "Cancel", Width = 90 };
             cancelButton.Click += (sender, e) => Close();
-            
+
             var applyButton = new Button { Text = "Apply", Width = 90 };
             applyButton.Click += (sender, e) => ApplySettings();
 
@@ -102,9 +104,10 @@ namespace RisContentPipeline.GUI.Windows
             _context.Preferences.Ktx2GlobalSettings.EncodeTarget = _ktx2SettingsPreferences.EncodeTarget;
             _context.Preferences.Ktx2GlobalSettings.GenerateMipmaps = _ktx2SettingsPreferences.GenerateMipmaps;
             _context.Preferences.Ktx2GlobalSettings.QualityLevel = _ktx2SettingsPreferences.QualityLevel;
+            _context.Preferences.Ktx2GlobalSettings.FlipY = _ktx2SettingsPreferences.FlipY;
             _ = _context.SavePreferencesAsync();
         }
-        
+
         private void ApplySettingsAndClose()
         {
             ApplySettings();
@@ -133,7 +136,7 @@ namespace RisContentPipeline.GUI.Windows
             _encodeTargetDropDown = new(_context.Preferences.Ktx2GlobalSettings.EncodeTarget);
             _encodeTargetDropDown.SelectedIndexChanged += (sender, e) =>
             {
-                var selectedTarget = (Ktx2EncodingTarget) _encodeTargetDropDown.SelectedIndex;
+                var selectedTarget = (Ktx2EncodingTarget)_encodeTargetDropDown.SelectedIndex;
                 _ktx2SettingsPreferences.EncodeTarget = selectedTarget;
             };
 
@@ -141,10 +144,14 @@ namespace RisContentPipeline.GUI.Windows
                 new EncodingQualityDropdown(_ktx2SettingsPreferences.QualityLevel);
             _encodingQualityDropdown.EncodingQualityLevelChanged += (_, qualityLevel) =>
                 _ktx2SettingsPreferences.QualityLevel = qualityLevel;
-            
+
             _generateMipmapsCheckBox = new GenerateMipmapsCheckbox(_ktx2SettingsPreferences.GenerateMipmaps);
             _generateMipmapsCheckBox.CheckedChanged += (sender, e) =>
                 _ktx2SettingsPreferences.GenerateMipmaps = _generateMipmapsCheckBox.Checked == true;
+
+            _flipYCheckBox = new FlipYCheckbox(_ktx2SettingsPreferences.FlipY);
+            _flipYCheckBox.CheckedChanged += (sender, e) =>
+                _ktx2SettingsPreferences.FlipY = _flipYCheckBox.Checked == true;
 
             var ktx2GroupBox = new GroupBox { Text = "KTX2 Settings" };
             var ktx2Layout = new TableLayout()
@@ -164,6 +171,10 @@ namespace RisContentPipeline.GUI.Windows
                     new TableRow(
                         new Label(),
                         new TableCell(_generateMipmapsCheckBox, scaleWidth: true),
+                        null),
+                    new TableRow(
+                        new Label(),
+                        new TableCell(_flipYCheckBox, scaleWidth: true),
                         null),
                 }
             };
