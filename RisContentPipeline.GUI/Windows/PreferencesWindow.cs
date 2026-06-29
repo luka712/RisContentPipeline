@@ -19,7 +19,7 @@ namespace RisContentPipeline.GUI.Windows
         private TextBox _buildDirectoryTextBox = null!;
 
         // KTX2 settings
-        private TextureModeDropdown _encodeTargetDropDown = null!;
+        private EncodingTargetDropdown _encodeTargetDropDown = null!;
         private CheckBox _generateMipmapsCheckBox = null!;
         private EncodingQualityDropdown _encodingQualityDropdown = null!;
         private CheckBox _flipYCheckBox = null!;

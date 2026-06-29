@@ -20,7 +20,7 @@ import { type KTX2Container } from 'ktx-parse';
 import { extractKtx2Info } from '../texture-info.js';
 import { UIConfig } from './ui-config.js';
 import {GpuPanel} from "./gpu-panel.ts";
-import {TexturePropertiesPanel} from "./texture-properties-panel.ts";
+import TexturePropertiesPanel from "./texture-properties-panel.ts";
 import {TextureListPanel} from "./texture-list-panel.ts";
 
 // ---------------------------------------------------------------------------

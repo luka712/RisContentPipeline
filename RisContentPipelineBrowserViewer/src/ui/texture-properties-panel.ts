@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import type {FolderApi, Pane} from "tweakpane";
 import {type AnyTexture, type TextureMeta, TextureType} from "../types.ts";
-import type {MagnificationTextureFilter, MinificationTextureFilter} from "three";
+import {type MagnificationTextureFilter, type MinificationTextureFilter} from "three";
+import {Mapping} from "../mapping.ts";
 
 interface TextureProperties {
     type: TextureType;
@@ -10,6 +11,8 @@ interface TextureProperties {
     magFilter: MagnificationTextureFilter,
     anisotropy: number,
     sliceIndex: number,
+    flipY: boolean,
+    format: string
 }
 
 const MIN_FILTER_OPTIONS = {
@@ -26,7 +29,9 @@ const MAG_FILTER_OPTIONS = {
     Linear: THREE.LinearFilter,
 } as const;
 
-export class TexturePropertiesPanel {
+
+
+class TexturePropertiesPanel {
 
     private readonly _pane: Pane;
     private _folder: FolderApi;
@@ -65,6 +70,8 @@ export class TexturePropertiesPanel {
             minFilter: texture.minFilter,
             magFilter: texture.magFilter,
             anisotropy: texture.anisotropy,
+            format: Mapping.textureFormatMap[texture.format] ?? `Unknown (${texture.format})`,
+            flipY: false,
             sliceIndex: 0
         }
 
@@ -83,7 +90,7 @@ export class TexturePropertiesPanel {
             expanded: true,
         });
 
-        if(!this._textureProperties) {
+        if (!this._textureProperties) {
             throw new Error("Texture properties object is not initialized.");
         }
 
@@ -93,6 +100,17 @@ export class TexturePropertiesPanel {
 
         this._folder.addBinding(this._textureProperties, 'dimensions', {
             readonly: true
+        })
+
+        this._folder.addBinding(this._textureProperties, 'format', {
+            readonly: true,
+            label: "Texture Format"
+        });
+
+        this._folder.addBinding(this._textureProperties, 'flipY').on('change', (_) => {
+            if (this._texture) {
+                this._texture.flipY = this._textureProperties!.flipY;
+            }
         })
 
         this._folder
@@ -135,3 +153,5 @@ export class TexturePropertiesPanel {
     }
 
 }
+
+export default TexturePropertiesPanel

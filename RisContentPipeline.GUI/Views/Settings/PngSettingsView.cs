@@ -19,19 +19,19 @@ public class PngSettingsView
     static internal void Create(Context context, ImageContainer imageContainer, TableLayout tableLayout)
     {
         // Defaults
-        var encodingTarget = context.Preferences.Ktx2GlobalSettings.EncodeTarget;
-        bool generateMipmaps = context.Preferences.Ktx2GlobalSettings.GenerateMipmaps;
-        int qualityLevelIndex = (int) context.Preferences.Ktx2GlobalSettings.QualityLevel;
-        bool flipY = context.Preferences.Ktx2GlobalSettings.FlipY;
+        var encodingTarget = imageContainer.Ktx2ExportSettings.EncodeTarget;
+        bool generateMipmaps = imageContainer.Ktx2ExportSettings.GenerateMipmaps;
+        int qualityLevelIndex = (int) imageContainer.Ktx2ExportSettings.QualityLevel;
+        bool flipY = imageContainer.Ktx2ExportSettings.FlipY;
 
         // ----- Editable export settings ------------------------------------
         AddSectionHeader(tableLayout, "Export");
 
         // TEXTURE MODE DROPDOWN
-        var textureModeDropdown = new TextureModeDropdown(encodingTarget);
-        textureModeDropdown.SelectedIndexChanged += (sender, e) =>
+        var textureModeDropdown = new EncodingTargetDropdown(encodingTarget);
+        textureModeDropdown.OnEncodingTargetSelected += (_, v) =>
         {
-            imageContainer.Ktx2ExportSettings.EncodeTarget = (Ktx2EncodingTarget)textureModeDropdown.SelectedIndex;
+            imageContainer.Ktx2ExportSettings.EncodeTarget = v;
         };
         tableLayout.Rows.Add(new TableRow(
             new TextureModeLabel(),

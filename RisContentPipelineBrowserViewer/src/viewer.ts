@@ -342,6 +342,17 @@ export class TextureViewer {
 
     private _startRenderLoop(): void {
         const loop = (): void => {
+
+            if(this._mesh && this._currentTexture){
+
+                if(this._currentTexture.flipY){
+                    this._mesh.scale.y = -1;
+                }
+                else {
+                    this._mesh.scale.y = 1;
+                }
+            }
+
             this._controls.update();
             this._renderer.render(this._scene, this._camera);
             requestAnimationFrame(loop);

@@ -124,4 +124,12 @@ export class Mapping {
         [KHR_DF_MODEL_ASTC]: 'ASTC',
         [KHR_DF_MODEL_UASTC]: 'UASTC',
     };
+
+    /** Map of texture format constants to human-readable labels. */
+    public static readonly textureFormatMap: Record<number, string> = {
+        1022: 'RGB',
+        1023: 'RGBA',
+        36492: 'BC7 RGBA',
+        37808: 'ASTC 4X4 RGBA',
+    }
 }

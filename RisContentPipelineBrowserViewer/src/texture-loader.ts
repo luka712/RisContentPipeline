@@ -190,11 +190,6 @@ export class TextureLoader {
             container.pixelDepth,
         );
 
-        // Flip Y for 2D textures; cubemaps and arrays use different conventions
-        if (type === TextureType.Texture2D) {
-            (texture as THREE.Texture).flipY = true;
-        }
-
         onLoad({
             texture,
             meta: {
