@@ -24,7 +24,11 @@
 
 
   <ItemGroup>
-  <Content Include="python-3.11.8\**\*">
+  <Content Include="_image_viewer\**\*">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+  </Content>
+   <Content Include="python-3.11.8\**\*">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
   </Content>

@@ -10,7 +10,7 @@ public class Constants
     /// <summary>
     /// If <c>true</c> the application will use local folders for storing settings and data, instead of the standard application data folder.
     /// </summary>
-    public const Boolean PORTABLE_MODE = true;
+    public const Boolean PORTABLE_MODE = false;
 
     /// <summary>
     /// The name of the application.

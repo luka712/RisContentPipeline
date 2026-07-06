@@ -13,7 +13,7 @@ echo -e "${GREEN}Building RisContentPipeline AppImage...${NC}"
 
 # Configuration
 APP_NAME="RisContentPipeline"
-APP_VERSION="0.1.0"
+APP_VERSION="0.2.1"
 ARCH=$(uname -m)
 BUILD_DIR="$(pwd)/build"
 APPDIR="$BUILD_DIR/$APP_NAME.AppDir"

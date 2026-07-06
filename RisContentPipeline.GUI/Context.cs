@@ -46,12 +46,12 @@ namespace RisContentPipeline.GUI
         /// </summary>
         public IPipelineSystem PipelineSystem = new PipelineSystem();
 
-        private readonly StbImageLoader _stbImageLoader = new StbImageLoader();
+        private readonly StbImageLoader _stbImageLoader = new ();
         private PythonIntegration? _pythonIntegration;
         private readonly List<Script> _buildScripts = [];
         private readonly List<Script> _internalScripts = [];
 
-        private List<AssetFileOrFolder> _filesOrFolders = new List<AssetFileOrFolder>();
+        private List<AssetFileOrFolder> _filesOrFolders = new ();
 
         /// <summary>
         /// Initializes a new <see cref="Context"/> and wires up build logging for the
