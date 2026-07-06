@@ -2,12 +2,13 @@ using Eto.Drawing;
 using Eto.Forms;
 using RisContentPipeline.GUI.Controls;
 using RisContentPipeline.GUI.Data;
-using RisContentPipeline.GUI.Settings;
-using RisContentPipeline.Ktx2;
 
 namespace RisContentPipeline.GUI.Views.Settings;
 
-public class PngSettingsView
+/// <summary>
+/// The view for the image file settings.
+/// </summary>
+public class ImageSettingsView
 {
     /// <summary>
     /// Adds rows describing the supplied <paramref name="imageContainer"/> to the

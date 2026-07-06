@@ -12,10 +12,12 @@ internal class AssetView
 {
     private readonly Context _context;
     private readonly TreeGridView _treeView;
+    private readonly ButtonMenuItem _openImgViewerButton;
+    private readonly ButtonMenuItem _removeButton;
 
     private ImageViewerWindow? _imageViewerWindow;
     private ImageTreeGridItem? _rootItem;
-
+    
     /// <summary>
     /// The titled panel that hosts the asset tree view.
     /// </summary>
@@ -28,6 +30,20 @@ internal class AssetView
     {
         _context = context;
 
+        _openImgViewerButton = new ButtonMenuItem()
+        {
+            Text = "Open Image Viewer", 
+            Command = new Command((_, _) => OpenPngViewer()),
+            Enabled = false
+        };
+        
+        _removeButton = new ButtonMenuItem()
+        {
+            Text = "Remove",
+            Command = new Command((_, _) => HandleRemoveAssetItem()),
+            Enabled = false
+        };
+
         _treeView = new TreeGridView
         {
             ShowHeader = false,
@@ -35,25 +51,9 @@ internal class AssetView
             Border = BorderType.None,
             ContextMenu = new ContextMenu()
             {
-                Items =
-                {
-                    new ButtonMenuItem()
-                    {
-                        Text = "Open Image Viewer", Command = new Command((_, _) => OpenPngViewer())
-                    },
-                    new ButtonMenuItem()
-                    {
-                        Text = "Remove", Command = new Command((_, _) =>
-                        {
-                            var index = _treeView.SelectedRow;
-                            _context.RemoveFile(index);
-                            Refresh();
-                        })
-                    }
-                }
+                Items = { _openImgViewerButton, _removeButton }
             }
         };
-
 
         // Add a column to the tree view
         _treeView.Columns.Add(new GridColumn
@@ -74,6 +74,22 @@ internal class AssetView
             Padding = new Padding(Theme.PADDING),
             Content = _treeView,
         };
+    }
+
+    /// <summary>
+    /// Handles the removal of an asset item from the tree view.
+    /// </summary>
+    private void HandleRemoveAssetItem()
+    {
+        var index = _treeView!.SelectedRow;
+        if (index > -1)
+        {
+            _context.RemoveFile(index);
+            Refresh();
+            _treeView.SelectedRow = -1;
+            _removeButton.Enabled = false;
+            _openImgViewerButton.Enabled = false;
+        }
     }
 
     public void Refresh()
@@ -118,6 +134,8 @@ internal class AssetView
         if (_treeView.SelectedItem is ImageTreeGridItem selectedItem && selectedItem.FileOrFolder != null)
         {
             _context.OnItemSelected?.Invoke(selectedItem.FileOrFolder);
+            _removeButton.Enabled = true;
+            _openImgViewerButton.Enabled = true;
         }
     }
 

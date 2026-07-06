@@ -38,6 +38,11 @@ namespace RisContentPipeline.GUI
         /// </summary>
         public static Icon InfoIcon { get; private set; } = null!;
 
+        /// <summary>
+        /// The context icon used in the asset view to indicate the current context of the asset.
+        /// </summary>
+        public static Icon ContextIcon { get; private set; } = null!;
+
         private static Icon LoadIcon(string path)
         {
             var directory = AppDomain.CurrentDomain.BaseDirectory;
@@ -57,6 +62,7 @@ namespace RisContentPipeline.GUI
             CheckIcon = LoadIcon("Icons/check-solid.png");
             PythonIcon = LoadIcon("Icons/python-brands-solid.png");
             InfoIcon = LoadIcon("Icons/circle-info-solid.png");
+            ContextIcon = LoadIcon("Icons/ellipsis-vertical-solid.png");
         }
     }
 }

@@ -117,6 +117,6 @@ internal class SettingsView
             new Label { Text = imageContainer.FileName }
         ));
 
-        PngSettingsView.Create(_context, imageContainer, _tableLayout);
+        ImageSettingsView.Create(_context, imageContainer, _tableLayout);
     }
 }
