@@ -9,6 +9,7 @@
     <AssemblyName>RisContentPipelineApp</AssemblyName>
     <Product>Ris Content Pipeline</Product>
     <AssemblyTitle>Ris Content Pipeline App</AssemblyTitle>
+    <RootNamespace>RisContentPipeline.GUI.Windows</RootNamespace>
   </PropertyGroup>
 
   <Target Name="CopyPythonFolder" AfterTargets="Build">
@@ -32,7 +33,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\RisContentPipeline.GUI\RisContentPipeline.GUI.csproj" />
+    <ProjectReference Include="..\RisContentPipeline.GUI.Old\RisContentPipeline.GUI.Old.csproj" />
   </ItemGroup>
 
   <ItemGroup>

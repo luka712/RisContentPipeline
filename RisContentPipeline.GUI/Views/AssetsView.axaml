@@ -1,0 +1,44 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="clr-namespace:RisContentPipeline.GUI.Models"
+             xmlns:viewModels="clr-namespace:RisContentPipeline.GUI.ViewModels"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             x:DataType="viewModels:MainViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="RisContentPipeline.GUI.Views.AssetsView">
+    <StackPanel Orientation="Vertical">
+
+        <suki:GlassCard Margin="10" MinHeight="300" Classes="Primary">
+            <suki:GroupBox Header="Assets">
+             
+                    <TreeView
+                        ItemsSource="{Binding Assets}"
+                        SelectedItem="{Binding SelectedAsset}"
+                        Margin="4">
+                        <TreeView.ItemTemplate>
+                            <DataTemplate x:DataType="models:AssetFileOrFolder">
+                                <TextBlock Text="{Binding PathOrFileName}" />
+                            </DataTemplate>
+                        </TreeView.ItemTemplate>
+                    </TreeView>
+            </suki:GroupBox>
+        </suki:GlassCard>
+
+        <ListBox ItemsSource="{Binding Assets}"
+                 SelectedItem="{Binding SelectedAsset}"
+                 Margin="4">
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="models:AssetFileOrFolder">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <PathIcon
+                            Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
+                            Width="16" Height="16" />
+                        <TextBlock Text="{Binding PathOrFileName}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </StackPanel>
+</UserControl>

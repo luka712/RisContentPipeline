@@ -1,0 +1,25 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:RisContentPipeline.GUI.Controls">
+    <Design.PreviewWith>
+        <controls:GenerateMipMapCheckBox />
+    </Design.PreviewWith>
+
+    <Style Selector="controls|GenerateMipMapCheckBox">
+        <!-- Set Defaults -->
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid ColumnDefinitions="120,*">
+                    <TextBlock Text="Generate Mipmap" VerticalAlignment="Center" 
+                               ToolTip.Tip="If checked mipmap chain is generated for sprite sheet."/>
+                    <CheckBox Grid.Column="1"
+                              Margin="12, 4" 
+                              VerticalAlignment="Center"
+                              IsChecked="{TemplateBinding IsChecked}"
+                            
+                              />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

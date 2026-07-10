@@ -1,0 +1,12 @@
+{
+  "BuildDirectory": "Build",
+  "LocalServerPort": 5050,
+  "ViewerPath": "BrowserViewer",
+  "Ktx2GlobalSettings": {
+    "EncodeTarget": 0,
+    "GenerateMipmaps": true,
+    "FlipY": false,
+    "QualityLevel": 3,
+    "UastcQualityLevel": 2
+  }
+}

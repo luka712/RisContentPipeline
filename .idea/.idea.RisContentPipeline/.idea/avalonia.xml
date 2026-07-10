@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AvaloniaProject">
+    <option name="projectPerEditor">
+      <map>
+        <entry key="RisContentPipeline.GUI/App.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+        <entry key="RisContentPipeline.GUI/Controls/EncodingTargetComboBox.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+        <entry key="RisContentPipeline.GUI/Controls/FlipYCheckBox.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+        <entry key="RisContentPipeline.GUI/Controls/GenerateMipMapCheckBox.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+        <entry key="RisContentPipeline.GUI/Controls/QualityLevelComboBox.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+        <entry key="RisContentPipeline.GUI/Views/AboutWindow.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+        <entry key="RisContentPipeline.GUI/Views/AssetsView.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+        <entry key="RisContentPipeline.GUI/Views/ImageViewerWindow.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+        <entry key="RisContentPipeline.GUI/Views/PreferencesBuildSettingsView.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+        <entry key="RisContentPipeline.GUI/Views/PreferencesWindow.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+        <entry key="RisContentPipeline.GUI/Windows/AboutWindow.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+        <entry key="RisContentPipeline.GUI/Windows/ImageViewerWindow.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+        <entry key="RisContentPipeline.GUI/Windows/MainWindow.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+        <entry key="RisContentPipeline.GUI/Windows/PreferencesWindow.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+      </map>
+    </option>
+  </component>
+</project>

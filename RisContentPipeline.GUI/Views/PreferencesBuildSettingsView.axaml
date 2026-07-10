@@ -1,0 +1,35 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:RisContentPipeline.GUI.Controls"
+             xmlns:vm="clr-namespace:RisContentPipeline.GUI.ViewModels"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="vm:PreferencesViewModel"
+             x:Class="RisContentPipeline.GUI.Views.PreferencesBuildSettingsView">
+    <StackPanel Spacing="16">
+
+        <!-- Build Settings -->
+        <StackPanel Orientation="Vertical">
+            <Grid ColumnDefinitions="120,*,Auto" RowDefinitions="Auto" Margin="0,0,0,8">
+                <TextBlock Grid.Column="0" Text="Build Directory" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Text="{Binding BuildDirectory}" Margin="8,0" />
+                <Button Grid.Column="2" Content="Browse..." Command="{Binding BrowseBuildDirectoryCommand}" />
+            </Grid>
+
+        </StackPanel>
+
+        <!-- Global KTX2 Settings Section -->
+        <suki:GroupBox Header="KTX2 Settings">
+            <StackPanel Orientation="Vertical">
+
+                <controls:EncodingTargetComboBox SelectedEncodingTarget="{Binding EncodingTarget}" />
+                <controls:QualityLevelComboBox SelectedIndex="{Binding QualityLevel}" />
+                <controls:GenerateMipMapCheckBox IsChecked="{Binding GenerateMipmaps}" />
+                <controls:FlipYCheckBox IsChecked="{Binding FlipY}" />
+            </StackPanel>
+
+        </suki:GroupBox>
+    </StackPanel>
+</UserControl>

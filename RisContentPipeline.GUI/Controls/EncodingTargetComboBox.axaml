@@ -1,0 +1,23 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:RisContentPipeline.GUI.Controls">
+    <Design.PreviewWith>
+        <controls:EncodingTargetComboBox />
+    </Design.PreviewWith>
+
+    <Style Selector="controls|EncodingTargetComboBox">
+        <!-- Set Defaults -->
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid ColumnDefinitions="120,*">
+                    <TextBlock Grid.Column="0" Text="Encoding Target" VerticalAlignment="Center" />
+                    <ComboBox Grid.Column="1"
+                              Margin="8,4"
+                              ItemsSource="{TemplateBinding  EncodingTargets}" 
+                              SelectedIndex="{TemplateBinding SelectedIndex}"
+                              />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

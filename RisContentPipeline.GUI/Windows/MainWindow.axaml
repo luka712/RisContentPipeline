@@ -1,0 +1,164 @@
+<suki:SukiWindow xmlns="https://github.com/avaloniaui"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:vm="using:RisContentPipeline.GUI.ViewModels"
+                 xmlns:models="using:RisContentPipeline.GUI.Models"
+                 xmlns:suki="https://github.com/kikipoulet/SukiUI"
+                 xmlns:views="clr-namespace:RisContentPipeline.GUI.Views"
+                 x:Class="RisContentPipeline.GUI.Views.MainWindow"
+                 x:DataType="vm:MainViewModel"
+                 Icon="/Assets/avalonia-logo.ico"
+                 Title="RisContentPipeline"
+                 Width="1200" Height="800"
+                 MinWidth="800" MinHeight="600"
+                 IsMenuVisible="True"
+                 >
+
+    <Design.DataContext>
+        <vm:MainViewModel />
+    </Design.DataContext>
+
+
+        <suki:SukiWindow.MenuItems>
+            <MenuItem Header="File">
+                <MenuItem Header="Add Files..." Command="{Binding AddFilesCommand}" />
+                <MenuItem Header="Clear All" Command="{Binding ClearAssetsCommand}" />
+                <Separator />
+                <MenuItem Header="Preferences..." Command="{Binding ShowPreferencesWindowCommand}" CommandParameter="{Binding $parent[suki:SukiWindow]}" />
+                <Separator />
+                <MenuItem Header="Exit" Click="OnExitClick" />
+            </MenuItem>
+            <MenuItem Header="Build">
+                <MenuItem Header="Build" Command="{Binding BuildCommand}" />
+                <MenuItem Header="Set Build Directory..." Command="{Binding SetBuildDirectoryCommand}" />
+            </MenuItem>
+            <MenuItem Header="Help">
+                <MenuItem Header="_About" Command="{Binding ShowAboutCommand}" />
+            </MenuItem>
+
+        </suki:SukiWindow.MenuItems>
+        <DockPanel>
+
+        <!-- Toolbar -->
+        <Border DockPanel.Dock="Top" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+                Padding="8">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="Add Files" Command="{Binding AddFilesCommand}" />
+                <Button Content="Remove" Command="{Binding RemoveSelectedAssetCommand}" />
+                <Button Content="Clear" Command="{Binding ClearAssetsCommand}" />
+                <Separator />
+                <Button Content="View" Command="{Binding ViewSelectedAssetCommand}"
+                        IsEnabled="{Binding SelectedAsset, Converter={x:Static ObjectConverters.IsNotNull}}"
+                        ToolTip.Tip="View selected image in KTX2/PNG viewer" />
+                <Separator />
+                <Button Content="Build" Command="{Binding BuildCommand}" IsEnabled="{Binding !IsBuilding}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Status Bar -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+                Padding="8,4">
+            <TextBlock Text="{Binding StatusText}" />
+        </Border>
+
+        <!-- Main Content -->
+        <Grid ColumnDefinitions="300,Auto,*">
+            <!-- Left Panel: Assets and Scripts -->
+            <Grid Grid.Column="0" RowDefinitions="*,Auto,*">
+                <!-- Assets List -->
+                <DockPanel Grid.Row="0">
+                  <views:AssetsView />
+                </DockPanel>
+
+                <GridSplitter Grid.Row="1" Height="4" HorizontalAlignment="Stretch" />
+
+                <!-- Scripts List -->
+                <DockPanel Grid.Row="2">
+                    <TextBlock DockPanel.Dock="Top" Text="Build Scripts" FontWeight="Bold" Margin="8" />
+                    <Grid RowDefinitions="*,Auto">
+                        <ListBox Grid.Row="0"
+                                 ItemsSource="{Binding BuildScripts}"
+                                 SelectedItem="{Binding SelectedScript}"
+                                 Margin="4">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="models:Script">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <PathIcon
+                                            Data="M12,3C10.73,3 9.6,3.8 9.18,5H3V7H4.95L2,14C1.53,16 3,17 5.5,17C8,17 9.56,16 9,14L6.05,7H9.17C9.5,7.85 10.15,8.5 11,8.83V20H2V22H22V20H13V8.82C13.85,8.5 14.5,7.85 14.82,7H17.95L15,14C14.53,16 16,17 18.5,17C21,17 22.56,16 22,14L19.05,7H21V5H14.83C14.4,3.8 13.27,3 12,3M12,5A1,1 0 0,1 13,6A1,1 0 0,1 12,7A1,1 0 0,1 11,6A1,1 0 0,1 12,5M5.5,10.25L7,14H4L5.5,10.25M18.5,10.25L20,14H17L18.5,10.25Z"
+                                            Width="16" Height="16" />
+                                        <TextBlock Text="{Binding Name}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="4" Margin="4">
+                            <Button Content="Remove" Command="{Binding RemoveSelectedScriptCommand}" />
+                        </StackPanel>
+                    </Grid>
+                </DockPanel>
+            </Grid>
+
+            <GridSplitter Grid.Column="1" Width="4" />
+
+            <!-- Right Panel: Inspector and Messages -->
+            <Grid Grid.Column="2" RowDefinitions="*,Auto,200">
+                <!-- Inspector Panel -->
+                <Border Grid.Row="0" Margin="4">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Inspector" FontWeight="Bold" Margin="8" />
+                        <ScrollViewer>
+                            <StackPanel Margin="8"
+                                        IsVisible="{Binding SelectedAsset, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                <TextBlock Text="Selected Asset" FontWeight="SemiBold" Margin="0,0,0,8" />
+                                <TextBlock Text="{Binding SelectedAsset.AbsolutePathOrFileName}" TextWrapping="Wrap" />
+
+                                <!-- KTX2 Settings (shown for images) -->
+                                <StackPanel IsVisible="{Binding SelectedAsset.IsPng}" Margin="0,16,0,0">
+                                    <TextBlock Text="KTX2 Export Settings" FontWeight="SemiBold" Margin="0,0,0,8" />
+
+                                    <CheckBox Content="Generate Mipmaps"
+                                              IsChecked="{Binding SelectedAsset.Image.Ktx2ExportSettings.GenerateMipmaps}" />
+                                    <CheckBox Content="Flip Y"
+                                              IsChecked="{Binding SelectedAsset.Image.Ktx2ExportSettings.FlipY}" />
+
+                                    <TextBlock Text="Encoding Target" Margin="0,8,0,4" />
+                                    <ComboBox
+                                        SelectedIndex="{Binding SelectedAsset.Image.Ktx2ExportSettings.EncodeTarget}">
+                                        <ComboBoxItem Content="BASIS ETC1S" />
+                                        <ComboBoxItem Content="BASIS UASTC" />
+                                        <ComboBoxItem Content="ASTC 4x4" />
+                                    </ComboBox>
+
+                                    <TextBlock Text="Quality Level" Margin="0,8,0,4" />
+                                    <Slider Minimum="0" Maximum="5"
+                                            Value="{Binding SelectedAsset.Image.Ktx2ExportSettings.QualityLevel}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Border>
+
+                <GridSplitter Grid.Row="1" Height="4" HorizontalAlignment="Stretch" />
+
+                <!-- Messages Panel -->
+                <DockPanel Grid.Row="2" Margin="4">
+                    <Grid DockPanel.Dock="Top">
+                        <TextBlock Text="Messages" FontWeight="Bold" Margin="8" />
+                        <Button Content="Clear" Command="{Binding ClearMessagesCommand}"
+                                HorizontalAlignment="Right" Margin="8,4" />
+                    </Grid>
+                    <ListBox ItemsSource="{Binding Messages}" Margin="4">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="models:LogMessage">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{Binding Timestamp, StringFormat='{}{0:HH:mm:ss}'}"
+                                               Foreground="Gray" FontFamily="Consolas" />
+                                    <TextBlock Text="{Binding Message}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Grid>
+        </Grid>
+    </DockPanel>
+</suki:SukiWindow>
