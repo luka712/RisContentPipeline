@@ -1,0 +1,23 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:RisContentPipeline.GUI.Controls"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia">
+    <Design.PreviewWith>
+        <controls:FilePathSelectableTextBlock />
+    </Design.PreviewWith>
+
+    <Style Selector="controls|FilePathSelectableTextBlock">
+        <!-- Set Defaults -->
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid ColumnDefinitions="120,*,Auto" RowDefinitions="Auto" Margin="0,0,0,8">
+                    <TextBlock Grid.Column="0" Text="File Path" VerticalAlignment="Center" />
+                    <SelectableTextBlock Name="PartSelectableTextBlock" Grid.Column="1" Text="{TemplateBinding FilePath}" Margin="8,0" VerticalAlignment="Center" />
+                    <Button Name="PartButton" Grid.Column="2" Padding="5">
+                        <avalonia:MaterialIcon  Classes="Icon" Kind="ContentCopy" />
+                    </Button>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

@@ -12,18 +12,12 @@
 
         <!-- Build Settings -->
         <StackPanel Orientation="Vertical">
-            <Grid ColumnDefinitions="120,*,Auto" RowDefinitions="Auto" Margin="0,0,0,8">
-                <TextBlock Grid.Column="0" Text="Build Directory" VerticalAlignment="Center" />
-                <TextBox Grid.Column="1" Text="{Binding BuildDirectory}" Margin="8,0" />
-                <Button Grid.Column="2" Content="Browse..." Command="{Binding BrowseBuildDirectoryCommand}" />
-            </Grid>
-
+            <controls:BuildDirectoryTextBox BuildDirectory="{Binding BuildDirectory}" IsButtonIcon="False" />
         </StackPanel>
 
         <!-- Global KTX2 Settings Section -->
         <suki:GroupBox Header="KTX2 Settings">
             <StackPanel Orientation="Vertical">
-
                 <controls:EncodingTargetComboBox SelectedEncodingTarget="{Binding EncodingTarget}" />
                 <controls:QualityLevelComboBox SelectedIndex="{Binding QualityLevel}" />
                 <controls:GenerateMipMapCheckBox IsChecked="{Binding GenerateMipmaps}" />

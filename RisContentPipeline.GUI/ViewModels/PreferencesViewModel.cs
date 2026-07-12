@@ -5,6 +5,9 @@ using RisContentPipeline.Ktx2;
 
 namespace RisContentPipeline.GUI.ViewModels;
 
+/// <summary>
+/// The view model for the preferences window.
+/// </summary>
 public partial class PreferencesViewModel : ViewModelBase
 {
     private readonly Preferences _preferences;

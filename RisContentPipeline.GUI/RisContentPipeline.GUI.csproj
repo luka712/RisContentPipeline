@@ -8,13 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="Models\"/>
-        <Folder Include="Services\"/>
         <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="12.1.0"/>
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.1.0" />
         <PackageReference Include="Avalonia.Desktop" Version="12.1.0"/>
         <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.0"/>
         <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.0"/>
@@ -23,6 +22,7 @@
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2"/>
+        <PackageReference Include="Material.Icons.Avalonia" Version="3.0.2" />
         <PackageReference Include="SukiUI.Dock" Version="7.0.1" />
     </ItemGroup>
 
@@ -47,5 +47,11 @@
         <DependentUpon>AboutWindow.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Assets\image-solid.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 </Project>

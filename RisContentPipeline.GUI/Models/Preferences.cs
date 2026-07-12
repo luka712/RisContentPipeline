@@ -1,4 +1,5 @@
 using System.Text.Json;
+using RisContentPipeline.GUI.ViewModels;
 
 namespace RisContentPipeline.GUI.Models;
 
@@ -27,7 +28,7 @@ public class Preferences
     /// <summary>
     /// Global KTX2 settings applied to new images.
     /// </summary>
-    public Ktx2Settings Ktx2GlobalSettings { get; set; } = new();
+    public Ktx2SettingsViewModel Ktx2GlobalSettings { get; set; } = new();
 
     /// <summary>
     /// Loads preferences from the preference file.

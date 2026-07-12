@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:viewModels="clr-namespace:RisContentPipeline.GUI.ViewModels"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:models="clr-namespace:RisContentPipeline.GUI.Models"
+             x:DataType="viewModels:MainViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="RisContentPipeline.GUI.Views.MessagesView">
+    <suki:GlassCard Margin="10" Classes="Primary">
+        <DataGrid ItemsSource="{Binding Messages}" CanUserReorderColumns="True" CanUserSortColumns="True"
+                  IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                            <avalonia:MaterialIcon Classes="Icon"
+                                                   IsVisible="{Binding Level, Converter={StaticResource EqualsConverter}, ConverterParameter={StaticResource InfoMessage}}"  
+                                                   Kind="Info"/>
+                            <avalonia:MaterialIcon Classes="Icon"
+                                                   IsVisible="{Binding Level, Converter={StaticResource EqualsConverter}, ConverterParameter={StaticResource WarningMessage}}"  
+                                                   Kind="Warning"/>
+                            <avalonia:MaterialIcon Classes="Icon"
+                                                   IsVisible="{Binding Level, Converter={StaticResource EqualsConverter}, ConverterParameter={StaticResource ErrorMessage}}"  
+                                                   Kind="Error"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Message" Binding="{Binding Message}" />
+                <DataGridTextColumn Header="Timestamp"
+                                    Binding="{Binding Timestamp, Converter={StaticResource DateTimeConverter}, Mode=OneWay}" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </suki:GlassCard>
+</UserControl>

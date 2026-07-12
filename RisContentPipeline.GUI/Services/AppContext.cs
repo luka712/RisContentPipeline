@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Text.Json;
 using RisContentPipeline.Generic;
 using RisContentPipeline.GUI.Models;
+using RisContentPipeline.GUI.ViewModels;
 using RisContentPipeline.Ktx2;
 using RisKtx2;
 
@@ -18,10 +19,8 @@ public class PipelineContext : IDisposable
 
     public IPipelineSystem PipelineSystem { get; } = new PipelineSystem();
 
-    public ObservableCollection<AssetFileOrFolder> Assets { get; } = [];
-    public ObservableCollection<Script> BuildScripts { get; } = [];
-    public ObservableCollection<Script> InternalScripts { get; } = [];
-    public ObservableCollection<LogMessage> Messages { get; } = [];
+    public ObservableCollection<AssetViewModel> Assets { get; } = [];
+    public ObservableCollection<LogMessage> Messages { get; } = [new LogMessage(MessageLogLevel.ERROR, "No messages", new DateTime())];
 
     public Preferences Preferences { get; private set; } = new();
 
@@ -63,20 +62,20 @@ public class PipelineContext : IDisposable
 
     private void AddPngFile(string filePath)
     {
-        Assets.Add(new AssetFileOrFolder
+        Assets.Add(new AssetViewModel() 
         {
-            AbsolutePathOrFileName = filePath,
-            Image = new ImageContainer
+            AbsoluteFilePath = filePath,
+            Image = new ImageViewModel()
             {
                 FilePath = filePath,
-                Ktx2ExportSettings = Preferences.Ktx2GlobalSettings.Copy()
+                Ktx2Settings= Preferences.Ktx2GlobalSettings.Copy()
             }
         });
     }
 
     private void AddGenericFile(string filePath)
     {
-        Assets.Add(new AssetFileOrFolder { AbsolutePathOrFileName = filePath });
+        Assets.Add(new AssetViewModel() { AbsoluteFilePath = filePath });
     }
 
     public void RemoveAsset(int index)
@@ -84,15 +83,7 @@ public class PipelineContext : IDisposable
         if (index >= 0 && index < Assets.Count)
             Assets.RemoveAt(index);
     }
-
-    public void AddBuildScript(Script script)
-    {
-        if (!BuildScripts.Any(s => s.FilePath == script.FilePath))
-            BuildScripts.Add(script);
-    }
-
-    public void RemoveBuildScript(Script script) => BuildScripts.Remove(script);
-
+    
     public async Task BuildAsync()
     {
         var buildDirectory = Preferences.BuildDirectory;
@@ -121,14 +112,14 @@ public class PipelineContext : IDisposable
         }
     }
 
-    private void QueueFileForBuild(AssetFileOrFolder asset, string buildDirectory)
+    private void QueueFileForBuild(AssetViewModel asset, string buildDirectory)
     {
-        var fileName = asset.PathOrFileName;
+        var fileName = asset.FileName;
         if (string.IsNullOrEmpty(fileName)) return;
 
         if (asset.Image != null)
         {
-            var settings = asset.Image.Ktx2ExportSettings;
+            var settings = asset.Image.Ktx2Settings;
             var outputPath = Path.Combine(buildDirectory, Path.GetFileNameWithoutExtension(fileName) + ".ktx2");
 
             var options = new Ktx2PipelineOptions
@@ -146,13 +137,13 @@ public class PipelineContext : IDisposable
             else if (settings.EncodeTarget == Ktx2EncodingTarget.ASTC_4X4)
                 options.AstcQuality = (KtxPackAstcQualityLevels)settings.GetQualityLevelValue();
 
-            PipelineSystem.StoreSourceAsset("png", "ktx2", new Ktx2PipelineSource { FilePath = asset.AbsolutePathOrFileName }, options);
+            PipelineSystem.StoreSourceAsset("png", "ktx2", new Ktx2PipelineSource { FilePath = asset.AbsoluteFilePath }, options);
         }
         else if (asset.IsJson || asset.IsXml)
         {
-            var fileType = Path.GetExtension(asset.AbsolutePathOrFileName).TrimStart('.');
+            var fileType = Path.GetExtension(asset.AbsoluteFilePath).TrimStart('.');
             PipelineSystem.StoreSourceAsset(fileType, IPipeline.ANY_TYPE,
-                new GenericPipelineSource { FilePath = asset.AbsolutePathOrFileName },
+                new GenericPipelineSource { FilePath = asset.AbsoluteFilePath },
                 new GenericPipelineOptions { OutputPath = Path.Combine(buildDirectory, fileName) });
         }
     }
@@ -181,13 +172,7 @@ public class PipelineContext : IDisposable
             var session = JsonSerializer.Deserialize<Session>(json);
             if (session != null)
             {
-                foreach (var scriptPath in session.BuildScripts.Distinct())
-                {
-                    if (File.Exists(scriptPath))
-                        AddBuildScript(new Script(scriptPath));
-                    else
-                        LogWarning($"Build script '{scriptPath}' not found.");
-                }
+               
             }
         }
         catch (Exception ex)
@@ -198,14 +183,13 @@ public class PipelineContext : IDisposable
 
     public void SaveSession()
     {
-        var session = new Session { BuildScripts = BuildScripts.Select(s => s.FilePath).Distinct().ToList() };
+        var session = new Session {  };
         var json = JsonSerializer.Serialize(session);
         File.WriteAllText(SESSION_FILE, json);
     }
 
     private void LoadInternalScripts()
     {
-        InternalScripts.Clear();
         var directory = ResolveScriptDirectory(INTERNAL_SCRIPTS_DIRECTORY);
         if (directory == null) return;
 
@@ -215,8 +199,6 @@ public class PipelineContext : IDisposable
             if (name.StartsWith("base_", StringComparison.OrdinalIgnoreCase) ||
                 name.StartsWith("__", StringComparison.Ordinal))
                 continue;
-
-            InternalScripts.Add(new Script(file));
         }
     }
 

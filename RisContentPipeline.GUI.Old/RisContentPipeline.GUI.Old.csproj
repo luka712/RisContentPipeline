@@ -59,6 +59,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.1.0" />
     <PackageReference Include="Eto.Forms" Version="2.11.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.3.10" />
     <PackageReference Include="pythonnet" Version="3.0.3" />

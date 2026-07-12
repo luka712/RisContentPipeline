@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.1.0" />
     <PackageReference Include="RisKtx2" Version="0.2.1-preview.20260623195431" />
   </ItemGroup>
 

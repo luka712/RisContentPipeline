@@ -1,11 +1,14 @@
 using System.Collections.ObjectModel;
+using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RisContentPipeline.GUI.Models;
 using RisContentPipeline.GUI.Services;
 using RisContentPipeline.GUI.Windows;
 using SukiUI.Controls;
+using SukiUI.Toasts;
 
 namespace RisContentPipeline.GUI.ViewModels;
 
@@ -13,16 +16,23 @@ public partial class MainViewModel : ViewModelBase
 {
     private readonly PipelineContext _context;
 
-    [ObservableProperty] private AssetFileOrFolder? _selectedAsset;
+    /// <summary>
+    /// The currently selected asset in UI.
+    /// </summary>
+    [ObservableProperty] private AssetViewModel? _selectedAsset;
+
     [ObservableProperty] private Script? _selectedScript;
     [ObservableProperty] private bool _isBuilding;
     [ObservableProperty] private string _statusText = "Ready";
 
-    public ObservableCollection<AssetFileOrFolder> Assets => _context.Assets;
-    public ObservableCollection<Script> BuildScripts => _context.BuildScripts;
-    public ObservableCollection<Script> InternalScripts => _context.InternalScripts;
-    public ObservableCollection<LogMessage> Messages => _context.Messages;
+    [ObservableProperty]
+    private ObservableCollection<LogMessage> _messages =
+        [new LogMessage(MessageLogLevel.ERROR, "No messages", DateTime.Now)];
+
+    public ObservableCollection<AssetViewModel> Assets => _context.Assets;
     
+
+
     /// <summary>
     /// The preferences view model.
     /// </summary>
@@ -34,7 +44,9 @@ public partial class MainViewModel : ViewModelBase
     public Action? ShowAboutWindow { get; set; }
     public Action<string>? ShowImageViewer { get; set; }
 
-    public MainViewModel() : this(new PipelineContext()) { }
+    public MainViewModel() : this(new PipelineContext())
+    {
+    }
 
     public MainViewModel(PipelineContext context)
     {
@@ -53,6 +65,44 @@ public partial class MainViewModel : ViewModelBase
         Preferences = new PreferencesViewModel(context.Preferences);
     }
 
+    /// <summary>
+    /// The toast manager.
+    /// </summary>
+    public ISukiToastManager ToastManager { get; } = new SukiToastManager();
+    
+    /// <summary>
+    /// Displays a toast message.
+    /// </summary>
+    public void DisplayToast(string title, string content, int duration = 3000)
+    {
+        ToastManager.CreateToast()
+            .WithTitle(title).WithContent(content)
+            .Dismiss().After(TimeSpan.FromMilliseconds(duration))
+            .Dismiss().ByClicking()
+            .Queue();
+    }
+    
+    // private void ShowUpdatingToast()
+    // {
+    //     var progress = new ProgressBar() { Value = 0, ShowProgressText = true };
+    //     var toast = ToastManager.CreateToast()
+    //         .WithTitle("Updating...")
+    //         .WithContent(progress)
+    //         .Queue();
+    //     var timer = new Timer(20);
+    //     timer.Elapsed += (_, _) =>
+    //     {
+    //         Dispatcher.UIThread.Invoke(() =>
+    //         {
+    //             progress.Value += 1;
+    //             if (progress.Value < 100) return;
+    //             timer.Dispose();
+    //             ToastManager.Dismiss(toast);
+    //         });
+    //     };
+    //     timer.Start();
+    // }
+    
     public async Task InitializeAsync()
     {
         await _context.LoadPreferencesAsync();
@@ -106,22 +156,6 @@ public partial class MainViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void AddScript(Script script)
-    {
-        _context.AddBuildScript(script);
-    }
-
-    [RelayCommand]
-    private void RemoveSelectedScript()
-    {
-        if (SelectedScript != null)
-        {
-            _context.RemoveBuildScript(SelectedScript);
-            SelectedScript = null;
-        }
-    }
-
-    [RelayCommand]
     private void ClearMessages()
     {
         _context.ClearMessages();
@@ -143,8 +177,8 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private void ViewSelectedAsset()
     {
-        if (SelectedAsset?.AbsolutePathOrFileName is { } path && 
-            (SelectedAsset.IsPng || path.EndsWith(".ktx2", StringComparison.OrdinalIgnoreCase)))
+        if (SelectedAsset?.AbsoluteFilePath is { } path &&
+            (SelectedAsset.IsImage || path.EndsWith(".ktx2", StringComparison.OrdinalIgnoreCase)))
         {
             ShowImageViewer?.Invoke(path);
         }

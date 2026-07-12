@@ -1,0 +1,27 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:RisContentPipeline.GUI.Controls"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia">
+    <Design.PreviewWith>
+        <controls:BuildDirectoryTextBox />
+    </Design.PreviewWith>
+
+    <Style Selector="controls|BuildDirectoryTextBox">
+        <!-- Set Defaults -->
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid ColumnDefinitions="120,*,Auto" RowDefinitions="Auto" Margin="0,0,0,8">
+                    <TextBlock Grid.Column="0" Text="Build Directory" VerticalAlignment="Center" />
+                    <TextBox Grid.Column="1" Text="{TemplateBinding BuildDirectory}" Margin="8,0" />
+                    <Button IsVisible="{TemplateBinding IsButtonIcon, Converter={x:Static BoolConverters.Not }}"
+                            Name="PartButton"
+                            Grid.Column="2"
+                            Content="Browse..." />
+                    <Button Name="PartIconButton" Grid.Column="2" IsVisible="{TemplateBinding IsButtonIcon}" Padding="5">
+                        <avalonia:MaterialIcon Classes="Icon" Kind="Folder" />
+                    </Button>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>
