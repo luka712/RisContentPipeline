@@ -17,7 +17,7 @@ public partial class BuildDirectoryTextBox : TemplatedControl
     /// The build directory property.
     /// </summary>
     internal static readonly StyledProperty<string> BuildDirectoryProperty =
-        AvaloniaProperty.Register<BuildDirectoryTextBox, string>(nameof(BuildDirectory));
+        AvaloniaProperty.Register<BuildDirectoryTextBox, string>(nameof(BuildDirectory), defaultBindingMode: BindingMode.TwoWay);
 
     /// <summary>
     /// The build directory.

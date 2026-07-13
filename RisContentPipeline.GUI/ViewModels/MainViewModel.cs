@@ -4,6 +4,7 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using RisContentPipeline.GUI.Models;
 using RisContentPipeline.GUI.Services;
 using RisContentPipeline.GUI.Windows;
@@ -14,6 +15,8 @@ namespace RisContentPipeline.GUI.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
+    private readonly AssetsService _assetsService;
+
     private readonly PipelineContext _context;
 
     /// <summary>
@@ -25,18 +28,18 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private bool _isBuilding;
     [ObservableProperty] private string _statusText = "Ready";
 
-    [ObservableProperty]
-    private ObservableCollection<LogMessage> _messages =
+    [ObservableProperty] private ObservableCollection<LogMessage> _messages =
         [new LogMessage(MessageLogLevel.ERROR, "No messages", DateTime.Now)];
 
-    public ObservableCollection<AssetViewModel> Assets => _context.Assets;
-    
-
+    /// <summary>
+    /// The currently added assets.
+    /// </summary>
+    public ObservableCollection<AssetViewModel> Assets => _assetsService.Assets;
 
     /// <summary>
     /// The preferences view model.
     /// </summary>
-    public PreferencesViewModel Preferences { get; }
+    public PreferencesViewModel Preferences { get; private set; }
 
     // File picker service - set by the view
     public Func<Task<IReadOnlyList<IStorageFile>>>? OpenFilePicker { get; set; }
@@ -44,32 +47,19 @@ public partial class MainViewModel : ViewModelBase
     public Action? ShowAboutWindow { get; set; }
     public Action<string>? ShowImageViewer { get; set; }
 
-    public MainViewModel() : this(new PipelineContext())
+    /// <summary>
+    /// The constructor.
+    /// </summary>
+    public MainViewModel()
     {
-    }
-
-    public MainViewModel(PipelineContext context)
-    {
-        _context = context;
-        _context.OnBuildStarted += () =>
-        {
-            IsBuilding = true;
-            StatusText = "Building...";
-        };
-        _context.OnBuildFinished += () =>
-        {
-            IsBuilding = false;
-            StatusText = "Build completed";
-        };
-
-        Preferences = new PreferencesViewModel(context.Preferences);
+        _assetsService = App.Services.GetService<AssetsService>()!;
     }
 
     /// <summary>
     /// The toast manager.
     /// </summary>
     public ISukiToastManager ToastManager { get; } = new SukiToastManager();
-    
+
     /// <summary>
     /// Displays a toast message.
     /// </summary>
@@ -81,7 +71,7 @@ public partial class MainViewModel : ViewModelBase
             .Dismiss().ByClicking()
             .Queue();
     }
-    
+
     // private void ShowUpdatingToast()
     // {
     //     var progress = new ProgressBar() { Value = 0, ShowProgressText = true };
@@ -102,11 +92,12 @@ public partial class MainViewModel : ViewModelBase
     //     };
     //     timer.Start();
     // }
-    
+
     public async Task InitializeAsync()
     {
-        await _context.LoadPreferencesAsync();
-        _context.LoadSession();
+        Preferences = await PreferencesViewModel.LoadAsync();
+        _assetsService.PreferencesViewModel = Preferences;
+        Preferences.ApplyTheme();
     }
 
     [RelayCommand]
@@ -118,7 +109,7 @@ public partial class MainViewModel : ViewModelBase
         foreach (var file in files)
         {
             if (file.Path.LocalPath is { } path)
-                _context.AddFile(path);
+                _assetsService.AddFile(path);
         }
     }
 
@@ -128,7 +119,7 @@ public partial class MainViewModel : ViewModelBase
         if (SelectedAsset != null)
         {
             var index = Assets.IndexOf(SelectedAsset);
-            _context.RemoveAsset(index);
+            _assetsService.RemoveAsset(index);
             SelectedAsset = null;
         }
     }
@@ -136,7 +127,7 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private void ClearAssets()
     {
-        _context.Assets.Clear();
+        _assetsService.Assets.Clear();
         SelectedAsset = null;
     }
 
@@ -147,7 +138,7 @@ public partial class MainViewModel : ViewModelBase
 
         try
         {
-            await _context.BuildAsync();
+            await _assetsService.BuildAsync();
         }
         catch (Exception ex)
         {
@@ -187,18 +178,18 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private async Task SetBuildDirectoryAsync()
     {
-        if (OpenFolderPicker == null) return;
-
-        var folder = await OpenFolderPicker();
-        if (folder?.Path.LocalPath is { } path)
-        {
-            _context.Preferences.BuildDirectory = path;
-            OnPropertyChanged(nameof(Preferences));
-        }
+        // if (OpenFolderPicker == null) return;
+        //
+        // var folder = await OpenFolderPicker();
+        // if (folder?.Path.LocalPath is { } path)
+        // {
+        //     _context.Preferences.BuildDirectory = path;
+        //     OnPropertyChanged(nameof(Preferences));
+        // }
     }
 
     public void SaveSession() => _context.SaveSession();
-    public Task SavePreferencesAsync() => _context.SavePreferencesAsync();
+    //public Task SavePreferencesAsync() => _context.SavePreferencesAsync();
 
     public void Dispose()
     {

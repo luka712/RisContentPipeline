@@ -6,10 +6,12 @@
         <entry key="RisContentPipeline.GUI/App.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
         <entry key="RisContentPipeline.GUI/Controls/BuildDirectoryTextBox.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
         <entry key="RisContentPipeline.GUI/Controls/EncodingTargetComboBox.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+        <entry key="RisContentPipeline.GUI/Controls/FilePathSelectableTextBlock.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
         <entry key="RisContentPipeline.GUI/Controls/FilePathTextBlock.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
         <entry key="RisContentPipeline.GUI/Controls/FlipYCheckBox.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
         <entry key="RisContentPipeline.GUI/Controls/GenerateMipMapCheckBox.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
         <entry key="RisContentPipeline.GUI/Controls/QualityLevelComboBox.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+        <entry key="RisContentPipeline.GUI/Themes/AppTheme.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
         <entry key="RisContentPipeline.GUI/Themes/ControlsTheme.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
         <entry key="RisContentPipeline.GUI/Views/AboutWindow.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
         <entry key="RisContentPipeline.GUI/Views/AssetSettingsView.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />

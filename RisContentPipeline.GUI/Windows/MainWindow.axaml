@@ -3,13 +3,17 @@
                  xmlns:vm="using:RisContentPipeline.GUI.ViewModels"
                  xmlns:suki="https://github.com/kikipoulet/SukiUI"
                  xmlns:views="clr-namespace:RisContentPipeline.GUI.Views"
-                 x:Class="RisContentPipeline.GUI.Views.MainWindow"
+                 x:Class="RisContentPipeline.GUI.Windows.MainWindow"
                  x:DataType="vm:MainViewModel"
                  Icon="/Assets/avalonia-logo.ico"
-                 Title="RisContentPipeline"
-                 Width="1200" Height="800"
-                 MinWidth="800" MinHeight="600"
-                 IsMenuVisible="True">
+                 Title="Ris Content Pipeline"
+                 WindowStartupLocation="CenterOwner"
+                 CanResize="True"
+                 ShowBottomBorder="True"
+                 CornerRadius="15"
+                 SizeToContent="WidthAndHeight"
+                 IsMenuVisible="True"
+                 >
     <Design.DataContext>
         <vm:MainViewModel />
     </Design.DataContext>
@@ -65,7 +69,7 @@
 
 
         <!-- Main Content -->
-        <Grid ColumnDefinitions="300,Auto,*, 400">
+        <Grid ColumnDefinitions="400,Auto,*, 400">
             <!-- Left Panel: Assets and Scripts -->
             <Grid Grid.Column="0" RowDefinitions="*,Auto,*">
                 <!-- Assets List -->

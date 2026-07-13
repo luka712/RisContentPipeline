@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 
 namespace RisContentPipeline.GUI.Controls;
 
@@ -12,7 +13,8 @@ public class GenerateMipMapCheckBox : TemplatedControl
     /// <summary>
     /// The property for the checked state.
     /// </summary>
-    public static readonly StyledProperty<bool> IsCheckedProperty = AvaloniaProperty.Register<GenerateMipMapCheckBox, bool>(nameof(IsChecked));
+    public static readonly StyledProperty<bool> IsCheckedProperty 
+        = AvaloniaProperty.Register<GenerateMipMapCheckBox, bool>(nameof(IsChecked), defaultBindingMode: BindingMode.TwoWay);
 
     /// <summary>
     /// The checked state.

@@ -6,61 +6,78 @@
                  x:Class="RisContentPipeline.GUI.Windows.PreferencesWindow"
                  x:DataType="vm:PreferencesViewModel"
                  Title="Preferences"
-                 Width="1200" Height="800"
                  WindowStartupLocation="CenterOwner"
-                 CanResize="True">
+                 CanResize="True"
+                 ShowBottomBorder="True"
+                 CornerRadius="15"
+                 Topmost="True"
+                 SizeToContent="WidthAndHeight">
 
     <Design.DataContext>
         <vm:PreferencesViewModel />
     </Design.DataContext>
 
 
-    <suki:SukiSideMenu IsSearchEnabled="False" SidebarToggleEnabled="False">
-        <suki:SukiSideMenu.Items>
+    <suki:GlassCard Classes="Container">
+        <DockPanel>
+            <!-- Buttons at bottom -->
+            <StackPanel DockPanel.Dock="Bottom" Classes="Confirm">
+                <Button Content="Save" Command="{Binding SaveCommand}" Classes="Flat" />
+                <Button Content="Cancel" Command="{Binding CancelCommand}" />
+            </StackPanel>
 
-            <!-- GENERAL -->
-            <suki:SukiSideMenuItem Header="General" Classes="Compact" Margin="10, 5" HorizontalAlignment="Center">
-                <suki:SukiSideMenuItem.PageContent>
+
+            <TabControl>
+                <!-- GENERAL -->
+                <TabItem Header="General">
                     <StackPanel Spacing="16" Margin="20" Orientation="Vertical">
                         <Grid ColumnDefinitions="120,*" RowDefinitions="Auto">
+
+                            <!-- Local Serve Port -->
                             <TextBlock Grid.Column="0" Text="Local Server Port" VerticalAlignment="Center" />
                             <NumericUpDown Grid.Column="1"
                                            Value="{Binding LocalServerPort}"
                                            Minimum="1000"
                                            Maximum="9999"
                                            Margin="8,0" />
+
                         </Grid>
+
+                        <suki:GroupBox Header="Appearance">
+                            <Grid ColumnDefinitions="120,*" RowDefinitions="Auto, Auto, Auto">
+
+                                <!-- Theme -->
+                                <TextBlock Text="Theme" VerticalAlignment="Center" />
+                                <ComboBox Grid.Row="0" Grid.Column="1"
+                                          Margin="8, 4"
+                                          ItemsSource="{Binding Themes, Mode=OneTime}"
+                                          SelectedItem="{Binding Theme}" />
+
+                                <!-- Theme Color -->
+                                <TextBlock Grid.Column="0" Grid.Row="1" Text="Color" VerticalAlignment="Center"
+                                           ToolTip.Tip="The color for selected theme." />
+                                <ComboBox Grid.Column="1" Grid.Row="1"
+                                          Margin="8, 4"
+                                          ItemsSource="{Binding ColorThemes, Mode=OneTime}"
+                                          SelectedItem="{Binding ColorTheme}" />
+
+                                <!-- Native Title Bar -->
+                                <TextBlock Grid.Column="0" Grid.Row="2" Text="Native Title Bar"
+                                           VerticalAlignment="Center" ToolTip.Tip="Prefers native title bar." />
+                                <CheckBox Grid.Column="1" Grid.Row="2" IsChecked="{Binding NativeTitleBar}"
+                                          Margin="12, 4" />
+
+                            </Grid>
+                        </suki:GroupBox>
+
                     </StackPanel>
-                </suki:SukiSideMenuItem.PageContent>
-            </suki:SukiSideMenuItem>
-
-            <!-- BUILD SETTINGS -->
-            <suki:SukiSideMenuItem Header="Build Settings" Classes="Compact" Margin="10, 5" HorizontalAlignment="Center">
-                <suki:SukiSideMenuItem.Icon>
-                    <!-- Icon -->
-                </suki:SukiSideMenuItem.Icon>
-                <suki:SukiSideMenuItem.PageContent>
+                </TabItem>
+                <TabItem Header="Build">
                     <views:PreferencesBuildSettingsView Margin="20" />
-                </suki:SukiSideMenuItem.PageContent>
-            </suki:SukiSideMenuItem>
+                </TabItem>
+            </TabControl>
+        </DockPanel>
 
-
-        </suki:SukiSideMenu.Items>
-
-
-        <suki:SukiSideMenu.HeaderContent>
-            <!-- Header Content -->
-            <!-- TODO: add icon -->
-        </suki:SukiSideMenu.HeaderContent>
-
-        <suki:SukiSideMenu.FooterContent>
-            <!-- Buttons at bottom -->
-            <StackPanel Orientation="Horizontal"
-                        HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8" Margin="0,16,0,0">
-                <Button Content="Cancel" Command="{Binding CancelCommand}"  VerticalAlignment="Center" HorizontalAlignment="Center" />
-                <Button Content="Save" Command="{Binding SaveCommand}"   VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            </StackPanel>
-        </suki:SukiSideMenu.FooterContent>
-    </suki:SukiSideMenu>
+    </suki:GlassCard>
 
 </suki:SukiWindow>

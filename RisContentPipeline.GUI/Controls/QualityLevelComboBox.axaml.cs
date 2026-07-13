@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 
 namespace RisContentPipeline.GUI.Controls;
 
@@ -33,7 +34,7 @@ public class QualityLevelComboBox : TemplatedControl
     /// The selected index.
     /// </summary>
     internal static readonly StyledProperty<int> SelectedIndexProperty =
-        AvaloniaProperty.Register<EncodingTargetComboBox, int>(nameof(SelectedIndex));
+        AvaloniaProperty.Register<EncodingTargetComboBox, int>(nameof(SelectedIndex), defaultBindingMode: BindingMode.TwoWay);
 
     /// <summary>
     /// The selected index.

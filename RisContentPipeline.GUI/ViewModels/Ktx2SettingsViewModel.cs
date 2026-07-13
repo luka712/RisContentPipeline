@@ -9,7 +9,7 @@ namespace RisContentPipeline.GUI.ViewModels;
 public partial class Ktx2SettingsViewModel : ViewModelBase
 {
     [ObservableProperty]
-    private Ktx2EncodingTarget _encodeTarget = Ktx2EncodingTarget.BASIS_ETC1S;
+    private Ktx2EncodingTarget _encodingTarget = Ktx2EncodingTarget.BASIS_ETC1S;
     
     [ObservableProperty]
     private bool _generateMipmaps = true;
@@ -53,7 +53,7 @@ public partial class Ktx2SettingsViewModel : ViewModelBase
     {
         return new Ktx2SettingsViewModel
         {
-            EncodeTarget = EncodeTarget,
+            EncodingTarget = EncodingTarget,
             GenerateMipmaps = GenerateMipmaps,
             FlipY = FlipY,
             QualityLevel = QualityLevel,

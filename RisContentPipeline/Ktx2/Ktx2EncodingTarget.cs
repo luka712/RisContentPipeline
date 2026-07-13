@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace RisContentPipeline.Ktx2;
 
 /// <summary>
@@ -12,5 +14,6 @@ public enum Ktx2EncodingTarget
     BASIS_ETC1S = 1,
     BASIS_UASTC = 2,
     
+    // ReSharper disable once InconsistentNaming
     ASTC_4X4 = 3
 }

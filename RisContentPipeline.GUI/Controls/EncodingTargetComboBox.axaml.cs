@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 using RisContentPipeline.Ktx2;
 
 namespace RisContentPipeline.GUI.Controls;
@@ -16,7 +17,7 @@ public class EncodingTargetComboBox : TemplatedControl
         Ktx2EncodingTarget.BASIS_UASTC,
         Ktx2EncodingTarget.ASTC_4X4
     ];
-    
+
     /// <summary>
     /// The encoding texture modes.
     /// </summary>
@@ -40,7 +41,8 @@ public class EncodingTargetComboBox : TemplatedControl
     /// The selected index.
     /// </summary>
     internal static readonly StyledProperty<int> SelectedIndexProperty =
-        AvaloniaProperty.Register<EncodingTargetComboBox, int>(nameof(SelectedIndex));
+        AvaloniaProperty.Register<EncodingTargetComboBox, int>(nameof(SelectedIndex),
+            defaultBindingMode: BindingMode.TwoWay);
 
     /// <summary>
     /// The selected index.
@@ -48,14 +50,7 @@ public class EncodingTargetComboBox : TemplatedControl
     public int SelectedIndex
     {
         get => GetValue(SelectedIndexProperty);
-        set
-        {
-            SetValue(SelectedIndexProperty, value);
-            if (SelectedEncodingTarget != _encodingTargets[value])
-            {
-                SelectedEncodingTarget = _encodingTargets[value];
-            }
-        }
+        set => SetValue(SelectedIndexProperty, value);
     }
 
     /// <summary>
@@ -63,21 +58,28 @@ public class EncodingTargetComboBox : TemplatedControl
     /// </summary>
     public static readonly StyledProperty<Ktx2EncodingTarget> SelectedEncodingTargetProperty =
         AvaloniaProperty.Register<EncodingTargetComboBox, Ktx2EncodingTarget>(
-            nameof(SelectedEncodingTarget));
-    
+            nameof(SelectedEncodingTarget),
+            defaultBindingMode: BindingMode.TwoWay);
+
     /// <summary>
     /// The selected encoding target.
     /// </summary>
-    public Ktx2EncodingTarget SelectedEncodingTarget 
+    public Ktx2EncodingTarget SelectedEncodingTarget
     {
         get => GetValue(SelectedEncodingTargetProperty);
-        set
+        set => SetValue(SelectedEncodingTargetProperty, value);
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == SelectedIndexProperty)
         {
-            SetValue(SelectedEncodingTargetProperty, value);
-            if (value != _encodingTargets[SelectedIndex])
-            {
-                SelectedIndex = Array.IndexOf(_encodingTargets, value);
-            }
+            SelectedEncodingTarget = _encodingTargets[SelectedIndex];
+        }
+        else if (change.Property == SelectedEncodingTargetProperty)
+        {
+            SelectedIndex = Array.IndexOf(_encodingTargets, SelectedEncodingTarget);
         }
     }
 }

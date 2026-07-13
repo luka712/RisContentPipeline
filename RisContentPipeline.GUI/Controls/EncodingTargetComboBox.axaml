@@ -10,11 +10,11 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid ColumnDefinitions="120,*">
-                    <TextBlock Grid.Column="0" Text="Encoding Target" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="0" Text="Encoding Target" VerticalAlignment="Center"  ToolTip.Tip="Sets the encoding target for generated KTX2 file." />
                     <ComboBox Grid.Column="1"
                               Margin="8,4"
                               ItemsSource="{TemplateBinding  EncodingTargets}" 
-                              SelectedIndex="{TemplateBinding SelectedIndex}"
+                              SelectedIndex="{TemplateBinding SelectedIndex, Mode=TwoWay}"
                               />
                 </Grid>
             </ControlTemplate>

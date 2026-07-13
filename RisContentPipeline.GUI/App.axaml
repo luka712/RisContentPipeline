@@ -5,8 +5,7 @@
              xmlns:sukiUi="clr-namespace:SukiUI;assembly=SukiUI"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:converters="clr-namespace:RisContentPipeline.GUI.Converters"
-             xmlns:models="clr-namespace:RisContentPipeline.GUI.Models"
-             RequestedThemeVariant="Default">
+             xmlns:models="clr-namespace:RisContentPipeline.GUI.Models">
     <!-- "Default" ThemeVariant follows the system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
@@ -25,10 +24,10 @@
     </Application.Resources>
 
     <Application.Styles>
-        <sukiUi:SukiTheme ThemeColor="Green" />
+        <sukiUi:SukiTheme />
         <avalonia:MaterialIconStyles />
         <StyleInclude Source="avares://SukiUI.Dock/Index.axaml" />
-        <StyleInclude Source="Themes/ControlsTheme.axaml" />
+        <StyleInclude Source="Themes/AppTheme.axaml" />
         <StyleInclude Source="Controls/BuildDirectoryTextBox.axaml" />
         <StyleInclude Source="Controls/EncodingTargetComboBox.axaml" />
         <StyleInclude Source="Controls/QualityLevelComboBox.axaml" />

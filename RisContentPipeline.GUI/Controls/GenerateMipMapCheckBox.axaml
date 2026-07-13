@@ -15,8 +15,7 @@
                     <CheckBox Grid.Column="1"
                               Margin="12, 4" 
                               VerticalAlignment="Center"
-                              IsChecked="{TemplateBinding IsChecked}"
-                            
+                              IsChecked="{TemplateBinding IsChecked, Mode=TwoWay}"
                               />
                 </Grid>
             </ControlTemplate>

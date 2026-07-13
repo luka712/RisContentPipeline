@@ -8,25 +8,36 @@
              x:DataType="viewModels:MainViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="RisContentPipeline.GUI.Views.AssetsView">
-    
-        <suki:GlassCard Margin="10" MinHeight="300" Classes="Primary">
-            <suki:GroupBox Header="Assets">
-                <TreeView
-                    ItemsSource="{Binding Assets}"
-                    SelectedItem="{Binding SelectedAsset}">
-                    <TreeView.ItemTemplate>
-                        <DataTemplate x:DataType="viewModels:AssetViewModel">
-                            <Grid ColumnDefinitions="25, *">
-                                <avalonia:MaterialIcon Kind="Image" 
-                                                       Width="20" Height="20" 
-                                                       VerticalAlignment="Center" HorizontalAlignment="Left"
-                                                       IsVisible="{Binding IsImage}"
-                                                       />
-                                <TextBlock Grid.Column="1"  Text="{Binding AbsoluteFilePath}" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                            </Grid>
-                        </DataTemplate>
-                    </TreeView.ItemTemplate>
-                </TreeView>
-            </suki:GroupBox>
-        </suki:GlassCard>
+
+    <suki:GlassCard Margin="10" MinHeight="300" Classes="Primary">
+        <suki:GroupBox Header="Assets">
+            <TreeView
+                ItemsSource="{Binding Assets}"
+                SelectedItem="{Binding SelectedAsset}">
+                <TreeView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:AssetViewModel">
+                        <Grid ColumnDefinitions="25, *" Background="Transparent">
+                            <avalonia:MaterialIcon Kind="Image"
+                                                   Classes="Icon"
+                                                   IsVisible="{Binding IsImage}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding AbsoluteFilePath, Mode=OneTime}"
+                                       ToolTip.Tip="{Binding AbsoluteFilePath, Mode=OneTime}"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Left">
+
+                            </TextBlock>
+
+                            <Grid.ContextMenu>
+                                <ContextMenu Opened="MenuBase_OnOpened">
+                                    <MenuItem Header="Remove" Command="{Binding RemoveSelf}" />
+                                    <MenuItem Header="Close" Click="MenuItem_OnClick" />
+                                </ContextMenu>
+                            </Grid.ContextMenu>
+                        </Grid>
+                    </DataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+        </suki:GroupBox>
+    </suki:GlassCard>
 </UserControl>

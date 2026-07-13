@@ -1,16 +1,26 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Microsoft.Extensions.DependencyInjection;
+using RisContentPipeline.GUI.Services;
 using RisContentPipeline.GUI.ViewModels;
-using RisContentPipeline.GUI.Windows;
 using SukiUI.Controls;
 
-namespace RisContentPipeline.GUI.Views;
+namespace RisContentPipeline.GUI.Windows;
 
+/// <summary>
+/// The main window of the application.
+/// </summary>
 public partial class MainWindow : SukiWindow
 {
+    private readonly WindowsService _windowsService;
+    
     public MainWindow()
     {
+        _windowsService = App.Services.GetService<WindowsService>()!;
+        _windowsService.AddWindow(this);
+        
         InitializeComponent();
     }
 
@@ -30,6 +40,7 @@ public partial class MainWindow : SukiWindow
         }
     }
 
+
     protected override void OnClosing(WindowClosingEventArgs e)
     {
         base.OnClosing(e);
@@ -37,7 +48,7 @@ public partial class MainWindow : SukiWindow
         if (DataContext is MainViewModel vm)
         {
             vm.SaveSession();
-            _ = vm.SavePreferencesAsync();
+          //   _ = vm.SavePreferencesAsync();
         }
     }
 

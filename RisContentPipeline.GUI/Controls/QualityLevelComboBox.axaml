@@ -10,11 +10,11 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid ColumnDefinitions="120,*">
-                    <TextBlock Grid.Column="0" Text="Quality Level" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="0" Text="Quality Level" VerticalAlignment="Center" ToolTip.Tip="The quality level of encoded KTX2 file, if applicable." />
                     <ComboBox Grid.Column="1"
                               Margin="8,4"
                               ItemsSource="{TemplateBinding  QualityLevels}"
-                              SelectedIndex="{TemplateBinding SelectedIndex}" />
+                              SelectedIndex="{TemplateBinding SelectedIndex, Mode=TwoWay}" />
                 </Grid>
             </ControlTemplate>
         </Setter>

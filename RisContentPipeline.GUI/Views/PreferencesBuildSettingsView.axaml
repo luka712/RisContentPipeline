@@ -18,10 +18,10 @@
         <!-- Global KTX2 Settings Section -->
         <suki:GroupBox Header="KTX2 Settings">
             <StackPanel Orientation="Vertical">
-                <controls:EncodingTargetComboBox SelectedEncodingTarget="{Binding EncodingTarget}" />
-                <controls:QualityLevelComboBox SelectedIndex="{Binding QualityLevel}" />
-                <controls:GenerateMipMapCheckBox IsChecked="{Binding GenerateMipmaps}" />
-                <controls:FlipYCheckBox IsChecked="{Binding FlipY}" />
+                <controls:EncodingTargetComboBox SelectedEncodingTarget="{Binding Ktx2Settings.EncodingTarget}" />
+                <controls:QualityLevelComboBox SelectedIndex="{Binding Ktx2Settings.QualityLevel}" />
+                <controls:GenerateMipMapCheckBox IsChecked="{Binding Ktx2Settings.GenerateMipmaps}" />
+                <controls:FlipYCheckBox IsChecked="{Binding Ktx2Settings.FlipY}" />
             </StackPanel>
 
         </suki:GroupBox>

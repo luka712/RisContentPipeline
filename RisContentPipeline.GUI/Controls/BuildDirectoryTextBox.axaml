@@ -11,8 +11,12 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid ColumnDefinitions="120,*,Auto" RowDefinitions="Auto" Margin="0,0,0,8">
-                    <TextBlock Grid.Column="0" Text="Build Directory" VerticalAlignment="Center" />
-                    <TextBox Grid.Column="1" Text="{TemplateBinding BuildDirectory}" Margin="8,0" />
+                    <TextBlock Grid.Column="0" Text="Build Directory" VerticalAlignment="Center" ToolTip.Tip="Sets the directory where generated asset file will be placed after build." />
+                    <TextBox Grid.Column="1" 
+                             Text="{TemplateBinding BuildDirectory, Mode=TwoWay}" 
+                             Margin="8,0" 
+                             ToolTip.Tip="{TemplateBinding BuildDirectory}"
+                             />
                     <Button IsVisible="{TemplateBinding IsButtonIcon, Converter={x:Static BoolConverters.Not }}"
                             Name="PartButton"
                             Grid.Column="2"

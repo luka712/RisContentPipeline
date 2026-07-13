@@ -12,11 +12,11 @@
                 <Grid ColumnDefinitions="120,*">
                     <TextBlock Text="Flip Y" 
                                VerticalAlignment="Center" 
-                               ToolTip.Tip="If checked generated sprite sheet will be flipped vertically."/>
+                               ToolTip.Tip="If checked generated image will be flipped vertically."/>
                     <CheckBox Grid.Column="1" 
                               Margin="12, 4" 
                               VerticalAlignment="Center"
-                              IsChecked="{TemplateBinding IsChecked}"
+                              IsChecked="{TemplateBinding IsChecked, Mode=TwoWay}"
                               />
                 </Grid>
             </ControlTemplate>

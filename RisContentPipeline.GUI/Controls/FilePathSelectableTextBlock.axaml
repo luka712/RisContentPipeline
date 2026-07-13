@@ -12,7 +12,12 @@
             <ControlTemplate>
                 <Grid ColumnDefinitions="120,*,Auto" RowDefinitions="Auto" Margin="0,0,0,8">
                     <TextBlock Grid.Column="0" Text="File Path" VerticalAlignment="Center" />
-                    <SelectableTextBlock Name="PartSelectableTextBlock" Grid.Column="1" Text="{TemplateBinding FilePath}" Margin="8,0" VerticalAlignment="Center" />
+                    <SelectableTextBlock Name="PartSelectableTextBlock" Grid.Column="1"
+                                         Text="{TemplateBinding FilePath, Mode=TwoWay}"
+                                         Margin="8,0"
+                                         VerticalAlignment="Center" 
+                                         ToolTip.Tip="{TemplateBinding FilePath}"
+                                         />
                     <Button Name="PartButton" Grid.Column="2" Padding="5">
                         <avalonia:MaterialIcon  Classes="Icon" Kind="ContentCopy" />
                     </Button>

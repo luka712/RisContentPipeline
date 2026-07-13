@@ -1,4 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
+using RisContentPipeline.GUI.Services;
 
 namespace RisContentPipeline.GUI.ViewModels;
 
@@ -7,6 +10,8 @@ namespace RisContentPipeline.GUI.ViewModels;
 /// </summary>
 public partial class AssetViewModel : ViewModelBase
 {
+    private readonly AssetsService _assetsService;
+    
     [ObservableProperty]
     private string _absoluteFilePath = string.Empty;
     
@@ -17,10 +22,17 @@ public partial class AssetViewModel : ViewModelBase
     private ImageViewModel? _image;
 
     /// <summary>
+    /// The constructor.
+    /// </summary>
+    public AssetViewModel()
+    {
+        _assetsService = App.Services.GetService<AssetsService>()!;
+    }
+    
+    /// <summary>
     /// Gets the file name or path without the directory.
     /// </summary>
     public string FileName => Path.GetFileName(AbsoluteFilePath);
-
     
     /// <summary>
     /// Gets whether this asset is a JSON file.
@@ -38,4 +50,13 @@ public partial class AssetViewModel : ViewModelBase
     public bool IsImage => AbsoluteFilePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase);
 
     public override string ToString() => FileName;
+
+    /// <summary>
+    /// Removes this asset from the list.
+    /// </summary>
+    [RelayCommand]
+    public void RemoveSelf()
+    {
+        _assetsService.RemoveAsset(this);
+    }
 }

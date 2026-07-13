@@ -1,4 +1,6 @@
 using Avalonia.Platform.Storage;
+using Microsoft.Extensions.DependencyInjection;
+using RisContentPipeline.GUI.Services;
 using RisContentPipeline.GUI.ViewModels;
 using SukiUI.Controls;
 
@@ -6,6 +8,8 @@ namespace RisContentPipeline.GUI.Windows;
 
 public partial class PreferencesWindow : SukiWindow
 {
+    private readonly WindowsService _windowsService;
+    
     /// <summary>
     /// The constructor for the PreferencesWindow.
     /// </summary>
@@ -15,6 +19,10 @@ public partial class PreferencesWindow : SukiWindow
         DataContext = viewModel;
         viewModel.SelectFolderAsync = SelectFolderAsync;
         viewModel.CloseWindow = () => Close();
+
+        _windowsService = App.Services.GetService<WindowsService>()!;
+        _windowsService.AddWindow(this);
+        
         InitializeComponent();
     }
 

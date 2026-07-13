@@ -21,7 +21,7 @@
                 <!-- Ktx2 settings -->
                 <StackPanel Orientation="Vertical" IsVisible="{Binding SelectedAsset?.IsImage}">
                     <controls:EncodingTargetComboBox
-                        SelectedEncodingTarget="{Binding SelectedAsset?.Image?.Ktx2Settings.EncodeTarget}" />
+                        SelectedEncodingTarget="{Binding SelectedAsset?.Image?.Ktx2Settings.EncodingTarget}" />
                     <controls:QualityLevelComboBox
                         SelectedIndex="{Binding SelectedAsset?.Image?.Ktx2Settings.QualityLevel}" />
                     <controls:GenerateMipMapCheckBox

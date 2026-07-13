@@ -12,12 +12,6 @@ public partial class ImageViewModel : ViewModelBase
     /// </summary>
     [ObservableProperty] 
     private string _filePath = string.Empty;
-    
-    /// <summary>
-    /// The file path where converted assets will be placed.
-    /// </summary>
-    [ObservableProperty]
-    private string _buildPath = string.Empty;
 
     /// <summary>
     /// The KTX2 settings to apply when converting the image to KTX2 format.
