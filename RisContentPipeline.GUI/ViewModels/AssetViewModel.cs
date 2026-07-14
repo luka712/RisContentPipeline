@@ -11,6 +11,7 @@ namespace RisContentPipeline.GUI.ViewModels;
 public partial class AssetViewModel : ViewModelBase
 {
     private readonly AssetsService _assetsService;
+    private readonly ViewerService _viewerService;
     
     [ObservableProperty]
     private string _absoluteFilePath = string.Empty;
@@ -20,6 +21,9 @@ public partial class AssetViewModel : ViewModelBase
 
     [ObservableProperty]
     private ImageViewModel? _image;
+    
+    [ObservableProperty]
+    private PreferencesViewModel? _preferences;
 
     /// <summary>
     /// The constructor.
@@ -27,6 +31,7 @@ public partial class AssetViewModel : ViewModelBase
     public AssetViewModel()
     {
         _assetsService = App.Services.GetService<AssetsService>()!;
+        _viewerService = App.Services.GetService<ViewerService>()!;
     }
     
     /// <summary>
@@ -58,5 +63,13 @@ public partial class AssetViewModel : ViewModelBase
     public void RemoveSelf()
     {
         _assetsService.RemoveAsset(this);
+    }
+
+    /// <summary>
+    /// Opens the asset view.
+    /// </summary>
+    public void ViewSelf()
+    {
+        _viewerService.ViewAsset(this);
     }
 }

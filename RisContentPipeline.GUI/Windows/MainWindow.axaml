@@ -54,10 +54,10 @@
                 <Button Content="Remove" Command="{Binding RemoveSelectedAssetCommand}" />
                 <Button Content="Clear" Command="{Binding ClearAssetsCommand}" />
                 <Separator />
-                <Button Content="View" Command="{Binding ViewSelectedAssetCommand}"
-                        IsEnabled="{Binding SelectedAsset, Converter={x:Static ObjectConverters.IsNotNull}}"
-                        ToolTip.Tip="View selected image in KTX2/PNG viewer" />
-                <Separator />
+                <!-- <Button Content="View" Command="{Binding ViewSelectedAssetCommand}" -->
+                <!--         IsEnabled="{Binding SelectedAsset, Converter={x:Static ObjectConverters.IsNotNull}}" -->
+                <!--         ToolTip.Tip="View selected image in KTX2/PNG viewer" /> -->
+                <!-- <Separator /> -->
                 <Button Content="Build" Command="{Binding BuildCommand}" IsEnabled="{Binding !IsBuilding}" />
             </StackPanel>
         </Border>

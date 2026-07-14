@@ -34,6 +34,7 @@ public class AssetsService
         Assets.Add(new AssetViewModel()
         {
             AbsoluteFilePath = filePath,
+            Preferences = PreferencesViewModel,
             BuildPath = PreferencesViewModel?.BuildDirectory ?? "",
             Image = new ImageViewModel()
             {
@@ -49,7 +50,11 @@ public class AssetsService
     /// <param name="filePath">The file path.</param>
     private void AddGenericFile(string filePath)
     {
-        Assets.Add(new AssetViewModel() { AbsoluteFilePath = filePath });
+        Assets.Add(new AssetViewModel
+        {
+            Preferences = PreferencesViewModel,
+            AbsoluteFilePath = filePath
+        });
     }
 
     /// <summary>

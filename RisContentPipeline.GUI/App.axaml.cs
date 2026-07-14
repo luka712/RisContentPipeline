@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using RisContentPipeline.GUI.Services;
 using RisContentPipeline.GUI.ViewModels;
 using MainWindow = RisContentPipeline.GUI.Windows.MainWindow;
@@ -31,12 +32,15 @@ public partial class App : Application
         
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
+            var mainViewModel = new MainViewModel();
+            AttachMainViewModel(Services, mainViewModel);
+            var mainWindow = new MainWindow()
             {
-                DataContext = new MainViewModel(),
+                DataContext = mainViewModel
             };
+            desktop.MainWindow = mainWindow;
         }
-
+        
         base.OnFrameworkInitializationCompleted();
     }
     
@@ -44,5 +48,14 @@ public partial class App : Application
     {
         services.AddSingleton<WindowsService>();
         services.AddSingleton<AssetsService>();
+        services.AddSingleton<ViewerService>();
+        services.AddSingleton<LocalWebServer>();
+        services.AddSingleton<UserPreferencesService>();
+    }
+    
+    private static void AttachMainViewModel(IServiceProvider container, MainViewModel viewModel)
+    {
+        container.GetRequiredService<UserPreferencesService>().ViewModel = viewModel;
+        container.GetRequiredService<LocalWebServer>().ViewModel = viewModel;
     }
 }

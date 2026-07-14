@@ -1,25 +1,17 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="RisContentPipeline.GUI.Views.ImageViewerWindow"
-        Title="Image Viewer"
-        Width="500" Height="300"
-        WindowStartupLocation="CenterOwner"
-        CanResize="False">
-
-    <DockPanel Margin="16">
-        <TextBlock DockPanel.Dock="Top" Text="KTX2/PNG Viewer" FontWeight="Bold" FontSize="16" Margin="0,0,0,16"/>
-        
-        <StackPanel>
-            <TextBlock Text="The image viewer is running in your browser." Margin="0,0,0,8"/>
-            <TextBlock x:Name="UrlText" Text="http://localhost:5050" Foreground="Blue" Margin="0,0,0,16"/>
-            
-            <TextBlock Text="File:" FontWeight="SemiBold" Margin="0,0,0,4"/>
-            <TextBlock x:Name="FilePathText" TextWrapping="Wrap" Foreground="Gray" Margin="0,0,0,16"/>
-            
-            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                <Button x:Name="OpenBrowserButton" Content="Open in Browser" Click="OnOpenBrowserClick"/>
-                <Button Content="Close" Click="OnCloseClick"/>
-            </StackPanel>
-        </StackPanel>
-    </DockPanel>
-</Window>
+<suki:SukiWindow xmlns="https://github.com/avaloniaui"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:suki="https://github.com/kikipoulet/SukiUI"
+                 xmlns:viewModels="clr-namespace:RisContentPipeline.GUI.ViewModels"
+                 x:Class="RisContentPipeline.GUI.Windows.ImageViewerWindow"
+                 Title="Image Viewer"
+                 WindowStartupLocation="CenterOwner"
+                 x:DataType="viewModels:AssetViewModel"
+                 SizeToContent="WidthAndHeight"
+                 Width="1000" Height="800"
+                 CanResize="True">
+        <NativeWebView Name="PartNativeWebView"
+                       HorizontalAlignment="Stretch"
+                       VerticalAlignment="Stretch"
+                       Source="{Binding Preferences?.LocalServerUri, Mode=OneTime}"
+                       NavigationCompleted="PartNativeWebView_OnNavigationCompleted" />
+</suki:SukiWindow>

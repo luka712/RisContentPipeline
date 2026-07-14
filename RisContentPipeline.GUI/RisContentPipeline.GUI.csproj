@@ -14,6 +14,7 @@
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="12.1.0"/>
         <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.1.0" />
+        <PackageReference Include="Avalonia.Controls.WebView" Version="12.0.1" />
         <PackageReference Include="Avalonia.Desktop" Version="12.1.0"/>
         <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.0"/>
         <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.0"/>
@@ -52,6 +53,24 @@
 
     <ItemGroup>
       <None Update="Assets\image-solid.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Assets\_image_viewer\assets\index-BC8gQRSI.js">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Assets\_image_viewer\assets\index-DbYn0ZPC.css">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Assets\_image_viewer\index.html">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Assets\ImageViewer\assets\index-BC8gQRSI.js">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Assets\ImageViewer\assets\index-DbYn0ZPC.css">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Assets\ImageViewer\index.html">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

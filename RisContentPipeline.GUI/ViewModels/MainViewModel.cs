@@ -16,6 +16,7 @@ namespace RisContentPipeline.GUI.ViewModels;
 public partial class MainViewModel : ViewModelBase
 {
     private readonly AssetsService _assetsService;
+    private readonly UserPreferencesService _preferencesService;
 
     private readonly PipelineContext _context;
 
@@ -45,7 +46,6 @@ public partial class MainViewModel : ViewModelBase
     public Func<Task<IReadOnlyList<IStorageFile>>>? OpenFilePicker { get; set; }
     public Func<Task<IStorageFolder?>>? OpenFolderPicker { get; set; }
     public Action? ShowAboutWindow { get; set; }
-    public Action<string>? ShowImageViewer { get; set; }
 
     /// <summary>
     /// The constructor.
@@ -53,6 +53,7 @@ public partial class MainViewModel : ViewModelBase
     public MainViewModel()
     {
         _assetsService = App.Services.GetService<AssetsService>()!;
+        _preferencesService = App.Services.GetService<UserPreferencesService>()!;
     }
 
     /// <summary>
@@ -95,7 +96,8 @@ public partial class MainViewModel : ViewModelBase
 
     public async Task InitializeAsync()
     {
-        Preferences = await PreferencesViewModel.LoadAsync();
+        Preferences = await _preferencesService.LoadAsync();
+        App.Services.GetService<LocalWebServer>()!.Start();
         _assetsService.PreferencesViewModel = Preferences;
         Preferences.ApplyTheme();
     }
@@ -163,16 +165,6 @@ public partial class MainViewModel : ViewModelBase
     {
         var preferencesWindow = new PreferencesWindow(Preferences);
         preferencesWindow.Show(owner);
-    }
-
-    [RelayCommand]
-    private void ViewSelectedAsset()
-    {
-        if (SelectedAsset?.AbsoluteFilePath is { } path &&
-            (SelectedAsset.IsImage || path.EndsWith(".ktx2", StringComparison.OrdinalIgnoreCase)))
-        {
-            ShowImageViewer?.Invoke(path);
-        }
     }
 
     [RelayCommand]

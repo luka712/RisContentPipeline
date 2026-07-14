@@ -21,9 +21,9 @@ public partial class PreferencesViewModel : ViewModelBase
 {
     private const string DEFAULT_THEME = "Default";
     private const string DEFAULT_COLOR_THEME = "Blue";
-    private const string PREFERENCES_FILE = "preferences.json";
 
     private readonly WindowsService _windowsService;
+    private readonly UserPreferencesService _preferencesService;
     
     [ObservableProperty] private string _buildDirectory = "Build";
     [ObservableProperty] private int _localServerPort;
@@ -42,6 +42,7 @@ public partial class PreferencesViewModel : ViewModelBase
     public PreferencesViewModel()
     {
         _windowsService = App.Services.GetService<WindowsService>()!;
+        _preferencesService = App.Services.GetService<UserPreferencesService>()!;
     }
     
     /// <summary>
@@ -53,6 +54,11 @@ public partial class PreferencesViewModel : ViewModelBase
     /// The available theme colors.
     /// </summary>
     public string[] ColorThemes { get; } = ["Blue", "Green", "Red", "Orange"];
+
+    /// <summary>
+    /// The local server port.
+    /// </summary>
+    public string LocalServerUri => $"http://localserver:{LocalServerPort}";
 
     public Func<Task<string?>>? SelectFolderAsync { get; set; }
     public Action? CloseWindow { get; set; }
@@ -76,7 +82,7 @@ public partial class PreferencesViewModel : ViewModelBase
     [RelayCommand]
     private void Save()
     {
-        _ = SaveAsync();
+        _ = _preferencesService.SaveAsync(this);
         CloseWindow?.Invoke();
     }
 
@@ -85,58 +91,7 @@ public partial class PreferencesViewModel : ViewModelBase
     {
         CloseWindow?.Invoke();
     }
-
-    /// <summary>
-    /// Loads preferences from the preference file.
-    /// </summary>
-    public static async Task<PreferencesViewModel> LoadAsync()
-    {
-        var viewModel = new PreferencesViewModel();
-        if (!File.Exists(PREFERENCES_FILE))
-        {
-            return viewModel;
-        }
-
-        var json = await File.ReadAllTextAsync(PREFERENCES_FILE);
-        var dto = JsonSerializer.Deserialize<PreferencesDto>(json);
-        if (dto != null)
-        {
-            viewModel.BuildDirectory = dto.BuildDirectory;
-            viewModel.LocalServerPort = dto.LocalServerPort;
-            viewModel.Theme = dto.Theme ?? DEFAULT_THEME;
-            viewModel.NativeTitleBar = dto.NativeTitleBar;
-            viewModel.ColorTheme = dto.ColorTheme ?? DEFAULT_COLOR_THEME;
-            viewModel.Ktx2Settings.EncodingTarget = dto.Ktx2Settings.EncodingTarget;
-            viewModel.Ktx2Settings.GenerateMipmaps = dto.Ktx2Settings.GenerateMipmaps;
-            viewModel.Ktx2Settings.QualityLevel = dto.Ktx2Settings.QualityLevel;
-            viewModel.Ktx2Settings.FlipY = dto.Ktx2Settings.FlipY;
-        }
-
-        return viewModel;
-    }
-
-    /// <summary>
-    /// Saves preferences to the preference file.
-    /// </summary>
-    public async Task SaveAsync()
-    {
-        var dto = new PreferencesDto()
-        {
-            BuildDirectory = BuildDirectory,
-            LocalServerPort = LocalServerPort,
-            Theme = Theme,
-            ColorTheme = ColorTheme,
-            NativeTitleBar = NativeTitleBar,
-        };
-        dto.Ktx2Settings.EncodingTarget = Ktx2Settings.EncodingTarget;
-        dto.Ktx2Settings.GenerateMipmaps = Ktx2Settings.GenerateMipmaps;
-        dto.Ktx2Settings.QualityLevel = Ktx2Settings.QualityLevel;
-        dto.Ktx2Settings.FlipY = Ktx2Settings.FlipY;
-
-        var json = JsonSerializer.Serialize(dto, new JsonSerializerOptions { WriteIndented = true });
-        await File.WriteAllTextAsync(PREFERENCES_FILE, json);
-    }
-
+    
     /// <summary>
     /// Applies the current theme.
     /// </summary>

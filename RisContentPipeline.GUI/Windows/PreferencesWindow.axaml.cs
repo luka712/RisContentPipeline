@@ -18,7 +18,7 @@ public partial class PreferencesWindow : SukiWindow
     {
         DataContext = viewModel;
         viewModel.SelectFolderAsync = SelectFolderAsync;
-        viewModel.CloseWindow = () => Close();
+        viewModel.CloseWindow = Close;
 
         _windowsService = App.Services.GetService<WindowsService>()!;
         _windowsService.AddWindow(this);

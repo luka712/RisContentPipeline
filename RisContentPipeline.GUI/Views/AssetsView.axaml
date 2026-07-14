@@ -30,8 +30,36 @@
 
                             <Grid.ContextMenu>
                                 <ContextMenu Opened="MenuBase_OnOpened">
-                                    <MenuItem Header="Remove" Command="{Binding RemoveSelf}" />
-                                    <MenuItem Header="Close" Click="MenuItem_OnClick" />
+                                    <!-- View -->
+                                    <MenuItem Header="View" Command="{Binding ViewSelf}">
+                                        <MenuItem.Icon>
+                                            <avalonia:MaterialIcon Classes="Icon" Kind="Eye" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    
+                                    <!-- Copy to Clipboard -->
+                                    <MenuItem Header="Copy To Clipboard" Click="MenuItem_ClipboardClick">
+                                        <MenuItem.Icon>
+                                            <avalonia:MaterialIcon Classes="Icon" Kind="ContentCopy" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    
+                                    <Separator />
+                                   
+                                    <!-- Remove -->
+                                    <MenuItem Header="Remove" Command="{Binding RemoveSelf}">
+                                        <MenuItem.Icon>
+                                            <avalonia:MaterialIcon Classes="Icon" Kind="Delete" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    
+                                    <Separator />
+                                    
+                                    <MenuItem Header="Close" Click="MenuItem_CloseClick">
+                                        <MenuItem.Icon>
+                                            <avalonia:MaterialIcon Classes="Icon" Kind="Close" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
                                 </ContextMenu>
                             </Grid.ContextMenu>
                         </Grid>

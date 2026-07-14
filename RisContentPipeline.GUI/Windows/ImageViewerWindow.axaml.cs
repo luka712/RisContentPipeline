@@ -1,101 +1,82 @@
+using System.ComponentModel;
 using System.Diagnostics;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
+using Microsoft.Extensions.DependencyInjection;
 using RisContentPipeline.GUI.Services;
+using RisContentPipeline.GUI.ViewModels;
+using SukiUI.Controls;
 
-namespace RisContentPipeline.GUI.Views;
+namespace RisContentPipeline.GUI.Windows;
 
 /// <summary>
 /// A window that manages the local web server for viewing KTX2 and PNG images.
 /// Opens the viewer in the system's default browser.
 /// </summary>
-public partial class ImageViewerWindow : Window
+public partial class ImageViewerWindow : SukiWindow
 {
-    private readonly LocalWebServer? _webServer;
-    private readonly string _serverUrl;
-    private string? _currentFilePath;
+    private readonly LocalWebServer _server;
+    private readonly WindowsService _windowsService;
+    private readonly NativeWebView _webView;
 
+    /// <summary>
+    /// The constructor.
+    /// </summary>
     public ImageViewerWindow()
     {
+        _server = App.Services.GetService<LocalWebServer>()!;
+        _windowsService = App.Services.GetService<WindowsService>()!;
         InitializeComponent();
-        _serverUrl = "http://localhost:5050";
+        _webView = this.FindControl<NativeWebView>("PartNativeWebView")!;
+    }
+    
+    protected override void OnOpened(EventArgs e)
+    {
+        base.OnOpened(e);
+        _webView.Source = new Uri($"http://localhost:{_server.Port}");
     }
 
+    private void PartNativeWebView_OnNavigationCompleted(object? sender, WebViewNavigationCompletedEventArgs e)
+    {
+        // BUG: Avalonia Bug most likely. WebView doesn't update its size until the next frame.
+        Dispatcher.UIThread.Post(() =>
+        {
+            _webView.InvalidateArrange();
+            _webView.InvalidateVisual();
+        }, DispatcherPriority.Render);
+        // BUG: END
+        
+        var viewModel = DataContext as AssetViewModel;
+        _ = LoadImageAsync(viewModel!.AbsoluteFilePath);
+    }
+    
     /// <summary>
-    /// Creates an ImageViewerWindow with a local web server.
+    /// Loads the image into the browser viewer.
     /// </summary>
-    /// <param name="viewerRootPath">The root path where the viewer HTML/JS files are located.</param>
-    /// <param name="serverPort">The port for the local web server.</param>
-    public ImageViewerWindow(string viewerRootPath, int serverPort) : this()
+    /// <param name="filePath">The file path.</param>
+    private async Task LoadImageAsync(string filePath)
     {
-        _serverUrl = $"http://localhost:{serverPort}";
-        UrlText.Text = _serverUrl;
+        var isKtx2 = filePath.EndsWith(".ktx2");
 
-        // Start local web server if viewer path exists
-        if (Directory.Exists(viewerRootPath))
+        // js function from viewer to call.
+        var jsFunction = isKtx2 ? "loadKtx2TextureFromBase64" : "loadPngTextureFromBase64";
+            
+        var fileName = Path.GetFileName(filePath);
+
+        if(!File.Exists(filePath))
         {
-            _webServer = new LocalWebServer(viewerRootPath, serverPort);
-            _webServer.Start();
+            throw new FileNotFoundException($"File '{filePath}' not found.", filePath);
         }
-    }
-
-    /// <summary>
-    /// Opens the viewer and loads the specified image files.
-    /// </summary>
-    /// <param name="filePaths">The paths to the image files.</param>
-    public void View(params string[] filePaths)
-    {
-        if (filePaths.Length > 0)
-        {
-            _currentFilePath = filePaths[0];
-            FilePathText.Text = _currentFilePath;
-        }
-
-        Show();
-        OpenInBrowser();
-    }
-
-    private void OpenInBrowser()
-    {
-        try
-        {
-            // Build URL with file parameter if we have a file
-            var url = _serverUrl;
-            if (!string.IsNullOrEmpty(_currentFilePath))
-            {
-                var fileName = Path.GetFileName(_currentFilePath);
-                var base64 = Convert.ToBase64String(File.ReadAllBytes(_currentFilePath));
-                // For now, just open the viewer - the file will need to be loaded via the UI
-                // In a more complete implementation, we could pass the file via query params or local storage
-            }
-
-            // Open in default browser
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = url,
-                UseShellExecute = true
-            });
-        }
-        catch (Exception ex)
-        {
-            // Log error but don't crash
-            System.Diagnostics.Debug.WriteLine($"Failed to open browser: {ex.Message}");
-        }
-    }
-
-    private void OnOpenBrowserClick(object? sender, RoutedEventArgs e)
-    {
-        OpenInBrowser();
-    }
-
-    private void OnCloseClick(object? sender, RoutedEventArgs e)
-    {
-        Close();
-    }
-
-    protected override void OnClosed(EventArgs e)
-    {
-        base.OnClosed(e);
-        _webServer?.Dispose();
+        
+        byte[] data = await File.ReadAllBytesAsync(filePath);
+        string base64 = Convert.ToBase64String(data);
+        
+        Dispatcher.UIThread.Post(() =>
+        {;
+            _ = _webView.InvokeScript($"window.{jsFunction}('{base64}');");
+        });
     }
 }

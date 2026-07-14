@@ -1,4 +1,6 @@
 using System.Net;
+using Avalonia.Platform;
+using RisContentPipeline.GUI.ViewModels;
 
 namespace RisContentPipeline.GUI.Services;
 
@@ -7,41 +9,46 @@ namespace RisContentPipeline.GUI.Services;
 /// </summary>
 public class LocalWebServer : IDisposable
 {
-    private readonly HttpListener _listener;
-    private readonly string _rootPath;
-    private readonly int _port;
+    private const string ROOT_PATH = "Assets/ImageViewer";
+    private const string INDEX_PATH = "index.html";
+    
+    private HttpListener? _listener;
+
     private readonly CancellationTokenSource _cts = new();
     private Task? _serverTask;
-
-    public int Port => _port;
-    public bool IsListening => _listener.IsListening;
+    
 
     public event Action<string>? OnLog;
-
+    
     /// <summary>
-    /// Creates a new local web server.
+    /// The view model.
     /// </summary>
-    /// <param name="rootPath">The root path to serve files from.</param>
-    /// <param name="port">The port to listen on.</param>
-    public LocalWebServer(string rootPath, int port)
-    {
-        _rootPath = rootPath;
-        _port = port;
-        _listener = new HttpListener();
-        _listener.Prefixes.Add($"http://localhost:{port}/");
-    }
+    public MainViewModel ViewModel { get; set; } = null!;
+    
+    /// <summary>
+    /// The local server port.
+    /// </summary>
+    public int Port => ViewModel.Preferences.LocalServerPort;
 
     /// <summary>
     /// Starts the local web server.
     /// </summary>
     public void Start()
     {
-        if (_listener.IsListening) return;
+        if (_listener?.IsListening == true)
+        {
+            return;
+        }
+
+        var port = ViewModel.Preferences.LocalServerPort;
+        
+        _listener = new HttpListener();
+        _listener.Prefixes.Add($"http://localhost:{port}/");
 
         try
         {
             _listener.Start();
-            OnLog?.Invoke($"🌐 Local server running at http://localhost:{_port}");
+            OnLog?.Invoke($"🌐 Local server running at http://localhost:{port}");
 
             _serverTask = Task.Run(async () =>
             {
@@ -74,10 +81,13 @@ public class LocalWebServer : IDisposable
     {
         try
         {
-            string path = context.Request.Url?.AbsolutePath.TrimStart('/') ?? "index.html";
-            if (string.IsNullOrEmpty(path) || path == "/") path = "index.html";
+            string path = context.Request.Url?.AbsolutePath.TrimStart('/') ?? INDEX_PATH;
+            if (string.IsNullOrEmpty(path) || path == "/")
+            {
+                path = INDEX_PATH;
+            }
 
-            string fullPath = Path.Combine(_rootPath, path.Replace('/', Path.DirectorySeparatorChar));
+            string fullPath = Path.Combine(ROOT_PATH, path.Replace('/', Path.DirectorySeparatorChar));
 
             if (File.Exists(fullPath))
             {
@@ -129,7 +139,7 @@ public class LocalWebServer : IDisposable
     public void Dispose()
     {
         _cts.Cancel();
-        if (_listener.IsListening)
+        if (_listener?.IsListening == true)
         {
             _listener.Stop();
             _listener.Close();

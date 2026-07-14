@@ -34,7 +34,6 @@ public partial class MainWindow : SukiWindow
             vm.OpenFilePicker = OpenFilePickerAsync;
             vm.OpenFolderPicker = OpenFolderPickerAsync;
             vm.ShowAboutWindow = ShowAboutDialog;
-            vm.ShowImageViewer = ShowImageViewerDialog;
 
             await vm.InitializeAsync();
         }
@@ -90,42 +89,6 @@ public partial class MainWindow : SukiWindow
     {
         var aboutWindow = new AboutWindow();
         aboutWindow.ShowDialog(this);
-    }
-
-    private void ShowPreferencesDialog()
-    {
-        if (DataContext is MainViewModel vm)
-        {
-            var preferencesWindow = new PreferencesWindow(vm.Preferences);
-            preferencesWindow.ShowDialog(this);
-        }
-    }
-
-    private void ShowImageViewerDialog(string filePath)
-    {
-        if (DataContext is MainViewModel vm)
-        {
-            // var viewerPath = ResolveViewerPath(vm.Preferences.ViewerPath);
-            // var viewerWindow = new ImageViewerWindow(viewerPath, vm.Preferences.LocalServerPort);
-            // viewerWindow.View(filePath);
-        }
-    }
-
-    private static string ResolveViewerPath(string relativePath)
-    {
-        // Try from current working directory
-        var fromCwd = Path.GetFullPath(relativePath);
-        if (Directory.Exists(fromCwd)) return fromCwd;
-
-        // Try from assembly directory
-        var assemblyDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-        if (assemblyDir != null)
-        {
-            var fromAssembly = Path.Combine(assemblyDir, relativePath);
-            if (Directory.Exists(fromAssembly)) return fromAssembly;
-        }
-
-        return relativePath;
     }
 
     private void OnExitClick(object? sender, RoutedEventArgs e)
