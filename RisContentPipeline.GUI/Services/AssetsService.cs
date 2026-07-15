@@ -26,6 +26,16 @@ public class AssetsService
     public PreferencesViewModel? PreferencesViewModel { get; set; }
 
     /// <summary>
+    /// The queued pipeline items.
+    /// </summary>
+    public IReadOnlyList<QueuedPipelineItem> QueuedPipelineItems => _pipelineSystem.QueuedItems;
+
+    /// <summary>
+    /// Called when a new item is added to the assets.
+    /// </summary>
+    public event Action<QueuedPipelineItem>? OnItemAdded;
+
+    /// <summary>
     /// Add a PNG file to the assets.
     /// </summary>
     /// <param name="filePath">The file path.</param>
@@ -93,21 +103,29 @@ public class AssetsService
             };
 
             if (settings.EncodingTarget == Ktx2EncodingTarget.BASIS_UASTC)
+            {
                 options.UastcFlags = (KtxUastcFlags)settings.GetUastcQualityLevelValue();
+            }
             else if (settings.EncodingTarget == Ktx2EncodingTarget.BASIS_ETC1S)
+            {
                 options.QualityLevel = (uint)settings.GetQualityLevelValue();
+            }
             else if (settings.EncodingTarget == Ktx2EncodingTarget.ASTC_4X4)
+            {
                 options.AstcQuality = (KtxPackAstcQualityLevels)settings.GetQualityLevelValue();
+            }
 
-            _pipelineSystem.StoreSourceAsset("png", "ktx2", new Ktx2PipelineSource { FilePath = asset.AbsoluteFilePath },
+            var queuedItem = _pipelineSystem.StoreSourceAsset("png", "ktx2", new Ktx2PipelineSource { FilePath = asset.AbsoluteFilePath },
                 options);
+            OnItemAdded?.Invoke(queuedItem);
         }
         else if (asset.IsJson || asset.IsXml)
         {
             var fileType = Path.GetExtension(asset.AbsoluteFilePath).TrimStart('.');
-            _pipelineSystem.StoreSourceAsset(fileType, IPipeline.ANY_TYPE,
+            var queuedItem = _pipelineSystem.StoreSourceAsset(fileType, IPipeline.ANY_TYPE,
                 new GenericPipelineSource { FilePath = asset.AbsoluteFilePath },
                 new GenericPipelineOptions { OutputPath = Path.Combine(asset.BuildPath, fileName) });
+            OnItemAdded?.Invoke(queuedItem);
         }
     }
 

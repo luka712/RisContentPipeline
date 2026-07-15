@@ -36,21 +36,16 @@ public class QueuedPipelineItem
     public PipelineResult? Result { get; internal set; }
 
     /// <summary>
-    /// The conversion is in progress.
+    /// The state of the item.
     /// </summary>
-    public bool IsStarted { get; private set; }
-
-    /// <summary>
-    /// True if the item has been processed.
-    /// </summary>
-    public bool IsFinished { get; private set; }
+    public QueuedItemState State { get; private set; } = QueuedItemState.Queued;
 
     /// <summary>
     /// Called when the conversion starts.
     /// </summary>
     internal void ConversionStart()
     {
-        IsStarted = true;
+        State = QueuedItemState.Processing;
         OnConversionStarted?.Invoke(this, EventArgs.Empty);
     }
 
@@ -59,7 +54,7 @@ public class QueuedPipelineItem
     /// </summary>
     internal void ConversionFinished()
     {
-        IsFinished = true;
+        State = QueuedItemState.Done;
         OnConversionFinished?.Invoke(this, EventArgs.Empty);
     }
 }

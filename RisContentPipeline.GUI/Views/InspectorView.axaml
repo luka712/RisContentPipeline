@@ -3,16 +3,55 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:viewModels="clr-namespace:RisContentPipeline.GUI.ViewModels"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:DataType="viewModels:MainViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="RisContentPipeline.GUI.Views.InspectorView">
     <suki:GlassCard Margin="10" MinHeight="300" Classes="Primary">
-        <TabControl>
-            <TabItem Header="Build">
-                <!-- Content -->
-            </TabItem>
-            <TabItem Header="Tab 2">
-                <!-- Content -->
-            </TabItem>
-        </TabControl>
-        </suki:GlassCard>
+        <DataGrid ItemsSource="{Binding QueuedItems}">
+            
+            <DataGrid.Styles>
+                <Style Selector="DataGridRow">
+                    <Setter Property="ContextMenu">
+                        <ContextMenu x:DataType="viewModels:QueuedPipelineItemViewModel" Opened="MenuBase_OnOpened">
+                            <!-- View -->
+                            <MenuItem Header="View" Command="{Binding ViewSelf}">
+                                <MenuItem.Icon>
+                                    <avalonia:MaterialIcon Classes="Icon" Kind="Eye" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            
+                            <Separator />
+                                    
+                            <MenuItem Header="Close" Click="MenuItem_CloseClick">
+                                <MenuItem.Icon>
+                                    <avalonia:MaterialIcon Classes="Icon" Kind="Close" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </ContextMenu>
+                    </Setter>
+                </Style>
+            </DataGrid.Styles>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="viewModels:QueuedPipelineItemViewModel">
+                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                <suki:Loading IsVisible="{Binding InProgress, Mode=OneWay}"
+                                              Width="20" Height="20" />
+                                <avalonia:MaterialIcon IsVisible="{Binding IsFinished}" Kind="Check" Classes="Icon" />
+                                <avalonia:MaterialIcon IsVisible="{Binding InError}" Kind="Error" Classes="Icon" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Source"
+                                    Binding="{Binding Source}" />
+                <DataGridTextColumn Header="Conversion" Binding="{Binding Conversion}" />
+                <DataGridTextColumn Header="Target" Binding="{Binding Target}" />
+                
+            </DataGrid.Columns>
+        </DataGrid>
+    </suki:GlassCard>
 </UserControl>

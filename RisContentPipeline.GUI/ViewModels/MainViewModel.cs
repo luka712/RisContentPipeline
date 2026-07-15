@@ -32,6 +32,9 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<LogMessage> _messages =
         [new LogMessage(MessageLogLevel.ERROR, "No messages", DateTime.Now)];
 
+    [ObservableProperty]
+    private ObservableCollection<QueuedPipelineItemViewModel> _queuedItems = [];
+
     /// <summary>
     /// The currently added assets.
     /// </summary>
@@ -54,6 +57,8 @@ public partial class MainViewModel : ViewModelBase
     {
         _assetsService = App.Services.GetService<AssetsService>()!;
         _preferencesService = App.Services.GetService<UserPreferencesService>()!;
+        
+        _assetsService.OnItemAdded += item => QueuedItems.Add(new QueuedPipelineItemViewModel(item));
     }
 
     /// <summary>

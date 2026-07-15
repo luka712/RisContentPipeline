@@ -225,7 +225,7 @@ internal class BuildView
             return;
         }
 
-        if (item.IsStarted)
+        if (item.InProgress)
         {
             statusText = "Converting...";
             return;
