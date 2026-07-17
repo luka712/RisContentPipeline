@@ -163,7 +163,7 @@ public class Ktx2Pipeline : APipeline
         }
 
         // Write the KTX2 texture to a file
-        if (!String.IsNullOrEmpty(pipelineOptions.OutputPath))
+        if (!string.IsNullOrEmpty(pipelineOptions.OutputPath))
         {
             texture.WriteToNamedFile(pipelineOptions.OutputPath);
         }

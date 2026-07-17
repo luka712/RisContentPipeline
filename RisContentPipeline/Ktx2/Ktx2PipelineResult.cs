@@ -11,9 +11,7 @@ public class Ktx2PipelineResult : PipelineResult
     /// The constructor.
     /// </summary>
     /// <param name="texture">The <see cref="Ktx2Texture"/>.</param>
-    public Ktx2PipelineResult(Ktx2Texture texture)
+    public Ktx2PipelineResult(Ktx2Texture texture) : base(true, texture)
     {
-        Success = true;
-        Result = texture;
     }
 }

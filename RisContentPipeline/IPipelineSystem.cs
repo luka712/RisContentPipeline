@@ -25,7 +25,7 @@ public class OnItemConversionFinishEventArgs
     /// <summary>
     /// The result of the conversion of the item.
     /// </summary>
-    public PipelineResult Result { get; internal set; } = new();
+    public PipelineResult Result { get; internal set; } = PipelineResult.FailureResult("Not set");
 }
 
 /// <summary>

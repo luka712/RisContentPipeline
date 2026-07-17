@@ -50,9 +50,11 @@ public partial class MainWindow : SukiWindow
             AllowMultiple = true,
             FileTypeFilter =
             [
-                new FilePickerFileType("Image Files") { Patterns = ["*.png"] },
-                new FilePickerFileType("Data Files") { Patterns = ["*.json", "*.xml"] },
-                new FilePickerFileType("All Files") { Patterns = ["*"] }
+                new FilePickerFileType("Png Files") { Patterns = ["*.png"] },
+                // TODO: for now jpg/jpeg are not supported but should be soon as image viewer is changed to support jpeg.
+                // new FilePickerFileType("Image Files") { Patterns = ["*.png", "*.jpg", "*.jpeg"] },
+                // new FilePickerFileType("Data Files") { Patterns = ["*.json", "*.xml"] },
+                // new FilePickerFileType("All Files") { Patterns = ["*"] }
             ]
         });
 

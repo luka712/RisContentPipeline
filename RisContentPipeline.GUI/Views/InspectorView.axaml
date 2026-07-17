@@ -22,8 +22,22 @@
                                 </MenuItem.Icon>
                             </MenuItem>
                             
+                            <!-- Copy to Clipboard -->
+                            <MenuItem Header="Copy Source Path" Click="MenuItem_CopySourcePath">
+                                <MenuItem.Icon>
+                                    <avalonia:MaterialIcon Classes="Icon" Kind="ContentCopy" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            
+                            <MenuItem Header="Copy Destination Path" Click="MenuItem_CopyDestinationPath">
+                                <MenuItem.Icon>
+                                    <avalonia:MaterialIcon Classes="Icon" Kind="ContentCopy" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            
                             <Separator />
                                     
+                            <!-- Close --> 
                             <MenuItem Header="Close" Click="MenuItem_CloseClick">
                                 <MenuItem.Icon>
                                     <avalonia:MaterialIcon Classes="Icon" Kind="Close" />

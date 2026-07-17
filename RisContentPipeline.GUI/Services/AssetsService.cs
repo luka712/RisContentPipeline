@@ -95,15 +95,18 @@ public class AssetsService
             return;
         }
         
-        if (filePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+        if (filePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase) 
+            || filePath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase)
+            || filePath.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)
+            )
         {
             AddPngFile(filePath);
         }
-        else if (filePath.EndsWith(".json", StringComparison.OrdinalIgnoreCase) ||
-                 filePath.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
-        {
-            AddGenericFile(filePath);
-        }
+        // else if (filePath.EndsWith(".json", StringComparison.OrdinalIgnoreCase) ||
+        //          filePath.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+        // {
+        //     AddGenericFile(filePath);
+        // }
     }
 
     private void QueueFileForBuild(AssetViewModel asset)
