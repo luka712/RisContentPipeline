@@ -1,7 +1,7 @@
-using Avalonia.Controls;
 using RisContentPipeline.GUI.ViewModels;
-using RisContentPipeline.GUI.Views;
 using RisContentPipeline.GUI.Windows;
+using RisContentPipeline.Ktx2;
+using RisKtx2;
 using ImageViewerWindow = RisContentPipeline.GUI.Windows.ImageViewerWindow;
 
 namespace RisContentPipeline.GUI.Services;
@@ -21,7 +21,7 @@ public class ViewerService
     {
         _windowsService = windowsService;
     }
-    
+
     /// <summary>
     /// Views the specified asset.
     /// </summary>
@@ -34,6 +34,30 @@ public class ViewerService
             window.DataContext = asset;
             _windowsService.ApplySettings(window);
             window.Show();
+        }
+        else
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// View the specified queued pipeline item.
+    /// </summary>
+    /// <param name="queuedPipelineItem">The <see cref="QueuedPipelineItemViewModel"/>.</param>
+    public void ViewAsset(QueuedPipelineItemViewModel queuedPipelineItem)
+    {
+        var conversionItem = queuedPipelineItem.Item.Item;
+        if (conversionItem.Source is Ktx2PipelineSource)
+        {
+            KtxViewerWindow window = new KtxViewerWindow();
+            window.DataContext = queuedPipelineItem;
+            _windowsService.ApplySettings(window);
+            window.Show();
+        }
+        else
+        {
+            throw new NotImplementedException();
         }
     }
 }

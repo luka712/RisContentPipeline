@@ -1,0 +1,20 @@
+<suki:SukiWindow xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:suki="https://github.com/kikipoulet/SukiUI"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:RisContentPipeline.GUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="RisContentPipeline.GUI.Windows.KtxViewerWindow"
+        Title="Image Viewer"
+        WindowStartupLocation="CenterOwner"
+        x:DataType="viewModels:QueuedPipelineItemViewModel"
+        SizeToContent="WidthAndHeight"
+        Width="1000" Height="800"
+        CanResize="True">
+    <NativeWebView Name="PartNativeWebView"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch"
+                   Source="{Binding Preferences?.LocalServerUri, Mode=OneTime}"
+                   NavigationCompleted="PartNativeWebView_OnNavigationCompleted" />
+</suki:SukiWindow>

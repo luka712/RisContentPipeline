@@ -38,19 +38,7 @@ public partial class MainWindow : SukiWindow
             await vm.InitializeAsync();
         }
     }
-
-
-    protected override void OnClosing(WindowClosingEventArgs e)
-    {
-        base.OnClosing(e);
-
-        if (DataContext is MainViewModel vm)
-        {
-            vm.SaveSession();
-          //   _ = vm.SavePreferencesAsync();
-        }
-    }
-
+    
     private async Task<IReadOnlyList<IStorageFile>> OpenFilePickerAsync()
     {
         var topLevel = GetTopLevel(this);

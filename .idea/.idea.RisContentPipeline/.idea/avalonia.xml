@@ -23,6 +23,7 @@
         <entry key="RisContentPipeline.GUI/Views/PreferencesWindow.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
         <entry key="RisContentPipeline.GUI/Windows/AboutWindow.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
         <entry key="RisContentPipeline.GUI/Windows/ImageViewerWindow.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
+        <entry key="RisContentPipeline.GUI/Windows/KtxViewerWindow.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
         <entry key="RisContentPipeline.GUI/Windows/MainWindow.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
         <entry key="RisContentPipeline.GUI/Windows/PreferencesWindow.axaml" value="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
       </map>

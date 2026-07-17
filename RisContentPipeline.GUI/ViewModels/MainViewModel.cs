@@ -18,9 +18,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly AssetsService _assetsService;
     private readonly UserPreferencesService _preferencesService;
     private readonly MessageService _messageService;
-
-    private readonly PipelineContext _context;
-
+    
     /// <summary>
     /// The currently selected asset in UI.
     /// </summary>
@@ -60,7 +58,7 @@ public partial class MainViewModel : ViewModelBase
         _preferencesService = App.Services.GetService<UserPreferencesService>()!;
         _messageService = App.Services.GetService<MessageService>()!;
         
-        _assetsService.OnItemQueued += item => QueuedItems.Add(new QueuedPipelineItemViewModel(item));
+        _assetsService.OnItemQueued += item => QueuedItems.Add(new QueuedPipelineItemViewModel(item, Preferences));
         _assetsService.OnBuildStarted += () => QueuedItems.Clear();
 
         _messageService.OnMessage += msg => Messages.Add(msg);
@@ -186,13 +184,5 @@ public partial class MainViewModel : ViewModelBase
         var preferencesWindow = new PreferencesWindow(Preferences, 1);
         preferencesWindow.Show(owner);
     }
-
-    public void SaveSession() => _context.SaveSession();
-    //public Task SavePreferencesAsync() => _context.SavePreferencesAsync();
-
-    public void Dispose()
-    {
-        _context.SaveSession();
-        _context.Dispose();
-    }
+    
 }

@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
+using RisContentPipeline.GUI.Services;
 using RisContentPipeline.Ktx2;
 
 namespace RisContentPipeline.GUI.ViewModels;
@@ -9,7 +11,8 @@ namespace RisContentPipeline.GUI.ViewModels;
 /// </summary>
 public partial class QueuedPipelineItemViewModel : ViewModelBase
 {
-    private readonly QueuedPipelineItem _item;
+    private readonly ViewerService _viewerService;
+    private readonly MessageService _messageService;
 
     [ObservableProperty] private bool _inProgress;
 
@@ -21,9 +24,14 @@ public partial class QueuedPipelineItemViewModel : ViewModelBase
     /// The constructor.
     /// </summary>
     /// <param name="item">The <see cref="QueuedPipelineItem"/>.</param>
-    public QueuedPipelineItemViewModel(QueuedPipelineItem item)
+    /// <param name="preferences">The <see cref="PreferencesViewModel"/>.</param>
+    public QueuedPipelineItemViewModel(QueuedPipelineItem item, PreferencesViewModel preferences)
     {
-        _item = item;
+        _viewerService = App.Services.GetService<ViewerService>()!;
+        _messageService = App.Services.GetService<MessageService>()!;
+
+        Item = item;
+        Preferences = preferences;
 
         if (item.Item.Source is Ktx2PipelineSource ktxSource)
         {
@@ -43,15 +51,26 @@ public partial class QueuedPipelineItemViewModel : ViewModelBase
             throw new NotImplementedException();
         }
 
-        _item.OnConversionStarted += (_, _) => ItemStatusChanged();
-        _item.OnConversionFinished += (_, _) => ItemStatusChanged();
+        Item.OnConversionStarted += (_, _) => ItemStatusChanged();
+        Item.OnConversionFinished += (_, _) => ItemStatusChanged();
     }
+    
+    /// <summary>
+    /// The <see cref="QueuedPipelineItem"/>.
+    /// </summary>
+    public QueuedPipelineItem Item { get; }
 
+
+    /// <summary>
+    /// The preferences.
+    /// </summary>
+    public PreferencesViewModel Preferences { get; set; }
+    
     private void ItemStatusChanged()
     {
-        IsFinished = _item.State == QueuedItemState.Done;
-        InProgress = _item.State == QueuedItemState.Processing;
-        InError = _item.State == QueuedItemState.Failed;
+        IsFinished = Item.State == QueuedItemState.Done;
+        InProgress = Item.State == QueuedItemState.Processing;
+        InError = Item.State == QueuedItemState.Failed;
     }
 
     /// <summary>
@@ -72,5 +91,6 @@ public partial class QueuedPipelineItemViewModel : ViewModelBase
     [RelayCommand]
     public void ViewSelf()
     {
+        _viewerService.ViewAsset(this);
     }
 }
