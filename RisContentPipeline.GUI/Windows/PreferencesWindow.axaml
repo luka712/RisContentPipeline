@@ -29,7 +29,7 @@
             </StackPanel>
 
 
-            <TabControl>
+            <TabControl SelectedIndex="{Binding SelectedTabIndex}">
                 <!-- GENERAL -->
                 <TabItem Header="General">
                     <StackPanel Spacing="16" Margin="20" Orientation="Vertical">

@@ -3,9 +3,6 @@
     <Platform Name="Any CPU" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="RisContentPipeline.GUI.Linux.Old\RisContentPipeline.GUI.Linux.Old.csproj" />
-  <Project Path="RisContentPipeline.GUI.Old\RisContentPipeline.GUI.Old.csproj" />
-  <Project Path="RisContentPipeline.GUI.Windows.Old\RisContentPipeline.GUI.Windows.Old.csproj" />
   <Project Path="RisContentPipeline.GUI/RisContentPipeline.GUI.csproj" />
   <Project Path="RisContentPipeline.Tests/RisContentPipeline.Tests.csproj" />
   <Project Path="RisContentPipeline/RisContentPipeline.csproj" />

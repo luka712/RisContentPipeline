@@ -62,6 +62,11 @@ public partial class PreferencesViewModel : ViewModelBase
 
     public Func<Task<string?>>? SelectFolderAsync { get; set; }
     public Action? CloseWindow { get; set; }
+    
+    /// <summary>
+    /// The selected tab index.
+    /// </summary>
+    public int SelectedTabIndex { get; set; }
 
 
     [RelayCommand]

@@ -28,14 +28,13 @@
             <MenuItem Header="Add Files..." Command="{Binding AddFilesCommand}" />
             <MenuItem Header="Clear All" Command="{Binding ClearAssetsCommand}" />
             <Separator />
+            <MenuItem Header="Set Build Directory..." Command="{Binding SetBuildDirectoryCommand}" 
+                      CommandParameter="{Binding $parent[suki:SukiWindow]}" />
+            <Separator />
             <MenuItem Header="Preferences..." Command="{Binding ShowPreferencesWindowCommand}"
                       CommandParameter="{Binding $parent[suki:SukiWindow]}" />
             <Separator />
             <MenuItem Header="Exit" Click="OnExitClick" />
-        </MenuItem>
-        <MenuItem Header="Build">
-            <MenuItem Header="Build" Command="{Binding BuildCommand}" />
-            <MenuItem Header="Set Build Directory..." Command="{Binding SetBuildDirectoryCommand}" />
         </MenuItem>
         <MenuItem Header="Help">
             <MenuItem Header="About" Command="{Binding ShowAboutCommand}" />

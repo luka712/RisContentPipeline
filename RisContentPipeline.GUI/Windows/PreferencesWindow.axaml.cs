@@ -14,18 +14,20 @@ public partial class PreferencesWindow : SukiWindow
     /// The constructor for the PreferencesWindow.
     /// </summary>
     /// <param name="viewModel">The <see cref="PreferencesViewModel"/>.</param>
-    public PreferencesWindow(PreferencesViewModel viewModel) 
+    /// <param name="tabIndex">The selected tab index.</param>
+    public PreferencesWindow(PreferencesViewModel viewModel, int tabIndex = 0) 
     {
         DataContext = viewModel;
         viewModel.SelectFolderAsync = SelectFolderAsync;
         viewModel.CloseWindow = Close;
+        viewModel.SelectedTabIndex = tabIndex;
 
         _windowsService = App.Services.GetService<WindowsService>()!;
         _windowsService.AddWindow(this);
         
         InitializeComponent();
     }
-
+    
     private async Task<string?> SelectFolderAsync()
     {
         var topLevel = GetTopLevel(this);

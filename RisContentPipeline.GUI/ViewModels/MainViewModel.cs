@@ -181,16 +181,10 @@ public partial class MainViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task SetBuildDirectoryAsync()
+    private async Task SetBuildDirectoryAsync(SukiWindow owner)
     {
-        // if (OpenFolderPicker == null) return;
-        //
-        // var folder = await OpenFolderPicker();
-        // if (folder?.Path.LocalPath is { } path)
-        // {
-        //     _context.Preferences.BuildDirectory = path;
-        //     OnPropertyChanged(nameof(Preferences));
-        // }
+        var preferencesWindow = new PreferencesWindow(Preferences, 1);
+        preferencesWindow.Show(owner);
     }
 
     public void SaveSession() => _context.SaveSession();

@@ -3,7 +3,7 @@
                  xmlns:suki="https://github.com/kikipoulet/SukiUI"
                  xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
                  x:Class="RisContentPipeline.GUI.Windows.AboutWindow"
-                 Title="About Ris Content Pipeline"
+                 Title="About"
                  WindowStartupLocation="CenterOwner"
                  CanResize="True"
                  ShowBottomBorder="True"
