@@ -11,7 +11,9 @@
                  ShowBottomBorder="True"
                  CornerRadius="15"
                  Topmost="True"
-                 SizeToContent="WidthAndHeight">
+                 SizeToContent="WidthAndHeight"
+                 MinWidth="600"
+                 >
 
     <Design.DataContext>
         <vm:PreferencesViewModel />

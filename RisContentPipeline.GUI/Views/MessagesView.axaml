@@ -13,26 +13,44 @@
         <DataGrid ItemsSource="{Binding Messages}" CanUserReorderColumns="True" CanUserSortColumns="True"
                   IsReadOnly="True">
             <DataGrid.Columns>
+                
+                <!-- Icon -->
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel>
-                            <avalonia:MaterialIcon Classes="Icon"
-                                                   IsVisible="{Binding Level, Converter={StaticResource EqualsConverter}, ConverterParameter={StaticResource InfoMessage}}"  
-                                                   Kind="Info"/>
-                            <avalonia:MaterialIcon Classes="Icon"
-                                                   IsVisible="{Binding Level, Converter={StaticResource EqualsConverter}, ConverterParameter={StaticResource WarningMessage}}"  
-                                                   Kind="Warning"/>
-                            <avalonia:MaterialIcon Classes="Icon"
-                                                   IsVisible="{Binding Level, Converter={StaticResource EqualsConverter}, ConverterParameter={StaticResource ErrorMessage}}"  
-                                                   Kind="Error"/>
+                                <avalonia:MaterialIcon Classes="Icon"
+                                                       IsVisible="{Binding LogLevel, Converter={StaticResource EqualsConverter}, ConverterParameter={StaticResource InfoMessage}}"
+                                                       Kind="Info" />
+                                <avalonia:MaterialIcon Classes="Icon"
+                                                       Foreground="{StaticResource Warning}"
+                                                       IsVisible="{Binding LogLevel, Converter={StaticResource EqualsConverter}, ConverterParameter={StaticResource WarningMessage}}"
+                                                       Kind="Warning" />
+                                <avalonia:MaterialIcon Classes="Icon"
+                                                       Foreground="{StaticResource Error}"
+                                                       IsVisible="{Binding LogLevel, Converter={StaticResource EqualsConverter}, ConverterParameter={StaticResource ErrorMessage}}"
+                                                       Kind="Error" />
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Message" Binding="{Binding Message}" />
+                
+                <!-- Timestamp -->
                 <DataGridTextColumn Header="Timestamp"
+                                    Width="150"
                                     Binding="{Binding Timestamp, Converter={StaticResource DateTimeConverter}, Mode=OneWay}" />
+                
+                <!-- Message -->
+                <DataGridTemplateColumn Header="Message">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Message}" ToolTip.Tip="{Binding Message}" TextWrapping="Wrap" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+
+                
             </DataGrid.Columns>
         </DataGrid>
     </suki:GlassCard>

@@ -51,6 +51,7 @@ public partial class App : Application
         services.AddSingleton<ViewerService>();
         services.AddSingleton<LocalWebServer>();
         services.AddSingleton<UserPreferencesService>();
+        services.AddSingleton<MessageService>();
     }
     
     private static void AttachMainViewModel(IServiceProvider container, MainViewModel viewModel)

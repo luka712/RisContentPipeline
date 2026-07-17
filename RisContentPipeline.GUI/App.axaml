@@ -21,6 +21,9 @@
         <models:MessageLogLevel x:Key="WarningMessage">WARNING</models:MessageLogLevel>
         <models:MessageLogLevel x:Key="ErrorMessage">ERROR</models:MessageLogLevel>
         
+        <Color x:Key="Warning">Yellow</Color>
+        <Color x:Key="Error">Red</Color>
+        
     </Application.Resources>
 
     <Application.Styles>

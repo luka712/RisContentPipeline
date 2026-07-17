@@ -17,10 +17,7 @@ public class PipelineContext : IDisposable
     private const string INTERNAL_SCRIPTS_DIRECTORY = "InternalScripts";
     private const string SESSION_FILE = "session.json";
 
-
-
-    public ObservableCollection<LogMessage> Messages { get; } = [new LogMessage(MessageLogLevel.ERROR, "No messages", new DateTime())];
-
+    
 
     public event Action? OnBuildStarted;
     public event Action? OnBuildFinished;
@@ -39,11 +36,6 @@ public class PipelineContext : IDisposable
     //         LogInfo($"Build finished. Total items: {args.TotalItems}");
     //     };
     // }
-
-    public void LogInfo(string message) => Messages.Add(LogMessage.Info(message));
-    public void LogWarning(string message) => Messages.Add(LogMessage.Warning(message));
-    public void LogError(string message) => Messages.Add(LogMessage.Error(message));
-    public void ClearMessages() => Messages.Clear();
 
 
 
@@ -65,25 +57,7 @@ public class PipelineContext : IDisposable
     // }
     //
     // public Task SavePreferencesAsync() => Preferences.SaveAsync();
-
-    public void LoadSession()
-    {
-        if (!File.Exists(SESSION_FILE)) return;
-
-        try
-        {
-            var json = File.ReadAllText(SESSION_FILE);
-            var session = JsonSerializer.Deserialize<Session>(json);
-            if (session != null)
-            {
-               
-            }
-        }
-        catch (Exception ex)
-        {
-            LogError($"Failed to load session: {ex.Message}");
-        }
-    }
+    
 
     public void SaveSession()
     {

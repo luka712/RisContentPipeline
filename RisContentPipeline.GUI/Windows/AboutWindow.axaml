@@ -1,36 +1,51 @@
 <suki:SukiWindow xmlns="https://github.com/avaloniaui"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:suki="https://github.com/kikipoulet/SukiUI"
+                 xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
                  x:Class="RisContentPipeline.GUI.Windows.AboutWindow"
-                 Title="About RisContentPipeline"
-                 Width="400" Height="300"
+                 Title="About Ris Content Pipeline"
                  WindowStartupLocation="CenterOwner"
-                 CanResize="False">
+                 CanResize="True"
+                 ShowBottomBorder="True"
+                 CornerRadius="15"
+                 Topmost="True"
+                 SizeToContent="WidthAndHeight">
 
     <StackPanel Margin="24" Spacing="16" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <TextBlock Text="RisContentPipeline" 
-                   FontSize="24" 
-                   FontWeight="Bold" 
-                   HorizontalAlignment="Center"/>
-        
-        <TextBlock Text="Version 1.0.0" 
+        <TextBlock Text="Ris Content Pipeline"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center" />
+
+        <TextBlock Text="Version 0.1.0"
+                   FontWeight="Bold"
                    HorizontalAlignment="Center"
-                   Foreground="Gray"/>
-        
+                   Foreground="Gray" />
+
         <TextBlock Text="A content pipeline tool for converting and processing game assets."
                    TextWrapping="Wrap"
                    TextAlignment="Center"
-                   MaxWidth="300"/>
-        
+                   MaxWidth="300" />
+
         <TextBlock Text="Supports PNG to KTX2 conversion with various encoding options."
                    TextWrapping="Wrap"
                    TextAlignment="Center"
                    MaxWidth="300"
-                   Foreground="Gray"/>
-        
-        <Button Content="Close" 
+                   Foreground="Gray" />
+
+        <Separator />
+
+        <TextBlock Text="Contact" TextAlignment="Center" FontSize="24" FontWeight="Bold" />
+
+        <Grid ColumnDefinitions="Auto, Auto" RowDefinitions="Auto" VerticalAlignment="Center" Margin="0,0,0,8">
+            <HyperlinkButton Content="erkapic.luka.dev@gmail.com" Foreground="DodgerBlue" FontSize="18"  VerticalAlignment="Center" Click="Button_MailToClipboard" />
+            <Button Click="Button_MailToClipboard" Grid.Column="1" Padding="5" Margin="8,0,0,0" >
+                <avalonia:MaterialIcon Classes="Icon" Kind="ContentCopy" />
+            </Button>
+        </Grid>
+        <Button Content="Close"
                 HorizontalAlignment="Center"
                 Click="OnCloseClick"
-                Margin="0,16,0,0"/>
+                Margin="0,16,0,0" />
     </StackPanel>
 </suki:SukiWindow>

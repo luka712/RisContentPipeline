@@ -17,6 +17,7 @@ public partial class MainViewModel : ViewModelBase
 {
     private readonly AssetsService _assetsService;
     private readonly UserPreferencesService _preferencesService;
+    private readonly MessageService _messageService;
 
     private readonly PipelineContext _context;
 
@@ -28,9 +29,9 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private Script? _selectedScript;
     [ObservableProperty] private bool _isBuilding;
     [ObservableProperty] private string _statusText = "Ready";
-
-    [ObservableProperty] private ObservableCollection<LogMessage> _messages =
-        [new LogMessage(MessageLogLevel.ERROR, "No messages", DateTime.Now)];
+    
+    [ObservableProperty]
+    private ObservableCollection<LogMessageViewModel> _messages = new();
 
     [ObservableProperty]
     private ObservableCollection<QueuedPipelineItemViewModel> _queuedItems = [];
@@ -57,8 +58,13 @@ public partial class MainViewModel : ViewModelBase
     {
         _assetsService = App.Services.GetService<AssetsService>()!;
         _preferencesService = App.Services.GetService<UserPreferencesService>()!;
+        _messageService = App.Services.GetService<MessageService>()!;
         
-        _assetsService.OnItemAdded += item => QueuedItems.Add(new QueuedPipelineItemViewModel(item));
+        _assetsService.OnItemQueued += item => QueuedItems.Add(new QueuedPipelineItemViewModel(item));
+        _assetsService.OnBuildStarted += () => QueuedItems.Clear();
+
+        _messageService.OnMessage += msg => Messages.Add(msg);
+        _messageService.OnClear += () => Messages.Clear();
     }
 
     /// <summary>
@@ -116,7 +122,9 @@ public partial class MainViewModel : ViewModelBase
         foreach (var file in files)
         {
             if (file.Path.LocalPath is { } path)
+            {
                 _assetsService.AddFile(path);
+            }
         }
     }
 
@@ -156,7 +164,7 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private void ClearMessages()
     {
-        _context.ClearMessages();
+        _messageService.Clear();
     }
 
     [RelayCommand]

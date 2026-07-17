@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.DependencyInjection;
 using RisContentPipeline.Generic;
 using RisContentPipeline.GUI.Models;
 using RisContentPipeline.GUI.ViewModels;
@@ -14,6 +15,15 @@ namespace RisContentPipeline.GUI.Services;
 public class AssetsService
 {
     private readonly IPipelineSystem _pipelineSystem = new PipelineSystem();
+    private readonly MessageService _messageService;
+
+    /// <summary>
+    /// The constructor.
+    /// </summary>
+    public AssetsService()
+    {
+        _messageService = App.Services.GetService<MessageService>()!;
+    }
 
     /// <summary>
     /// The assets.
@@ -33,7 +43,12 @@ public class AssetsService
     /// <summary>
     /// Called when a new item is added to the assets.
     /// </summary>
-    public event Action<QueuedPipelineItem>? OnItemAdded;
+    public event Action<QueuedPipelineItem>? OnItemQueued;
+    
+    /// <summary>
+    /// Called when the build process starts.
+    /// </summary>
+    public event Action? OnBuildStarted;
 
     /// <summary>
     /// Add a PNG file to the assets.
@@ -73,6 +88,13 @@ public class AssetsService
     /// <param name="filePath">The file path.</param>
     public void AddFile(string filePath)
     {
+        // Do not add a file if it's already in the list.
+        if (Assets.Any(x => x.AbsoluteFilePath == filePath))
+        {
+            _messageService.Warning($"File '{filePath}' is already in the list.");
+            return;
+        }
+        
         if (filePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
         {
             AddPngFile(filePath);
@@ -117,7 +139,7 @@ public class AssetsService
 
             var queuedItem = _pipelineSystem.StoreSourceAsset("png", "ktx2", new Ktx2PipelineSource { FilePath = asset.AbsoluteFilePath },
                 options);
-            OnItemAdded?.Invoke(queuedItem);
+            OnItemQueued?.Invoke(queuedItem);
         }
         else if (asset.IsJson || asset.IsXml)
         {
@@ -125,7 +147,7 @@ public class AssetsService
             var queuedItem = _pipelineSystem.StoreSourceAsset(fileType, IPipeline.ANY_TYPE,
                 new GenericPipelineSource { FilePath = asset.AbsoluteFilePath },
                 new GenericPipelineOptions { OutputPath = Path.Combine(asset.BuildPath, fileName) });
-            OnItemAdded?.Invoke(queuedItem);
+            OnItemQueued?.Invoke(queuedItem);
         }
     }
 
@@ -157,8 +179,10 @@ public class AssetsService
     {
         try
         {
-            // OnBuildStarted?.Invoke();
-            // ClearMessages();
+            OnBuildStarted?.Invoke();
+            _messageService.Clear();
+            _messageService.Info("Building assets   ");
+            
             // PipelineSystem.ClearStoredAssets();
 
             foreach (var asset in Assets)
@@ -168,10 +192,12 @@ public class AssetsService
 
             await _pipelineSystem.ConvertAllAsync();
            // OnBuildFinished?.Invoke();
+           
+           _messageService.Info("Build finished   ");
         }
         catch (Exception ex)
         {
-            // LogError($"Build failed: {ex.Message}");
+            _messageService.Error($"Build failed: {ex.Message}");
             throw;
         }
     }

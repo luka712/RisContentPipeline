@@ -38,7 +38,7 @@
             <MenuItem Header="Set Build Directory..." Command="{Binding SetBuildDirectoryCommand}" />
         </MenuItem>
         <MenuItem Header="Help">
-            <MenuItem Header="_About" Command="{Binding ShowAboutCommand}" />
+            <MenuItem Header="About" Command="{Binding ShowAboutCommand}" />
         </MenuItem>
 
     </suki:SukiWindow.MenuItems>
@@ -62,22 +62,18 @@
             </StackPanel>
         </Border>
         
-        <!-- Status Bar -->
-        <!-- <Border DockPanel.Dock="Bottom" Padding="8,4"> -->
-        <!--     <ProgressBar IsIndeterminate="True" ShowProgressText="True" Value="50"/> -->
-        <!-- </Border> -->
 
 
         <!-- Main Content -->
         <Grid ColumnDefinitions="400,Auto,*, 400">
             <!-- Left Panel: Assets and Scripts -->
-            <Grid Grid.Column="0" RowDefinitions="*,Auto,*">
+            <Grid Grid.Column="0" RowDefinitions="*">
                 <!-- Assets List -->
                 <DockPanel Grid.Row="0">
                     <views:AssetsView />
                 </DockPanel>
 
-                <GridSplitter Grid.Row="1" Height="4" HorizontalAlignment="Stretch" />
+                <!-- <GridSplitter Grid.Row="1" Height="4" HorizontalAlignment="Stretch" /> -->
             </Grid>
 
             <GridSplitter Grid.Column="1" Width="4" />
