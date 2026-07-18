@@ -46,12 +46,15 @@ public partial class App : Application
     
     private static void ConfigureServices(IServiceCollection services)
     {
+        services.AddSingleton<IPipelineSystem, PipelineSystem>();
+        services.AddSingleton<AppConfig>();
         services.AddSingleton<WindowsService>();
         services.AddSingleton<AssetsService>();
         services.AddSingleton<ViewerService>();
         services.AddSingleton<LocalWebServer>();
         services.AddSingleton<UserPreferencesService>();
         services.AddSingleton<MessageService>();
+        services.AddSingleton<FoldersService>();
     }
     
     private static void AttachMainViewModel(IServiceProvider container, MainViewModel viewModel)

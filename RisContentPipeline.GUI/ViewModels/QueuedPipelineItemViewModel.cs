@@ -53,6 +53,7 @@ public partial class QueuedPipelineItemViewModel : ViewModelBase
 
         Item.OnConversionStarted += (_, _) => ItemStatusChanged();
         Item.OnConversionFinished += (_, _) => ItemStatusChanged();
+        Item.OnConversionFailed += (_, _) => ItemStatusChanged();
     }
     
     /// <summary>

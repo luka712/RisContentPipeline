@@ -1,3 +1,4 @@
+using RisContentPipeline.Exceptions;
 using RisKtx2;
 
 namespace RisContentPipeline.Ktx2;
@@ -165,7 +166,20 @@ public class Ktx2Pipeline : APipeline
         // Write the KTX2 texture to a file
         if (!string.IsNullOrEmpty(pipelineOptions.OutputPath))
         {
-            texture.WriteToNamedFile(pipelineOptions.OutputPath);
+            try
+            {
+                texture.WriteToNamedFile(pipelineOptions.OutputPath);
+            }
+            catch (Exception ex)
+            {
+                throw new ConversionException(ex)
+                {
+                    SourceFilePath = sourceFilePath,
+                    TargetFilePath = pipelineOptions.OutputPath,
+                    TargetType = ".ktx2",
+                    SourceType = File.Exists(sourceFilePath) ? Path.GetExtension(sourceFilePath) : "unknown"
+                };
+            }
         }
 
         return new Ktx2PipelineResult(texture);

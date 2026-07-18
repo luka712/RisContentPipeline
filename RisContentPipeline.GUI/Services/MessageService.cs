@@ -8,8 +8,24 @@ namespace RisContentPipeline.GUI.Services;
 /// </summary>
 public class MessageService
 {
+    private readonly IPipelineSystem _pipelineSystem;
     private readonly List<LogMessageViewModel> _messages = new();
 
+    /// <summary>
+    /// The constructor.
+    /// </summary>
+    /// <param name="pipelineSystem">The <see cref="IPipelineSystem"/>.</param>
+    public MessageService(IPipelineSystem pipelineSystem)
+    {
+        _pipelineSystem = pipelineSystem;
+        
+        _pipelineSystem.OnConversionException += (sender, e) =>
+        {
+            var msg = $"Conversion from {e.SourceFilePath} to {e.TargetFilePath} failed. {e.Message}";
+            Error(msg);
+        };
+    }
+    
     /// <summary>
     /// Indicates that a message has been added.
     /// </summary>

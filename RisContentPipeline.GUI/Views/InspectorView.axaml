@@ -55,7 +55,7 @@
                                 <suki:Loading IsVisible="{Binding InProgress, Mode=OneWay}"
                                               Width="20" Height="20" />
                                 <avalonia:MaterialIcon IsVisible="{Binding IsFinished}" Kind="Check" Classes="Icon" />
-                                <avalonia:MaterialIcon IsVisible="{Binding InError}" Kind="Error" Classes="Icon" />
+                                <avalonia:MaterialIcon Foreground="Red" IsVisible="{Binding InError}" Kind="Error" Classes="Icon" />
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

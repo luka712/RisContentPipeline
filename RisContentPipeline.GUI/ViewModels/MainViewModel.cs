@@ -58,10 +58,20 @@ public partial class MainViewModel : ViewModelBase
         _preferencesService = App.Services.GetService<UserPreferencesService>()!;
         _messageService = App.Services.GetService<MessageService>()!;
         
-        _assetsService.OnItemQueued += item => QueuedItems.Add(new QueuedPipelineItemViewModel(item, Preferences));
+        _assetsService.OnItemQueued += item =>
+        {
+            if (Preferences is null)
+            {
+                throw new InvalidOperationException("Preferences not initialized");
+            }
+            QueuedItems.Add(new QueuedPipelineItemViewModel(item, Preferences));
+        };
         _assetsService.OnBuildStarted += () => QueuedItems.Clear();
 
-        _messageService.OnMessage += msg => Messages.Add(msg);
+        _messageService.OnMessage += msg =>
+        {
+            Dispatcher.UIThread.InvokeAsync(() => Messages.Add(msg));
+        };
         _messageService.OnClear += () => Messages.Clear();
     }
 

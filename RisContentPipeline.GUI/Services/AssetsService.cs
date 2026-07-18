@@ -14,14 +14,16 @@ namespace RisContentPipeline.GUI.Services;
 /// </summary>
 public class AssetsService
 {
-    private readonly IPipelineSystem _pipelineSystem = new PipelineSystem();
+    private readonly IPipelineSystem _pipelineSystem;
     private readonly MessageService _messageService;
 
     /// <summary>
     /// The constructor.
     /// </summary>
-    public AssetsService()
+    /// <param name="pipelineSystem">The <see cref="IPipelineSystem"/>.</param>
+    public AssetsService(IPipelineSystem pipelineSystem) 
     {
+        _pipelineSystem = pipelineSystem;
         _messageService = App.Services.GetService<MessageService>()!;
     }
 

@@ -24,9 +24,9 @@ public partial class PreferencesViewModel : ViewModelBase
 
     private readonly WindowsService _windowsService;
     private readonly UserPreferencesService _preferencesService;
-    
-    [ObservableProperty] private string _buildDirectory = "Build";
-    [ObservableProperty] private int _localServerPort;
+
+    [ObservableProperty] private string _buildDirectory;
+    [ObservableProperty] private int _localServerPort = 9876;
     [ObservableProperty] private string _theme = DEFAULT_THEME;
     [ObservableProperty] private string _colorTheme = DEFAULT_COLOR_THEME;
     [ObservableProperty] private bool _nativeTitleBar;
@@ -43,6 +43,9 @@ public partial class PreferencesViewModel : ViewModelBase
     {
         _windowsService = App.Services.GetService<WindowsService>()!;
         _preferencesService = App.Services.GetService<UserPreferencesService>()!;
+        var pathService = App.Services.GetService<FoldersService>()!;
+        
+        BuildDirectory = pathService.GetMyDocumentsPath("Build");
     }
     
     /// <summary>

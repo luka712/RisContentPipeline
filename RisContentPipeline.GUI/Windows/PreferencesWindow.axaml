@@ -10,7 +10,6 @@
                  CanResize="True"
                  ShowBottomBorder="True"
                  CornerRadius="15"
-                 Topmost="True"
                  SizeToContent="WidthAndHeight"
                  MinWidth="600"
                  >

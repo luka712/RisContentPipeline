@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Build script for creating RisContentPipeline AppImage
 set -e
 
@@ -13,7 +12,7 @@ echo -e "${GREEN}Building RisContentPipeline AppImage...${NC}"
 
 # Configuration
 APP_NAME="RisContentPipeline"
-APP_VERSION="0.2.1"
+APP_VERSION="0.1.0"
 ARCH=$(uname -m)
 BUILD_DIR="$(pwd)/build"
 APPDIR="$BUILD_DIR/$APP_NAME.AppDir"
@@ -28,7 +27,7 @@ mkdir -p "$OUTPUT_DIR"
 
 # Build the .NET application
 echo -e "${YELLOW}Building .NET application...${NC}"
-cd ../RisContentPipeline.GUI.Linux
+cd ../RisContentPipeline.GUI
 dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=false -o "$BUILD_DIR/publish"
 
 # Create AppDir structure
@@ -47,46 +46,38 @@ mkdir -p "$APPDIR/usr/share/icons/hicolor/16x16/apps"
 echo -e "${YELLOW}Copying application files...${NC}"
 cp -r "$BUILD_DIR/publish/"* "$APPDIR/usr/lib/"
 
-# Copy Python runtime if it exists
-if [ -d "python-3.11.8" ]; then
-    echo -e "${YELLOW}Copying Python runtime...${NC}"
-    cp -r python-3.11.8 "$APPDIR/usr/lib/"
-fi
-
 # Create the main executable wrapper
 echo -e "${YELLOW}Creating executable wrapper...${NC}"
 cat > "$APPDIR/usr/bin/riscontentpipeline" << 'EOF'
 #!/bin/bash
 APPDIR="$(dirname "$(dirname "$(readlink -f "$0")")")"
-export LD_LIBRARY_PATH="$APPDIR/usr/lib:$APPDIR/usr/lib/python-3.11.8/lib:$LD_LIBRARY_PATH"
-export PYTHONHOME="$APPDIR/usr/lib/python-3.11.8"
-export PYTHONPATH="$APPDIR/usr/lib/python-3.11.8/lib/python3.11:$PYTHONPATH"
+export LD_LIBRARY_PATH="$APPDIR/usr/lib:$LD_LIBRARY_PATH"
 cd "$APPDIR/usr/lib"
-exec "$APPDIR/usr/lib/RisContentPipeline.GUI.Linux" "$@"
+exec "$APPDIR/usr/lib/RisContentPipeline.GUI" "$@"
 EOF
 chmod +x "$APPDIR/usr/bin/riscontentpipeline"
 
 # Copy and convert icon
 echo -e "${YELLOW}Setting up icons...${NC}"
-if [ -f "Resources/Icon.png" ]; then
-    cp "Resources/Icon.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/riscontentpipeline.png"
-    
+if [ -f "Assets/Icon.png" ]; then
+    cp "Assets/Icon.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/riscontentpipeline.png"
+
     # Create different icon sizes using ImageMagick if available
     if command -v convert &> /dev/null; then
-        convert "Resources/Icon.png" -resize 128x128 "$APPDIR/usr/share/icons/hicolor/128x128/apps/riscontentpipeline.png"
-        convert "Resources/Icon.png" -resize 64x64 "$APPDIR/usr/share/icons/hicolor/64x64/apps/riscontentpipeline.png"
-        convert "Resources/Icon.png" -resize 32x32 "$APPDIR/usr/share/icons/hicolor/32x32/apps/riscontentpipeline.png"
-        convert "Resources/Icon.png" -resize 16x16 "$APPDIR/usr/share/icons/hicolor/16x16/apps/riscontentpipeline.png"
+        convert "Assets/Icon.png" -resize 128x128 "$APPDIR/usr/share/icons/hicolor/128x128/apps/riscontentpipeline.png"
+        convert "Assets/Icon.png" -resize 64x64 "$APPDIR/usr/share/icons/hicolor/64x64/apps/riscontentpipeline.png"
+        convert "Assets/Icon.png" -resize 32x32 "$APPDIR/usr/share/icons/hicolor/32x32/apps/riscontentpipeline.png"
+        convert "Assets/Icon.png" -resize 16x16 "$APPDIR/usr/share/icons/hicolor/16x16/apps/riscontentpipeline.png"
     else
         # Copy the same icon to all sizes if ImageMagick is not available
-        cp "Resources/Icon.png" "$APPDIR/usr/share/icons/hicolor/128x128/apps/riscontentpipeline.png"
-        cp "Resources/Icon.png" "$APPDIR/usr/share/icons/hicolor/64x64/apps/riscontentpipeline.png"
-        cp "Resources/Icon.png" "$APPDIR/usr/share/icons/hicolor/32x32/apps/riscontentpipeline.png"
-        cp "Resources/Icon.png" "$APPDIR/usr/share/icons/hicolor/16x16/apps/riscontentpipeline.png"
+        cp "Assets/Icon.png" "$APPDIR/usr/share/icons/hicolor/128x128/apps/riscontentpipeline.png"
+        cp "Assets/Icon.png" "$APPDIR/usr/share/icons/hicolor/64x64/apps/riscontentpipeline.png"
+        cp "Assets/Icon.png" "$APPDIR/usr/share/icons/hicolor/32x32/apps/riscontentpipeline.png"
+        cp "Assets/Icon.png" "$APPDIR/usr/share/icons/hicolor/16x16/apps/riscontentpipeline.png"
     fi
-    
+
     # Copy icon to root for AppImage
-    cp "Resources/Icon.png" "$APPDIR/riscontentpipeline.png"
+    cp "Assets/Icon.png" "$APPDIR/riscontentpipeline.png"
 else
     echo -e "${RED}Warning: Icon.png not found${NC}"
 fi
@@ -114,11 +105,9 @@ echo -e "${YELLOW}Creating AppRun script...${NC}"
 cat > "$APPDIR/AppRun" << 'EOF'
 #!/bin/bash
 HERE="$(dirname "$(readlink -f "${0}")")"
-export LD_LIBRARY_PATH="${HERE}/usr/lib:${HERE}/usr/lib/python-3.11.8/lib:${LD_LIBRARY_PATH}"
-export PYTHONHOME="${HERE}/usr/lib/python-3.11.8"
-export PYTHONPATH="${HERE}/usr/lib/python-3.11.8/lib/python3.11:${PYTHONPATH}"
+export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH}"
 cd "${HERE}/usr/lib"
-exec "${HERE}/usr/lib/RisContentPipeline.GUI.Linux" "$@"
+exec "${HERE}/usr/lib/RisContentPipeline.GUI" "$@"
 EOF
 chmod +x "$APPDIR/AppRun"
 

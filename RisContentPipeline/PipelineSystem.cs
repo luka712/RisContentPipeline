@@ -1,3 +1,4 @@
+using RisContentPipeline.Exceptions;
 using RisContentPipeline.Ktx2;
 
 namespace RisContentPipeline;
@@ -21,7 +22,7 @@ public class PipelineSystem : IPipelineSystem
     [
         new Ktx2Pipeline()
     ];
-    
+
     /// <inheritdoc/>
     public IReadOnlyList<IPipeline> Pipelines => _pipelines;
 
@@ -45,6 +46,9 @@ public class PipelineSystem : IPipelineSystem
 
     /// <inheritdoc/>
     public event EventHandler<OnItemConversionFinishEventArgs>? OnItemConversionFinish;
+
+    /// <inheritdoc/>
+    public event EventHandler<ConversionException>? OnConversionException;
 
     /// <inheritdoc/>
     public void AddPipeline(IPipeline pipeline)
@@ -108,10 +112,23 @@ public class PipelineSystem : IPipelineSystem
             tasks.Add(Task.Run(() =>
             {
                 queuedItem.ConversionStart();
-                var result = Convert(queuedItem.Item);
-                queuedItem.Result = result;
-                queuedItem.ConversionFinished();
-                OnItemConversionFinish?.Invoke(this, new OnItemConversionFinishEventArgs() { Item = queuedItem, Result = result });
+
+                PipelineResult? result = null;
+                
+                try
+                {
+                    result = Convert(queuedItem.Item);
+                    queuedItem.ConversionFinished(result);
+                }
+                catch (ConversionException ex)
+                {
+                    result = PipelineResult.FailureResult(ex.Message);
+                    queuedItem.ConversionFailed(result);
+                    OnConversionException?.Invoke(this, ex);
+                }
+
+                OnItemConversionFinish?.Invoke(this, new OnItemConversionFinishEventArgs());
+                
                 return result;
             }));
         }
@@ -134,7 +151,8 @@ public class PipelineSystem : IPipelineSystem
             }
         }
 
-        return PipelineResult.FailureResult($"No pipeline registered that can convert '{sourceType}' to '{targetType}'.");
+        return PipelineResult.FailureResult(
+            $"No pipeline registered that can convert '{sourceType}' to '{targetType}'.");
     }
 
     /// <inheritdoc/>

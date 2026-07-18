@@ -24,6 +24,11 @@ public class QueuedPipelineItem
     /// The event fired when the conversion finishes.
     /// </summary>
     public event EventHandler? OnConversionFinished;
+    
+    /// <summary>
+    /// The event fired when the conversion fails.
+    /// </summary>
+    public event EventHandler? OnConversionFailed;
 
     /// <summary>
     /// The item to be processed.
@@ -52,9 +57,20 @@ public class QueuedPipelineItem
     /// <summary>
     /// Called when the conversion finishes.
     /// </summary>
-    internal void ConversionFinished()
+    internal void ConversionFinished(PipelineResult result)
     {
+        Result = result;
         State = QueuedItemState.Done;
         OnConversionFinished?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Called when the conversion fails.
+    /// </summary>
+    internal void ConversionFailed(PipelineResult result)
+    {
+        Result = result;
+        State = QueuedItemState.Failed;
+        OnConversionFailed?.Invoke(this, EventArgs.Empty);       
     }
 }

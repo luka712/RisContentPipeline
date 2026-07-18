@@ -1,3 +1,5 @@
+using RisContentPipeline.Exceptions;
+
 namespace RisContentPipeline;
 
 /// <summary>
@@ -70,6 +72,11 @@ public interface IPipelineSystem
     /// The event handler receives the <see cref="PipelineResult"/> of the item that was just converted.
     /// </summary>
     event EventHandler<OnItemConversionFinishEventArgs>? OnItemConversionFinish;
+    
+    /// <summary>
+    /// Called when an exception occurs during the conversion process.
+    /// </summary>
+    event EventHandler<ConversionException>? OnConversionException;
 
     /// <summary>
     /// Add a pipeline to the pipeline system.
